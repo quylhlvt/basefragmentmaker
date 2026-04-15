@@ -1,0 +1,51 @@
+package com.example.basefragment.ui.onboarding.intro
+
+import android.R
+import android.content.Context
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
+import androidx.recyclerview.widget.RecyclerView
+import com.example.basefragment.core.base.BaseAdapter
+import com.example.basefragment.core.extention.loadImage
+import com.example.basefragment.core.extention.select
+import com.example.basefragment.core.extention.strings
+import com.example.basefragment.data.model.intro.IntroModel
+import com.example.basefragment.databinding.ItemIntroBinding
+import javax.inject.Inject
+//import kotlin.io.root
+
+private val pageIntroDiff = object : DiffUtil.ItemCallback<IntroModel>() {
+    override fun areItemsTheSame(oldItem: IntroModel, newItem: IntroModel) =
+        oldItem.id == newItem.id
+
+    override fun areContentsTheSame(oldItem: IntroModel, newItem: IntroModel) = oldItem == newItem
+}
+
+class IntroAdapter@Inject constructor() :
+    ListAdapter<IntroModel, PagerIntroViewHolder>(pageIntroDiff) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int) =
+        PagerIntroViewHolder(
+            ItemIntroBinding.inflate(
+                LayoutInflater.from(parent.context), parent, false
+            )
+        )
+
+    override fun onBindViewHolder(holder: PagerIntroViewHolder, position: Int) {
+        holder.bind(getItem(position))
+    }
+}
+class PagerIntroViewHolder(
+    private val binding: ItemIntroBinding
+) : RecyclerView.ViewHolder(binding.root) {
+    fun bind(pager: IntroModel) {
+        binding.run {
+            tvContent.text = root.context.strings(pager.content)
+            loadImage(root, pager.image, imvImage, false)
+
+//            imvImage.loadImage(pager.image)
+        }
+    }
+}

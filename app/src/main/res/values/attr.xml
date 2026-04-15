@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Khai báo dùng chung -->
+    <attr name="strokeJoinStyle">
+        <enum name="miter" value="0" />
+        <enum name="bevel" value="1" />
+        <enum name="round" value="2" />
+    </attr>
+    <attr name="strokeMiter" format="dimension" />
+
+    <!-- Single Stroke -->
+    <declare-styleable name="StrokeTextView">
+        <attr name="strokeWidth" format="dimension" />
+        <attr name="strokeColor" format="color" />
+        <attr name="strokeJoinStyle" />
+        <attr name="strokeMiter" />
+        <attr name="gradientStartColor" format="color" />
+        <attr name="gradientEndColor" format="color" />
+        <attr name="useGradient" format="boolean" />
+        <attr name="gradientOrientation">
+            <enum name="leftToRight" value="0" />
+            <enum name="topToBottom" value="1" />
+            <enum name="diagonal" value="2" />
+        </attr>
+    </declare-styleable>
+
+    <!--sticker -->
+    <declare-styleable name="StickerView">
+        <attr name="showIcons" format="boolean" />
+        <attr name="showBorder" format="boolean" />
+        <attr name="bringToFrontCurrentSticker" format="boolean" />
+        <attr name="borderColor" format="color"/>
+        <attr name="borderAlpha" format="integer"/>
+    </declare-styleable>
+
+</resources>

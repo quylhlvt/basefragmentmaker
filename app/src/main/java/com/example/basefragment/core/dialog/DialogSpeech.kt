@@ -1,0 +1,76 @@
+package com.example.basefragment.core.dialog
+
+import android.app.Activity
+import android.content.Context
+import android.graphics.Bitmap
+import android.text.Editable
+import android.text.TextUtils
+import android.text.TextWatcher
+import android.view.KeyEvent
+
+import kotlin.apply
+import kotlin.text.trim
+import kotlin.toString
+import androidx.core.view.isVisible
+import com.example.basefragment.R
+import com.example.basefragment.core.base.BaseDialog
+import com.example.basefragment.core.extention.invisible
+import com.example.basefragment.core.extention.loadImage
+import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.helper.BitmapHelper
+import com.example.basefragment.databinding.DialogSpeechBinding
+
+class DialogSpeech(val mcontext: Context, val path: String) : BaseDialog<DialogSpeechBinding>(mcontext, maxWidth = true, maxHeight = true) {
+    override val layoutId: Int = R.layout.dialog_speech
+    override val isCancelOnTouchOutside: Boolean = false
+    override val isCancelableByBack: Boolean = false
+    var onDoneClick: ((Bitmap?) -> Unit) = { }
+
+    override fun initView() {
+        binding.apply {
+            edtSpeech.isFocusableInTouchMode = true
+            edtSpeech.isFocusable = true
+            edtSpeech.requestFocus()
+
+            loadImage(mcontext, path, imvBubble)
+        }
+
+    }
+
+    override fun initAction() {
+        binding.apply {
+            edtSpeech.setOnKeyListener { _, keyCode, event ->
+                if (keyCode == KeyEvent.KEYCODE_ENTER && event.action == KeyEvent.ACTION_DOWN) {
+                    handleDone()
+                    true
+                } else {
+                    false
+                }
+            }
+
+            layoutRoot.onClick { handleDone() }
+
+            edtSpeech.addTextChangedListener(object : TextWatcher {
+                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
+
+                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+                    binding.tvGetText.text = p0.toString()
+                }
+
+                override fun afterTextChanged(p0: Editable?) {}
+            })
+        }
+    }
+
+    fun handleDone(){
+        binding.apply {
+            edtSpeech.clearFocus()
+            edtSpeech.invisible()
+            tvGetText.isVisible = !TextUtils.isEmpty(edtSpeech.text.toString().trim())
+            val bitmap = BitmapHelper.getBitmapFromEditText(layoutBubble)
+            onDoneClick.invoke(bitmap)
+        }
+    }
+
+    override fun onDismissListener() {}
+}

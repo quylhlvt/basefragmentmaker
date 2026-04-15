@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context=".ui.main.view.ViewFragment">
+
+    <ImageView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:src="@drawable/img_bg_app"
+        android:scaleType="fitXY"
+        android:elevation="-1dp"
+        android:adjustViewBounds="true"/>
+    <FrameLayout
+        android:id="@+id/layoutActionBar"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent">
+        <include
+            android:id="@+id/actionBar"
+            layout="@layout/layout_actionbar" />
+    </FrameLayout>
+
+    <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cvImage"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="10dp"
+        app:cardBackgroundColor="@color/transparent"
+        app:cardCornerRadius="16dp"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/layoutActionBar"
+        app:strokeColor="#FFF3D2"
+        app:strokeWidth="4dp">
+
+
+        <!--        imvImage-->
+        <ImageView
+            android:id="@+id/imvImage"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:scaleType="centerCrop" />
+    </com.google.android.material.card.MaterialCardView>
+
+    <!--    btnEdit-->
+    <!--    <ImageView-->
+    <!--        android:id="@+id/btnEdit"-->
+    <!--        android:layout_width="32dp"-->
+    <!--        android:visibility="gone"-->
+    <!--        android:layout_height="32dp"-->
+    <!--        android:layout_marginTop="10dp"-->
+    <!--        android:layout_marginEnd="16dp"-->
+    <!--        android:src="@drawable/ic_edit_2"-->
+    <!--        app:layout_constraintEnd_toEndOf="parent"-->
+    <!--        app:layout_constraintTop_toBottomOf="@id/layoutActionBar" />-->
+
+    <!--        tvSuccess-->
+    <TextView
+        style="@style/single_marquee"
+        android:id="@+id/tvSuccess"
+        android:visibility="gone"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:fontFamily="@font/itim_regular"
+        android:gravity="center"
+        android:layout_marginTop="12dp"
+        android:text="@string/image_has_been_saved_successfully"
+        android:textColor="@color/app_color3"
+        android:textSize="16sp"
+        app:layout_constraintTop_toBottomOf="@+id/cvImage" />
+
+
+    <!--    lnlBottom-->
+    <LinearLayout
+        android:id="@+id/lnlBottom"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="16dp"
+        android:layout_marginTop="20dp"
+        android:orientation="horizontal"
+        app:layout_constraintTop_toBottomOf="@+id/tvSuccess">
+
+        <!--        btnBottomLeft-->
+
+        <TextView
+            style="@style/single_marquee"
+            android:id="@+id/btnBottomLeft"
+
+            android:layout_width="0dp"
+            android:layout_height="51dp"
+            android:layout_marginEnd="28dp"
+            android:layout_weight="1"
+            android:background="@drawable/frame_btn_view"
+            android:fontFamily="@font/itim_regular"
+            android:gravity="center"
+            android:text="@string/my_work"
+            android:textColor="@color/app_color"
+            android:textSize="16sp" />
+
+        <!--        btnBottomRight-->
+        <TextView
+            style="@style/single_marquee"
+            android:id="@+id/btnBottomRight"
+
+            android:layout_width="0dp"
+            android:layout_height="51dp"
+            android:layout_weight="1"
+            android:background="@drawable/frame_btn_view"
+            android:fontFamily="@font/itim_regular"
+            android:gravity="center"
+            android:text="@string/download"
+            android:textColor="@color/app_color"
+            android:textSize="16sp" />
+    </LinearLayout>
+</androidx.constraintlayout.widget.ConstraintLayout>
