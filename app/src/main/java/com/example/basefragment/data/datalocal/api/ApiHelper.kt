@@ -20,12 +20,12 @@ class ApiHelper @Inject constructor() {
         .readTimeout(6, TimeUnit.SECONDS)      // ← giống 226
         .writeTimeout(6, TimeUnit.SECONDS)
         .connectionPool(ConnectionPool(5, 5, TimeUnit.MINUTES))
+
         .addInterceptor(HttpLoggingInterceptor().apply {
             level = if (BuildConfig.DEBUG) HttpLoggingInterceptor.Level.BASIC
             else HttpLoggingInterceptor.Level.NONE
         })
         .build()
-
     val api1: AvatarApiService = Retrofit.Builder()
         .baseUrl(ApiConfig.BASE_URL_1)
         .client(okHttpClient)

@@ -5,6 +5,7 @@ import android.util.Log
 import com.example.basefragment.data.model.custom.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.tencent.mmkv.MMKV
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -23,9 +24,13 @@ class AppDataManager @Inject constructor(
         private const val CUSTOMIZED_FILE = "customized.json"
         private const val MY_DESIGNS_FILE = "my_designs.json"
         private const val API_CACHE_FILE = "api_cache.json"
+        private const val KEY_TEMPLATES   = "templates"
+        private const val KEY_CUSTOMIZED  = "customized"
+        private const val KEY_MY_DESIGNS  = "my_designs"
+        private const val KEY_API_CACHE   = "api_cache"
 
     }
-
+    private val mmkv = MMKV.defaultMMKV()
     private val gson = Gson()
 
     // ── STATE FLOWS ──────────────────────────────────────────────────────────
@@ -98,12 +103,7 @@ class AppDataManager @Inject constructor(
             }
         }
     }
-    suspend fun saveApiCache(templates: List<CustomModel>) = withContext(Dispatchers.IO) {
-        runCatching {
-            File(context.filesDir, API_CACHE_FILE).writeText(gson.toJson(templates))
-            Log.d(TAG, "✅ Saved ${templates.size} API templates to cache")
-        }.onFailure { Log.e(TAG, "❌ saveApiCache error", it) }
-    }
+
 
     /**
      * Merge API templates vào _templates:
@@ -258,15 +258,14 @@ class AppDataManager @Inject constructor(
     // ── TEMPLATE CACHE ────────────────────────────────────────────────────────
 
     private fun saveTemplatesToJson(templates: List<CustomModel>) = runCatching {
-        File(context.filesDir, TEMPLATES_FILE).writeText(gson.toJson(templates))
+        mmkv.encode(KEY_TEMPLATES, gson.toJson(templates))
     }.onFailure { Log.e(TAG, "❌ Cache save error", it) }
 
     private suspend fun loadTemplatesFromJson(): List<CustomModel> = withContext(Dispatchers.IO) {
         runCatching {
-            val file = File(context.filesDir, TEMPLATES_FILE)
-            if (!file.exists()) return@withContext emptyList()
+            val json = mmkv.decodeString(KEY_TEMPLATES) ?: return@withContext emptyList()
             val type = object : TypeToken<List<CustomModel>>() {}.type
-            gson.fromJson<List<CustomModel>>(file.readText(), type) ?: emptyList()
+            gson.fromJson<List<CustomModel>>(json, type) ?: emptyList()
         }.getOrDefault(emptyList())
     }
 
@@ -277,29 +276,30 @@ class AppDataManager @Inject constructor(
 
     private suspend fun saveCustomizedCharacters(characters: List<CustomModel>) = withContext(Dispatchers.IO) {
         runCatching {
-            // ✅ Chỉ lưu Dto — không lưu listPath
             val dtos = characters.map { it.toDto() }
-            File(context.filesDir, CUSTOMIZED_FILE).writeText(gson.toJson(dtos))
+            mmkv.encode(KEY_CUSTOMIZED, gson.toJson(dtos))
         }.onFailure { Log.e(TAG, "❌ Save customized error", it) }
     }
 
+    suspend fun saveApiCache(templates: List<CustomModel>) = withContext(Dispatchers.IO) {
+        runCatching {
+            mmkv.encode(KEY_API_CACHE, gson.toJson(templates))
+            Log.d(TAG, "✅ Saved ${templates.size} API templates to cache")
+        }.onFailure { Log.e(TAG, "❌ saveApiCache error", it) }
+    }
     private suspend fun loadCustomizedCharacters() = withContext(Dispatchers.IO) {
         runCatching {
-            val file = File(context.filesDir, CUSTOMIZED_FILE)
-            if (!file.exists()) { _customizedCharacters.value = emptyList(); return@withContext }
+            val json = mmkv.decodeString(KEY_CUSTOMIZED)
+            if (json.isNullOrEmpty()) { _customizedCharacters.value = emptyList(); return@withContext }
 
             val type = object : TypeToken<List<CustomizedCharacterDto>>() {}.type
-            val dtos: List<CustomizedCharacterDto> = gson.fromJson(file.readText(), type) ?: emptyList()
+            val dtos: List<CustomizedCharacterDto> = gson.fromJson(json, type) ?: emptyList()
 
-            // ✅ Inject listPath từ template tương ứng
             val models = dtos.map { dto ->
                 val template = _templates.value.find { t ->
-                    // Tìm template theo templateId trước, fallback sang avatar
                     t.id == dto.templateId || t.avatar == dto.avatar
                 }
-                dto.toModel(
-                    templateListPath = template?.listPath ?: arrayListOf()
-                )
+                dto.toModel(templateListPath = template?.listPath ?: arrayListOf())
             }
 
             _customizedCharacters.value = models
@@ -399,18 +399,17 @@ class AppDataManager @Inject constructor(
 
     private suspend fun loadMyDesigns() = withContext(Dispatchers.IO) {
         runCatching {
-            val file = File(context.filesDir, MY_DESIGNS_FILE)
-            if (!file.exists()) { _myDesignPaths.value = emptyList(); return@withContext }
+            val json = mmkv.decodeString(KEY_MY_DESIGNS)
+            if (json.isNullOrEmpty()) { _myDesignPaths.value = emptyList(); return@withContext }
             val type = object : TypeToken<List<String>>() {}.type
-            _myDesignPaths.value = gson.fromJson<List<String>>(file.readText(), type) ?: emptyList()
+            _myDesignPaths.value = gson.fromJson<List<String>>(json, type) ?: emptyList()
         }.onFailure { Log.e(TAG, "❌ loadMyDesigns", it) }
     }
 
     suspend fun saveMyDesignToJson(paths: List<String>) = withContext(Dispatchers.IO) {
-        runCatching { File(context.filesDir, MY_DESIGNS_FILE).writeText(gson.toJson(paths)) }
+        runCatching { mmkv.encode(KEY_MY_DESIGNS, gson.toJson(paths)) }
             .onFailure { Log.e(TAG, "❌ saveMyDesigns", it) }
     }
-
     suspend fun addMyDesignPath(imagePath: String) {
         val list = _myDesignPaths.value.toMutableList()
         if (!list.contains(imagePath)) {

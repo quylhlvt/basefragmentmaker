@@ -19,6 +19,7 @@ import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.ConcurrentHashMap
@@ -36,25 +37,30 @@ class QuickViewModel @Inject constructor(
     private val _isLoading = MutableStateFlow(false)
     val isLoading: StateFlow<Boolean> = _isLoading.asStateFlow()
 
-    // Cache bitmap đã merge — sống cùng ViewModel, không bị destroy khi navigate
     val bitmapCache = ConcurrentHashMap<String, Bitmap>()
 
-    // Signal cho adapter biết key nào vừa ready
     private val _readyKey = MutableStateFlow<String?>(null)
     val readyKey: StateFlow<String?> = _readyKey.asStateFlow()
 
-    private val ioDispatcher = Dispatchers.IO.limitedParallelism(6)
+    // ── MỚI: khai báo đủ ──────────────────────────────────────────────────
+    private val mergeDispatcher = Dispatchers.IO.limitedParallelism(12)
+    private var backgroundJob: kotlinx.coroutines.Job? = null
+    val keyToPosition = ConcurrentHashMap<String, Int>()
+    private val _visibleRange = MutableStateFlow(0..5)
 
     companion object {
-        const val PER_TEMPLATE = 10
+        const val PER_TEMPLATE = 10       // giảm từ 10 → 4
+        const val PAGE_SIZE    = 6
+        const val MERGE_SIZE   = 192     // giảm từ 256 → 192
     }
 
     fun itemKey(item: QuickMixItem) =
         "${item.templateIndex}_${item.selections.hashCode()}"
 
+    // ── GENERATE ──────────────────────────────────────────────────────────
     fun generate() {
         if (_items.value.isNotEmpty()) return
-        viewModelScope.launch(Dispatchers.IO) {
+        viewModelScope.launch(Dispatchers.Default) {
             _isLoading.value = true
             val templates = appDataManager.templates.value
             if (templates.isEmpty()) { _isLoading.value = false; return@launch }
@@ -68,98 +74,99 @@ class QuickViewModel @Inject constructor(
                 }
             }
             all.shuffle()
+            all.forEachIndexed { i, item -> keyToPosition[itemKey(item)] = i }
 
-            // Emit items trước để UI layout xong, biết visible range
-            withContext(Dispatchers.Main) {
-                _items.value     = all
-                _isLoading.value = false
-            }
+            _items.value     = all
+            _isLoading.value = false
 
-            // Phase 1: merge đúng các item visible (do Fragment báo qua visibleRange)
-            // Đợi 1 frame để RecyclerView layout xong
-            withContext(Dispatchers.Main) { }
+            mergeAll(all)
+        }
+    }
 
-            val visible = _visibleRange.value
-            val visibleItems = if (visible != IntRange.EMPTY) {
-                all.subList(
-                    visible.first.coerceIn(0, all.size),
-                    (visible.last + 1).coerceIn(0, all.size)
-                )
-            } else {
-                all.take(6) // fallback nếu chưa có visible range
-            }
+    // ── MERGE ALL (windowed) ───────────────────────────────────────────────
+    private fun mergeAll(all: List<QuickMixItem>) {
+        backgroundJob?.cancel()
+        backgroundJob = viewModelScope.launch(mergeDispatcher) {
 
-            // Merge visible ngay — ưu tiên cao nhất
-            kotlinx.coroutines.coroutineScope {
-                visibleItems.map { item ->
-                    async(Dispatchers.IO) {
-                        val key = itemKey(item)
-                        if (bitmapCache.containsKey(key)) return@async
-                        val merged = mergeItem(item) ?: return@async
-                        bitmapCache[key] = merged
-                        withContext(Dispatchers.Main) { _readyKey.value = key }
-                    }
-                }.awaitAll()
-            }
+            // Window 1: merge PAGE_SIZE item đầu (visible ngay khi mở)
+            all.take(PAGE_SIZE)
+                .map { async(mergeDispatcher) { mergeAndCache(it) } }
+                .awaitAll()
 
-            // Phase 2: merge phần còn lại ở background — limitedParallelism thấp hơn
-            val remaining = all.filter { !bitmapCache.containsKey(itemKey(it)) }
-            kotlinx.coroutines.coroutineScope {
-                remaining.map { item ->
-                    async(ioDispatcher) {
-                        val key = itemKey(item)
-                        if (bitmapCache.containsKey(key)) return@async
-                        val merged = mergeItem(item) ?: return@async
-                        bitmapCache[key] = merged
-                        withContext(Dispatchers.Main) { _readyKey.value = key }
-                    }
-                }.awaitAll()
+            // Window 2+: background tuần tự theo batch
+            all.drop(PAGE_SIZE).chunked(PAGE_SIZE).forEach { batch ->
+                if (!isActive) return@launch
+                // ── ƯU TIÊN: bỏ qua item đã có trong visible range ──
+                // (chúng đã được merge bởi updateVisibleRange rồi)
+                val needed = batch.filter { !bitmapCache.containsKey(itemKey(it)) }
+                if (needed.isEmpty()) return@forEach
+                needed.map { async(mergeDispatcher) { mergeAndCache(it) } }.awaitAll()
             }
         }
     }
 
-    // Fragment gọi hàm này mỗi khi scroll để ViewModel biết visible range
-    private val _visibleRange = MutableStateFlow(IntRange.EMPTY)
 
+    // ── MERGE AND CACHE ───────────────────────────────────────────────────
+    private suspend fun mergeAndCache(item: QuickMixItem) {
+        val key = itemKey(item)
+        if (bitmapCache.containsKey(key)) {
+            withContext(Dispatchers.Main) { _readyKey.value = key }
+            return
+        }
+        val merged = mergeItem(item) ?: return
+        bitmapCache[key] = merged
+        withContext(Dispatchers.Main) { _readyKey.value = key }
+    }
+
+    // ── VISIBLE RANGE (scroll) ────────────────────────────────────────────
     fun updateVisibleRange(first: Int, last: Int) {
-        _visibleRange.value = first..last
+        val newRange = first..last
+        if (_visibleRange.value == newRange) return
+        _visibleRange.value = newRange
 
-        // Nếu items đã có nhưng bitmap chưa có → merge ngay visible range
         val all = _items.value
         if (all.isEmpty()) return
 
-        viewModelScope.launch(Dispatchers.IO) {
-            val visibleItems = all.subList(
-                first.coerceIn(0, all.size),
-                (last + 1).coerceIn(0, all.size)
-            )
-            // Cancel background jobs nếu có — tập trung vào visible
-            kotlinx.coroutines.coroutineScope {
-                visibleItems.map { item ->
-                    async(Dispatchers.IO) {
-                        val key = itemKey(item)
-                        if (bitmapCache.containsKey(key)) {
-                            // Đã có — notify lại để hiển thị
-                            withContext(Dispatchers.Main) { _readyKey.value = key }
-                            return@async
-                        }
-                        val merged = mergeItem(item) ?: return@async
-                        bitmapCache[key] = merged
-                        withContext(Dispatchers.Main) { _readyKey.value = key }
-                    }
-                }.awaitAll()
-            }
+        val safeFirst = first.coerceIn(0, all.size)
+        val safeLast  = (last + 1).coerceIn(0, all.size)
+        if (safeFirst >= safeLast) return
+
+        val visible = all.subList(safeFirst, safeLast)
+        val missing = visible.filter { !bitmapCache.containsKey(itemKey(it)) }
+        if (missing.isEmpty()) return
+
+        // ── Hủy background job, ưu tiên visible trước ──
+        backgroundJob?.cancel()
+
+        backgroundJob = viewModelScope.launch(mergeDispatcher) {
+            // 1. Merge visible ngay lập tức
+            missing
+                .map { async(mergeDispatcher) { mergeAndCache(it) } }
+                .awaitAll()
+
+            // 2. Tiếp tục background các item còn lại (chưa cache)
+            if (!isActive) return@launch
+            all.filter { !bitmapCache.containsKey(itemKey(it)) }
+                .chunked(PAGE_SIZE)
+                .forEach { batch ->
+                    if (!isActive) return@launch
+                    batch.map { async(mergeDispatcher) { mergeAndCache(it) } }.awaitAll()
+                }
         }
     }
 
+    // ── FORCE GENERATE ────────────────────────────────────────────────────
     fun forceGenerate() {
+        backgroundJob?.cancel()
         bitmapCache.values.forEach { if (!it.isRecycled) it.recycle() }
         bitmapCache.clear()
+        keyToPosition.clear()
         _items.value    = emptyList()
         _readyKey.value = null
         generate()
     }
 
+    // ── REGENERATE AT ─────────────────────────────────────────────────────
     fun regenerateAt(pos: Int) {
         val current  = _items.value.toMutableList()
         val old      = current.getOrNull(pos) ?: return
@@ -169,35 +176,29 @@ class QuickViewModel @Inject constructor(
         current[pos] = newItem
         _items.value  = current
 
-        // Xóa bitmap cũ, merge lại
         bitmapCache.remove(itemKey(old))?.let { if (!it.isRecycled) it.recycle() }
-        viewModelScope.launch(ioDispatcher) {
-            val key    = itemKey(newItem)
-            val merged = mergeItem(newItem) ?: return@launch
-            bitmapCache[key] = merged
-            withContext(Dispatchers.Main) { _readyKey.value = key }
+        keyToPosition[itemKey(newItem)] = pos
+
+        viewModelScope.launch(mergeDispatcher) {
+            mergeAndCache(newItem)
         }
     }
 
+    // ── MERGE ITEM ────────────────────────────────────────────────────────
     private suspend fun mergeItem(item: QuickMixItem): Bitmap? {
-        val paths = item.template.listPath
-            .sortedBy { it.position }
-            .mapIndexedNotNull { _, bp ->
-                val idx = item.template.listPath.indexOf(bp)
-                item.resolvedPaths.getOrNull(idx)
-            }
+        // Dùng resolvedPaths có sẵn — không sort lại
+        val paths = item.resolvedPaths.filterNotNull().filter { it.isNotBlank() }
         if (paths.isEmpty()) return null
 
-        // ✅ coroutineScope để dùng async bên trong suspend fun
         val bitmaps = kotlinx.coroutines.coroutineScope {
             paths.map { path ->
-                async(Dispatchers.IO) {
+                async(mergeDispatcher) {
                     runCatching {
                         Glide.with(context)
                             .asBitmap()
                             .load(path)
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
-                            .override(256, 256)
+                            .override(MERGE_SIZE, MERGE_SIZE)  // ✅ dùng MERGE_SIZE
                             .submit()
                             .get()
                     }.getOrNull()
@@ -207,20 +208,22 @@ class QuickViewModel @Inject constructor(
 
         if (bitmaps.isEmpty()) return null
 
-        val w      = bitmaps[0].width
-        val h      = bitmaps[0].height
-        val merged = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(merged)
-        bitmaps.forEach { bmp ->
-            canvas.drawBitmap(
-                if (bmp.width == w && bmp.height == h) bmp
-                else Bitmap.createScaledBitmap(bmp, w, h, true),
-                0f, 0f, null
-            )
+        // Canvas merge trên Default dispatcher
+        return withContext(Dispatchers.Default) {
+            val merged = Bitmap.createBitmap(MERGE_SIZE, MERGE_SIZE, Bitmap.Config.ARGB_8888)
+            val canvas = Canvas(merged)
+            bitmaps.forEach { bmp ->
+                canvas.drawBitmap(
+                    if (bmp.width == MERGE_SIZE && bmp.height == MERGE_SIZE) bmp
+                    else Bitmap.createScaledBitmap(bmp, MERGE_SIZE, MERGE_SIZE, true),
+                    0f, 0f, null
+                )
+            }
+            merged
         }
-        return merged
     }
 
+    // ── RANDOM SELECTIONS ─────────────────────────────────────────────────
     private fun randomSelections(template: CustomModel): ArrayList<SelectionIndex> {
         val list = ArrayList<SelectionIndex>()
         template.listPath.forEachIndexed { bpIdx, bp ->
@@ -238,6 +241,7 @@ class QuickViewModel @Inject constructor(
         return list
     }
 
+    // ── RESOLVE PATHS ─────────────────────────────────────────────────────
     private fun resolvePaths(template: CustomModel, sel: ArrayList<SelectionIndex>): List<String?> =
         template.listPath.mapIndexed { bpIdx, bp ->
             val s     = sel.getOrNull(bpIdx) ?: return@mapIndexed null
@@ -246,8 +250,10 @@ class QuickViewModel @Inject constructor(
             if (path == "none") null else path
         }
 
+    // ── CLEAR ─────────────────────────────────────────────────────────────
     override fun onCleared() {
         super.onCleared()
+        backgroundJob?.cancel()
         bitmapCache.values.forEach { if (!it.isRecycled) it.recycle() }
         bitmapCache.clear()
     }
