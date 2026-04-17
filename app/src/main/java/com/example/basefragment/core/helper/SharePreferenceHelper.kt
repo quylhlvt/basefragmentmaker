@@ -29,10 +29,21 @@ object SharedPreferencesManager {
     fun setSplashScreen(isSkipped: Boolean) {
         saveBooleanDataByKey(SPLASH_SCREEN, isSkipped)
     }
+    fun isLanguageKey(): String=
+        getStringDataByKey(
+            LANGUAGE_KEY
+        )
+
+    fun setLanguageKey(isSkipped: String) {
+        saveStringDataByKey(LANGUAGE_KEY, isSkipped)
+    }
 
     fun isLanuageScreen(): Boolean = getBooleanDataByKey(LANGUAGE_SCREEN)
-    fun setLanuageScreen(isSkipped: Boolean) {
-        saveBooleanDataByKey(LANGUAGE_SCREEN, isSkipped)
+    fun setLanuageScreen(isSkipped: Boolean=true) {
+      saveBooleanDataByKey(
+            LANGUAGE_SCREEN,
+            isSkipped
+        )
     }
 
     fun isPermissionScreen(): Boolean = getBooleanDataByKey(PERMISSION_SCREEN)
@@ -63,11 +74,7 @@ object SharedPreferencesManager {
         saveIntDataByKey(COUNT_BACK_KEY, isSkipped)
     }
 
-    fun isLanguageKey(): String=getStringDataByKey(LANGUAGE_KEY)
 
-    fun setLanguageKey(isSkipped: String) {
-        saveStringDataByKey(LANGUAGE_KEY, isSkipped)
-    }
 
 
     private fun getBooleanDataByKey(key: String?): Boolean =

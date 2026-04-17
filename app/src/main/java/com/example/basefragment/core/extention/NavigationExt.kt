@@ -47,10 +47,31 @@ fun Fragment.toHome()       = nav(R.id.action_intro_to_home)
 fun Fragment.toHomeFromPermission() = nav(R.id.action_permission_to_home)
 
 // ── Setting ───────────────────────────────────────────────────────────────────
+fun Fragment.toLangFromSetting() = nav(R.id.action_setting_to_language)
 
 fun Fragment.toHomeFromSetting() = nav(R.id.action_setting_to_home)
 
 // ── Language ──────────────────────────────────────────────────────────────────
-
+fun Fragment.toSettingFromLang() {
+    try {
+        // Pop back về Setting
+        findNavController().popBackStack()
+    } catch (e: Exception) {
+        android.util.Log.e("Navigation", "Error popping back to setting: ${e.message}")
+    }
+}
 fun Fragment.toIntroFromLanguage() = nav(R.id.action_language_to_intro)
 fun Fragment.toHomeFromLanguage()  = nav(R.id.action_language_to_home)
+// Home
+fun Fragment.toSettingFromHome() = nav(R.id.action_home_to_setting)
+
+
+
+fun Fragment.popBack(): Boolean {
+    return try {
+        findNavController().popBackStack()
+    } catch (e: Exception) {
+        android.util.Log.e("Navigation", "Error popping back: ${e.message}")
+        false
+    }
+}

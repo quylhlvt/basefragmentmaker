@@ -12,6 +12,7 @@ import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.setImageActionBar
+import com.example.basefragment.core.extention.toSettingFromHome
 import com.example.basefragment.databinding.FragmentHomeBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -39,6 +40,15 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
             }
             btnMyAlbum.onClick {
                 findNavController().navigate(R.id.action_home_to_myPony)
+            }
+            btnRandom.onClick {
+                findNavController().navigate(R.id.action_home_to_random)
+            }
+                btnCosPlay.onClick {
+                findNavController().navigate(R.id.action_home_to_cosplay)
+            }
+            actionBar.btnActionBarRight.onClick {
+                toSettingFromHome()
             }
         }
     }

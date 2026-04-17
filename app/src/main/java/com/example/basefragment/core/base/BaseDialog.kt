@@ -25,7 +25,6 @@ abstract class BaseDialog<VB : ViewBinding>(
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        LanguageHelper.setLocale(context)
         requestWindowFeature(Window.FEATURE_NO_TITLE)
 
         binding = DataBindingUtil.inflate(LayoutInflater.from(context), layoutId, null, false)

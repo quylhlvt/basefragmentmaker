@@ -4,6 +4,7 @@ package com.example.basefragment.core.base
 import android.app.Dialog
 import android.content.ContentValues.TAG
 import android.content.Context
+import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
@@ -27,6 +28,7 @@ import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.databinding.DialogbaseBinding
 import com.google.android.material.snackbar.Snackbar
+import java.util.Locale
 import javax.inject.Inject
 import kotlin.getValue
 
@@ -65,7 +67,24 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         setupPreViews()
         return binding.root
     }
+    override fun onConfigurationChanged(newConfig: Configuration) {
+        super.onConfigurationChanged(newConfig)
 
+        // ✅ Re-apply language
+        val savedLanguage = sharedPreferences.isLanguageKey()
+        if (savedLanguage.isNotEmpty()) {
+            val locale = Locale(savedLanguage)
+            Locale.setDefault(locale)
+
+            val config = Configuration(requireContext().resources.configuration)
+            config.setLocale(locale)
+
+            requireContext().resources.updateConfiguration(
+                config,
+                requireContext().resources.displayMetrics
+            )
+        }
+    }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         Log.v(TAG, "onViewCreated: $this")

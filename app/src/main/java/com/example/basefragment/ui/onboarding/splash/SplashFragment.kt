@@ -34,18 +34,19 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
             val startTime = System.currentTimeMillis()
 
             if (isNetworkAvailable()) {
-                // Có mạng: đợi API + preload avatar xong trong GetCatalogueUseCase
-                // GetCatalogueUseCase.invoke() sẽ preloadAvatarsParallel() trước khi return
-                // → templates Flow emit "online_*" khi cả API lẫn preload đều done
                 withTimeoutOrNull(API_TIMEOUT_MS) {
-                    mainViewModel.templates.first { list ->
-                        list.any { it.id.startsWith("online_") }
+                    // ✅ Kiểm tra giá trị HIỆN TẠI của StateFlow trước
+                    val currentList = mainViewModel.templates.value
+                    if (currentList.none { it.id.startsWith("online_") }) {
+                        // Chưa có data online → mới chờ
+                        mainViewModel.templates.first { list ->
+                            list.any { it.id.startsWith("online_") }
+                        }
                     }
+                    // Nếu đã có data rồi → không chờ nữa
                 }
-                // null = timeout → navigate với local data, không sao
             }
 
-            // Đảm bảo splash tối thiểu MIN_SPLASH_MS
             val elapsed = System.currentTimeMillis() - startTime
             val remaining = MIN_SPLASH_MS - elapsed
             if (remaining > 0) kotlinx.coroutines.delay(remaining)
@@ -62,6 +63,9 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     } catch (e: Exception) { false }
 
     private fun goToHome() {
+        // ✅ Tránh navigate khi Fragment đã detach
+        if (!isAdded || isDetached || isRemoving) return
+
         if (!isLanuageScreen()) { toLanguage(); return }
         toIntro()
     }
