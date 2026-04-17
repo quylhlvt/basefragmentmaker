@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -18,7 +20,14 @@ import javax.inject.Inject
 class CosplayViewModel @Inject constructor(
     private val appDataManager: AppDataManager
 ) : ViewModel() {
-
+    init {
+        viewModelScope.launch {
+            appDataManager.templates
+                .filter { it.isNotEmpty() }
+                .take(1) // Chỉ trigger lần đầu
+                .collect { randomize() }
+        }
+    }
     private val _randomItem = MutableStateFlow<RandomItem?>(null)
     val randomItem: StateFlow<RandomItem?> = _randomItem.asStateFlow()
     private var _cachedBitmap: Bitmap? = null
@@ -37,8 +46,10 @@ class CosplayViewModel @Inject constructor(
         _cachedBitmap = null
     }
     fun randomize() {
-        _cachedBitmap?.recycle()
-        _cachedBitmap = null
+        if (_randomItem.value != null) {
+            _cachedBitmap?.recycle()
+            _cachedBitmap = null
+        }
         viewModelScope.launch(Dispatchers.IO) {
             val templates = appDataManager.templates.value
             if (templates.isEmpty()) return@launch

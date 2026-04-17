@@ -1,11 +1,14 @@
 package com.example.basefragment.ui.main.show
 
+import android.animation.ObjectAnimator
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.drawable.Drawable
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.core.view.isVisible
@@ -25,6 +28,8 @@ import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.setImageActionBar
+import com.example.basefragment.data.model.custom.BodyPartModel
+import com.example.basefragment.data.model.custom.SelectionIndex
 import com.example.basefragment.databinding.FragmentShowBinding
 import com.example.basefragment.ui.main.customize.ColorAdapter
 import com.example.basefragment.ui.main.customize.NavAdapter
@@ -39,8 +44,8 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
     FragmentShowBinding::inflate,
     ShowViewModel::class.java
 ) {
-    // ── Layer views cho ảnh TARGET render lên rlCharacter ────────────────────
-    private val layerViews     = arrayListOf<AppCompatImageView>()
+    // ── Layer views (giống CustomizeFragment) ─────────────────────────────────
+    private val layerViews      = arrayListOf<AppCompatImageView>()
     private val navToLayerIndex = mutableMapOf<String, Int>()
 
     private val adapterNav   by lazy { NavAdapter() }
@@ -62,11 +67,20 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
     override fun initView() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
+            setImageActionBar(btnActionBarRight, R.drawable.next_app)
         }
         setupAdapters()
-        if (viewModel.state.value.listData.isEmpty()) {
-            viewModel.randomize()
-        }
+        readArgsAndInit()
+    }
+
+    private fun readArgsAndInit() {
+        val templateIndex = arguments?.getInt(ARG_TEMPLATE_INDEX, 0) ?: 0
+
+        @Suppress("UNCHECKED_CAST")
+        val targetSelections = arguments?.getSerializable(ARG_SELECTIONS) as? ArrayList<SelectionIndex>
+            ?: return
+
+        viewModel.init(templateIndex, targetSelections)
     }
 
     private fun setupAdapters() {
@@ -79,19 +93,25 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
 
     override fun viewListener() {
         binding.actionBar.btnActionBarLeft.onClick { popBack() }
+        binding.actionBar.btnActionBarRight.onClick {
+            findNavController().navigate(R.id.action_show_to_successCosplay)
+        }
+
+        // imgRandom — randomize toàn bộ (giống btnDice ở ShowActivity)
+        binding.imgRandom.onClick { viewModel.randomizeAll() }
+
+        // imgChangColor — reset về default (giống btnReset)
+        binding.imgChangColor.onClick { viewModel.resetAll() }
 
         adapterNav.onClick   = { viewModel.selectNav(it) }
         adapterColor.onClick = { viewModel.selectColor(it) }
         adapterPart.onClick  = { idx, type ->
             when (type) {
-                "none" -> viewModel.selectPath(0)
-                "dice" -> { /* không cho dice ở màn đoán */ }
+                "none" -> viewModel.selectNone()
+                "dice" -> viewModel.selectDiceCurrent()
                 else   -> viewModel.selectPath(idx)
             }
         }
-
-        // imgRandom không dùng ở màn Show → ẩn đi
-        binding.imgRandom.visibility = View.GONE
     }
 
     // ── OBSERVE ───────────────────────────────────────────────────────────────
@@ -107,14 +127,18 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
                         buildLayerViews(state.listData)
                     }
 
-                    // Render nhân vật TARGET lên rlCharacter
-                    renderTargetLayers(state)
+                    // Render nhân vật theo userSelections (giống renderLayers ở CustomizeFragment)
+                    renderLayers(state)
 
-                    // Update adapters (user chọn theo userSelections)
+                    // Update adapters
                     updateAdapters(state)
 
+                    // Flip
+                    val scale = if (state.isFlipped) -1f else 1f
+                    layerViews.forEach { it.scaleX = scale }
+
                     // Update progress
-                    updateProgress(state.matchPercent)
+                    updateMatchUI(state.matchPercent)
                 }
             }
         }
@@ -127,11 +151,9 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         }
     }
 
-    // ── BUILD LAYER VIEWS ─────────────────────────────────────────────────────
+    // ── BUILD LAYER VIEWS (giống CustomizeFragment.buildLayerViews) ───────────
 
-    private fun buildLayerViews(
-        parts: List<com.example.basefragment.data.model.custom.BodyPartModel>
-    ) {
+    private fun buildLayerViews(parts: List<BodyPartModel>) {
         layerViews.clear()
         navToLayerIndex.clear()
         binding.rlCharacter.removeAllViews()
@@ -150,18 +172,11 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         }
     }
 
-    // ── RENDER TARGET (nhân vật đáp án — user nhìn để đoán) ──────────────────
+    // ── RENDER LAYERS (giống CustomizeFragment.renderLayers) ─────────────────
 
-    private fun renderTargetLayers(state: ShowState) {
-        // Dùng cache bitmap nếu đã render xong
-        val cached = viewModel.cachedBitmap
-        if (cached != null && !cached.isRecycled) {
-            showCachedBitmap(cached)
-            return
-        }
-
+    private fun renderLayers(state: ShowState) {
         val pathsToLoad = state.listData.mapIndexedNotNull { i, bp ->
-            val path       = viewModel.resolveTargetPathAt(i)
+            val path       = viewModel.resolveUserPathAt(i)
             val layerIndex = navToLayerIndex[bp.nav] ?: return@mapIndexedNotNull null
             val view       = layerViews.getOrNull(layerIndex) ?: return@mapIndexedNotNull null
 
@@ -179,19 +194,20 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
 
         if (pathsToLoad.isEmpty()) {
             viewModel.onLoadingComplete()
-            cacheTargetBitmap()
             return
         }
 
         pendingLoads.set(pathsToLoad.size)
+
         pathsToLoad.forEach { (view, path, _) ->
             view.tag        = path
             view.visibility = View.VISIBLE
-            loadTargetImage(view, path)
+            view.scaleX     = if (viewModel.state.value.isFlipped) -1f else 1f
+            loadImageIntoView(view, path)
         }
     }
 
-    private fun loadTargetImage(view: ImageView, path: String) {
+    private fun loadImageIntoView(view: ImageView, path: String) {
         Glide.with(binding.rlCharacter)
             .load(path)
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
@@ -199,65 +215,29 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
             .skipMemoryCache(false)
             .dontAnimate()
             .dontTransform()
-            .listener(object : RequestListener<android.graphics.drawable.Drawable> {
+            .listener(object : RequestListener<Drawable> {
                 override fun onLoadFailed(
                     e: GlideException?, model: Any?,
-                    target: Target<android.graphics.drawable.Drawable>?,
-                    isFirstResource: Boolean
-                ): Boolean { onTargetLoadFinished(); return false }
+                    target: Target<Drawable>?, isFirstResource: Boolean
+                ): Boolean { onLoadFinished(); return false }
 
                 override fun onResourceReady(
-                    resource: android.graphics.drawable.Drawable?, model: Any?,
-                    target: Target<android.graphics.drawable.Drawable>?,
-                    dataSource: DataSource?, isFirstResource: Boolean
-                ): Boolean { onTargetLoadFinished(); return false }
+                    resource: Drawable?, model: Any?,
+                    target: Target<Drawable>?, dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean { onLoadFinished(); return false }
             })
             .into(view)
     }
 
-    private fun onTargetLoadFinished() {
+    private fun onLoadFinished() {
         if (pendingLoads.decrementAndGet() <= 0) {
             pendingLoads.set(0)
-            view?.post {
-                viewModel.onLoadingComplete()
-                cacheTargetBitmap()
-            }
+            view?.post { viewModel.onLoadingComplete() }
         }
     }
 
-    private fun cacheTargetBitmap() {
-        val root = binding.rlCharacter
-        if (root.width == 0 || root.height == 0) return
-        val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        layerViews.forEach { iv ->
-            if (iv.visibility != View.VISIBLE) return@forEach
-            val drawable = iv.drawable ?: return@forEach
-            drawable.setBounds(0, 0, root.width, root.height)
-            drawable.draw(canvas)
-        }
-        viewModel.setCachedBitmap(bitmap)
-    }
-
-    private fun showCachedBitmap(bitmap: Bitmap) {
-        // Chỉ replace nếu chưa hiển thị bitmap này
-        val firstChild = binding.rlCharacter.getChildAt(0)
-        if (firstChild is AppCompatImageView && firstChild.drawable != null
-            && firstChild.tag == "cached") return
-
-        binding.rlCharacter.removeAllViews()
-        binding.rlCharacter.addView(AppCompatImageView(requireContext()).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            scaleType = ImageView.ScaleType.FIT_CENTER
-            setImageBitmap(bitmap)
-            tag = "cached"
-        })
-    }
-
-    // ── ADAPTERS ──────────────────────────────────────────────────────────────
+    // ── ADAPTERS (giống CustomizeFragment.updateAdapters) ────────────────────
 
     private fun updateAdapters(state: ShowState) {
         adapterNav.setPos(state.currentNavIndex)
@@ -272,6 +252,9 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
             }
         }
 
+        val bp    = state.listData.getOrNull(state.currentNavIndex)
+        val thumb = buildThumbList(bp, state.currentPaths)
+        adapterPart.listThumb = thumb
         adapterPart.setPos(state.currentPathIndex)
         adapterPart.submitList(state.currentPaths)
         binding.rcvPart.post {
@@ -279,22 +262,92 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         }
     }
 
-    // ── PROGRESS ──────────────────────────────────────────────────────────────
+    private fun buildThumbList(bp: BodyPartModel?, paths: List<String>): List<String> {
+        val thumbs = bp?.listThumbPath ?: return paths
+        if (thumbs.isEmpty()) return paths
+        var idx = 0
+        return paths.map { path ->
+            when (path) {
+                "none", "dice" -> path
+                else           -> thumbs.getOrElse(idx++) { path }
+            }
+        }
+    }
 
-    private fun updateProgress(percent: Float) {
-        binding.progressMatch.progress = percent.toInt()
-        binding.tvPercent.text = "${percent.toInt()}%"
+    // ── PROGRESS (giống ShowActivity.updateMatchUI) ───────────────────────────
+
+    private fun updateMatchUI(percent: Int) {
+        binding.tvPercent.text = "$percent%"
+
+        // Animate progress fill (scaleY từ 0→1 theo %)
+        binding.progressTrack.post {
+            val trackH   = binding.progressTrack.height.toFloat()
+            val marginPx = 10 * resources.displayMetrics.density
+            val fillH    = trackH - marginPx
+            val scale    = percent / 100f
+
+            binding.progressFill.pivotX = binding.progressFill.width / 2f
+            binding.progressFill.pivotY = fillH
+
+            ObjectAnimator.ofFloat(
+                binding.progressFill, "scaleY",
+                binding.progressFill.scaleY,
+                scale * fillH / trackH
+            ).apply {
+                duration     = 400
+                interpolator = DecelerateInterpolator()
+                start()
+            }
+
+            // Star icon chạy theo thanh progress
+            val starH = binding.imgStar.height.toFloat()
+            ObjectAnimator.ofFloat(
+                binding.imgStar, "translationY",
+                binding.imgStar.translationY,
+                -(fillH * scale) - marginPx + starH / 2f
+            ).apply {
+                duration     = 400
+                interpolator = DecelerateInterpolator()
+                start()
+            }
+        }
     }
 
     // ── RESUME ────────────────────────────────────────────────────────────────
 
     override fun onResume() {
         super.onResume()
-        val cached = viewModel.cachedBitmap
-        if (cached != null && !cached.isRecycled) {
-            showCachedBitmap(cached)
+        pendingLoads.set(0)
+
+        val needRebuild = layerViews.isEmpty() ||
+                layerViews.firstOrNull()?.isAttachedToWindow == false
+
+        if (needRebuild) {
+            val currentState = viewModel.state.value
+            if (currentState.listData.isNotEmpty()) {
+                buildLayerViews(currentState.listData)
+                renderLayers(currentState)
+                updateAdapters(currentState)
+                val scale = if (currentState.isFlipped) -1f else 1f
+                layerViews.forEach { it.scaleX = scale }
+            }
         }
     }
 
     override fun bindViewModel() {}
+
+    // ── COMPANION ─────────────────────────────────────────────────────────────
+
+    companion object {
+        const val ARG_TEMPLATE_INDEX = "template_index"
+        const val ARG_SELECTIONS     = "selections"
+
+        fun newArgs(
+            templateIndex   : Int,
+            targetSelections: ArrayList<SelectionIndex>
+        ) = Bundle().apply {
+            putInt(ARG_TEMPLATE_INDEX, templateIndex)
+            putSerializable(ARG_SELECTIONS, targetSelections)
+        }
+    }
 }

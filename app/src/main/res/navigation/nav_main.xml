@@ -190,7 +190,6 @@
         <action
             android:id="@+id/action_cosplay_to_show"
             app:destination="@id/show"
-            app:popUpTo="@id/homeFragment"
             app:enterAnim="@anim/slide_in_right"
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"

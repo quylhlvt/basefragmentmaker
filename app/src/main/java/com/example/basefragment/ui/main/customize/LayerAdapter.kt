@@ -37,7 +37,7 @@ class NavAdapter : BaseAdapter<BodyPartModel, ItemNavBinding>(ItemNavBinding::in
         Glide.with(binding.ivIcon)
             .load(item.nav)
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-            .override(180)
+            .override(256)
             .dontAnimate()
             .into(binding.ivIcon)
         binding.root.setOnClickListener { onClick?.invoke(position) }
@@ -106,7 +106,7 @@ class PartAdapter : BaseAdapter<String, ItemPartBinding>(ItemPartBinding::inflat
                 Glide.with(binding.imv)
                     .load(thumbPath)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .override(128)
+                    .override(256)
                     .dontAnimate()
                     .into(binding.imv)
             }

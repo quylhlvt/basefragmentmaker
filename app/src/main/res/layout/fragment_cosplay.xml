@@ -32,9 +32,16 @@
         app:layout_constraintTop_toBottomOf="@+id/layoutActionBar"
         app:strokeWidth="2dp"
         app:cardCornerRadius="20dp"
+        app:strokeColor="@color/app_color">
 
-        app:strokeColor="@color/app_color"
-        />
+        <!-- Thêm ImageView này -->
+        <FrameLayout
+            android:id="@+id/imgPreview"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+        </FrameLayout>
+
+    </com.google.android.material.card.MaterialCardView>
     <com.google.android.material.card.MaterialCardView
         app:layout_constraintTop_toBottomOf="@+id/imgRandom"
         app:layout_constraintStart_toStartOf="parent"

@@ -1,20 +1,25 @@
 package com.example.basefragment.ui.main.show
 
+import com.example.basefragment.data.model.custom.BodyPartModel
 import com.example.basefragment.data.model.custom.ColorModel
 import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.data.model.custom.SelectionIndex
 
 data class ShowState(
-    val template        : CustomModel?        = null,
-    val listData        : List<com.example.basefragment.data.model.custom.BodyPartModel> = emptyList(),
-    val targetSelections: List<SelectionIndex> = emptyList(), // nhân vật random (đáp án)
-    val userSelections  : List<SelectionIndex> = emptyList(), // lựa chọn của user
-    val currentNavIndex : Int     = 0,
-    val isLoading       : Boolean = true,
-    val matchPercent    : Float   = 0f   // 0f..100f
-) {
-    val totalNav: Int get() = listData.size
+    val template        : CustomModel?         = null,
+    val listData        : List<BodyPartModel>  = emptyList(),
 
+    /** Selections của nhân vật random từ Cosplay — đây là ĐÁP ÁN */
+    val targetSelections: List<SelectionIndex> = emptyList(),
+
+    /** Selections user đang chỉnh — giống CustomizeState.selections */
+    val userSelections  : List<SelectionIndex> = emptyList(),
+
+    val currentNavIndex : Int     = 0,
+    val isFlipped       : Boolean = false,
+    val isLoading       : Boolean = true,
+    val matchPercent    : Int     = 0   // 0..100
+) {
     val currentColors: List<ColorModel>
         get() = listData.getOrNull(currentNavIndex)?.listPath ?: emptyList()
 
@@ -25,7 +30,7 @@ data class ShowState(
                 ?.listPath?.getOrNull(sel.colorIndex)?.listPath ?: emptyList()
         }
 
-    val currentColorIndex: Int get() = userSelections.getOrNull(currentNavIndex)?.colorIndex ?: 0
-    val currentPathIndex : Int get() = userSelections.getOrNull(currentNavIndex)?.pathIndex  ?: 0
+    val currentColorIndex: Int    get() = userSelections.getOrNull(currentNavIndex)?.colorIndex ?: 0
+    val currentPathIndex : Int    get() = userSelections.getOrNull(currentNavIndex)?.pathIndex  ?: 0
     val hasMultipleColors: Boolean get() = (listData.getOrNull(currentNavIndex)?.listPath?.size ?: 0) > 1
 }

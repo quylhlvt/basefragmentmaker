@@ -17,12 +17,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
-
-// ── UI STATE ──────────────────────────────────────────────────────────────────
-
-
-
-// ── VIEWMODEL ─────────────────────────────────────────────────────────────────
+import kotlin.math.roundToInt
 
 @HiltViewModel
 class ShowViewModel @Inject constructor(
@@ -32,53 +27,55 @@ class ShowViewModel @Inject constructor(
     private val _state = MutableStateFlow(ShowState())
     val state: StateFlow<ShowState> = _state.asStateFlow()
 
-    // event navigate khi đạt 100%
+    /** Phát khi đạt 100% — Fragment lắng nghe để navigate */
     private val _onComplete = MutableSharedFlow<Unit>(replay = 0)
     val onComplete = _onComplete.asSharedFlow()
 
-    // cache bitmap nhân vật random để không render lại
-    private var _cachedBitmap: Bitmap? = null
-    val cachedBitmap get() = _cachedBitmap
+    private var isInitialized = false
 
-    fun setCachedBitmap(bmp: Bitmap) { _cachedBitmap = bmp }
+    // ── INIT — gọi từ Fragment sau khi nhận args từ CosplayFragment ───────────
 
-    override fun onCleared() {
-        super.onCleared()
-        _cachedBitmap?.recycle()
-        _cachedBitmap = null
-    }
+    /**
+     * [templateIndex]   : index template random từ CosplayViewModel
+     * [targetSelections]: selections random từ CosplayViewModel (đáp án)
+     */
+    fun init(templateIndex: Int, targetSelections: ArrayList<SelectionIndex>) {
+        if (isInitialized) return
+        isInitialized = true
 
-    // ── INIT ──────────────────────────────────────────────────────────────────
+        val template = appDataManager.getCharacterByIndex(templateIndex) ?: return
+        val sorted   = template.listPath.sortedBy { it.zIndex }
 
-    fun randomize() {
-        _cachedBitmap?.recycle()
-        _cachedBitmap = null
-
-        viewModelScope.launch(Dispatchers.IO) {
-            val templates = appDataManager.templates.value
-            if (templates.isEmpty()) return@launch
-
-            val idx      = templates.indices.random()
-            val template = templates[idx]
-            val sorted   = template.listPath.sortedBy { it.zIndex }
-            val target   = buildRandomSelections(sorted)
-            val user     = buildDefaultSelections(sorted)
-
-            _state.value = ShowState(
-                template         = template,
-                listData         = sorted,
-                targetSelections = target,
-                userSelections   = user,
-                currentNavIndex  = 0,
-                isLoading        = true,
-                matchPercent     = calcPercent(sorted.size, target, user)
-            )
+        // Remap targetSelections từ unsorted sang sorted (giống CustomizeViewModel.initWithSelections)
+        val remapped = sorted.mapIndexed { sortedIdx, bp ->
+            val originalIdx = template.listPath.indexOf(bp)
+            val sel = targetSelections.getOrElse(originalIdx) { SelectionIndex(originalIdx, 0, 0) }
+            SelectionIndex(sortedIdx, sel.colorIndex, sel.pathIndex)
         }
+
+        // User bắt đầu với default (index 0) — giống "tạo nhân vật mới"
+        val userDefault = sorted.mapIndexed { i, _ ->
+            if (i == 0) SelectionIndex(i, 0, 1) else SelectionIndex(i, 0, 0)
+        }
+
+        _state.value = ShowState(
+            template         = template,
+            listData         = sorted,
+            targetSelections = remapped,
+            userSelections   = userDefault,
+            currentNavIndex  = 0,
+            isLoading        = true,
+            matchPercent     = calcPercent(sorted.size, remapped, userDefault)
+        )
     }
 
-    // ── USER SELECTION ────────────────────────────────────────────────────────
+    fun onLoadingComplete() = _state.update { it.copy(isLoading = false) }
+
+    // ── USER INTERACTIONS (giống CustomizeViewModel) ──────────────────────────
 
     fun selectNav(navIndex: Int) = _state.update { it.copy(currentNavIndex = navIndex) }
+
+    fun toggleFlip() = _state.update { it.copy(isFlipped = !it.isFlipped) }
 
     fun selectColor(colorIndex: Int) {
         updateUserSelection { state, old ->
@@ -97,11 +94,44 @@ class ShowViewModel @Inject constructor(
         }
     }
 
-    fun onLoadingComplete() = _state.update { it.copy(isLoading = false) }
+    fun selectNone() = selectPath(0)
 
-    // ── RESOLVE PATH (để Fragment render ảnh user đang chọn) ─────────────────
+    fun selectDiceCurrent() {
+        updateUserSelection { state, old ->
+            val bp    = state.listData.getOrNull(state.currentNavIndex) ?: return@updateUserSelection old
+            val paths = bp.listPath.getOrNull(old.colorIndex)?.listPath ?: return@updateUserSelection old
+            val start = startIndexAfterSpecial(paths)
+            val idx   = if (paths.size > start) (start until paths.size).random() else start
+            SelectionIndex(old.bodyPartIndex, old.colorIndex, idx)
+        }
+    }
 
-    /** Path tại bodyPartIndex theo userSelections. */
+    fun randomizeAll() {
+        val state = _state.value
+        val newSel = state.listData.mapIndexed { i, bp ->
+            val colorIdx = if (bp.listPath.size > 1) (0 until bp.listPath.size).random() else 0
+            val paths    = bp.listPath.getOrNull(colorIdx)?.listPath ?: emptyList()
+            val start    = startIndexAfterSpecial(paths)
+            val pathIdx  = if (paths.size > start) (start until paths.size).random() else start
+            SelectionIndex(i, colorIdx, pathIdx)
+        }
+        val percent = calcPercent(state.listData.size, state.targetSelections, newSel)
+        _state.update { it.copy(userSelections = newSel, matchPercent = percent) }
+        checkComplete(percent)
+    }
+
+    fun resetAll() {
+        val state   = _state.value
+        val newSel  = state.listData.mapIndexed { i, _ ->
+            if (i == 0) SelectionIndex(i, 0, 1) else SelectionIndex(i, 0, 0)
+        }
+        val percent = calcPercent(state.listData.size, state.targetSelections, newSel)
+        _state.update { it.copy(userSelections = newSel, matchPercent = percent) }
+    }
+
+    // ── PATH RESOLUTION ───────────────────────────────────────────────────────
+
+    /** Path theo userSelections — để render nhân vật user đang tạo */
     fun resolveUserPathAt(bodyPartIndex: Int): String? {
         val s    = _state.value
         val bp   = s.listData.getOrNull(bodyPartIndex) ?: return null
@@ -110,7 +140,7 @@ class ShowViewModel @Inject constructor(
         return if (path == "none" || path == "dice") null else path
     }
 
-    /** Path tại bodyPartIndex theo targetSelections (để render nhân vật đáp án). */
+    /** Path theo targetSelections — để tính % (không render lên màn) */
     fun resolveTargetPathAt(bodyPartIndex: Int): String? {
         val s    = _state.value
         val bp   = s.listData.getOrNull(bodyPartIndex) ?: return null
@@ -121,38 +151,34 @@ class ShowViewModel @Inject constructor(
 
     // ── HELPERS ───────────────────────────────────────────────────────────────
 
-    private fun buildRandomSelections(
-        parts: List<com.example.basefragment.data.model.custom.BodyPartModel>
-    ): List<SelectionIndex> = parts.mapIndexed { i, bp ->
-        val colorCount = bp.listPath.size
-        if (colorCount == 0) return@mapIndexed SelectionIndex(i, 0, 0)
-        val colorIdx = (0 until colorCount).random()
-        val paths    = bp.listPath[colorIdx].listPath
-        val validIdx = paths.indices.filter { paths[it] != "none" && paths[it] != "dice" }
-        val pathIdx  = if (validIdx.isNotEmpty()) validIdx.random() else 0
-        SelectionIndex(i, colorIdx, pathIdx)
-    }
-
-    private fun buildDefaultSelections(
-        parts: List<com.example.basefragment.data.model.custom.BodyPartModel>
-    ): List<SelectionIndex> = parts.mapIndexed { i, _ -> SelectionIndex(i, 0, 0) }
-
     /**
-     * Tính % số nav khớp hoàn toàn (cả colorIndex lẫn pathIndex).
-     * Mỗi nav đúng = 100f / totalNav.
+     * Tính % nav khớp: mỗi nav đúng cả colorIndex lẫn pathIndex = 100/total
+     * Kết quả trả về Int 0..100
      */
     private fun calcPercent(
         total : Int,
         target: List<SelectionIndex>,
         user  : List<SelectionIndex>
-    ): Float {
-        if (total == 0) return 0f
-        val matched = target.indices.count { i ->
+    ): Int {
+        if (total == 0) return 0
+        val matched = (0 until total).count { i ->
             val t = target.getOrNull(i) ?: return@count false
             val u = user.getOrNull(i)   ?: return@count false
             t.colorIndex == u.colorIndex && t.pathIndex == u.pathIndex
         }
-        return (matched.toFloat() / total.toFloat()) * 100f
+        return (matched * 100f / total).roundToInt()
+    }
+
+    private fun checkComplete(percent: Int) {
+        if (percent >= 100) {
+            viewModelScope.launch { _onComplete.emit(Unit) }
+        }
+    }
+
+    private fun startIndexAfterSpecial(paths: List<String>): Int = when {
+        paths.firstOrNull() == "none" -> 2
+        paths.firstOrNull() == "dice" -> 1
+        else -> 0
     }
 
     private fun updateUserSelection(
@@ -168,14 +194,9 @@ class ShowViewModel @Inject constructor(
                 while (updated.size < navIdx) updated.add(SelectionIndex(updated.size, 0, 0))
                 updated.add(new)
             }
-            val percent = calcPercent(state.totalNav, state.targetSelections, updated)
+            val percent = calcPercent(state.listData.size, state.targetSelections, updated)
             state.copy(userSelections = updated, matchPercent = percent)
         }
-
-        // Kiểm tra đạt 100% sau khi update
-        val currentPercent = _state.value.matchPercent
-        if (currentPercent >= 100f) {
-            viewModelScope.launch { _onComplete.emit(Unit) }
-        }
+        checkComplete(_state.value.matchPercent)
     }
 }
