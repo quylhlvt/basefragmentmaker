@@ -14,8 +14,8 @@ import javax.inject.Singleton
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 
 object ApiConfig {
-    const val BASE_URL_1   = "https://lvtglobal.site/"
-    const val BASE_URL_2   = "https://lvt-api-site.io.vn/"
+    const val BASE_URL_1   = "https://raw.githubusercontent.com/lehongquy/ST001_OCMaker/refs/heads/main/"
+    const val BASE_URL_2   = "https://raw.githubusercontent.com/lehongquy/ST001_OCMaker/refs/heads/main/"
     const val BASE_CONNECT = "public/app/ST212_Bedroom_Maker/"
 
     // URL đang active (thay đổi khi fallback)
@@ -46,7 +46,7 @@ data class X10(
 // ── SERVICE ───────────────────────────────────────────────────────────────────
 
 interface AvatarApiService {
-    @GET("api/app/ST212_Bedroom_Maker")
+    @GET("ST001_OCMaker.json")
     suspend fun getAllData(): Map<String, List<X10>>
 }
 
@@ -70,7 +70,8 @@ object ApiTemplateMapper {
 
                         val (colors, listThumbPath) = buildColorsAndThumbs(x10, base, conn)
                         BodyPartModel(
-                            nav           = "${base}${conn}${x10.position}/${x10.parts}/nav.png",
+//                            nav           = "${base}${conn}${x10.position}/${x10.parts}/nav.png",
+                            nav           = "${base}${x10.position}/${x10.parts}/nav.png",
                             listPath      = colors,
                             listThumbPath = listThumbPath,
                             position      = x,
@@ -102,7 +103,8 @@ object ApiTemplateMapper {
 
                 CustomModel(
                     id         = "online_$key",
-                    avatar     = "${base}${conn}$key/avatar.png",
+//                    avatar     = "${base}${conn}$key/avatar.png",
+                    avatar     = "${base}$key/avatar.png",
                     listPath   = ArrayList(bodyParts),
                     selections = arrayListOf(),
                     updatedAt  = System.currentTimeMillis()
@@ -122,19 +124,23 @@ object ApiTemplateMapper {
 
         if (x10.colorArray.isEmpty()) {
             for (i in 1..halfQty) {
-                listThumbPath.add("${base}${conn}${x10.position}/${x10.parts}/thumb_$i.png")
+//                listThumbPath.add("${base}${conn}${x10.position}/${x10.parts}/thumb_$i.png")
+                listThumbPath.add("${base}${x10.position}/${x10.parts}/thumb_$i.png")
             }
             val realPaths = (1..halfQty).map { i ->
-                "${base}${conn}${x10.position}/${x10.parts}/$i.png"
+//                "${base}${conn}${x10.position}/${x10.parts}/$i.png"
+                "${base}${x10.position}/${x10.parts}/$i.png"
             }
             colors.add(ColorModel("", ArrayList(realPaths)))
         } else {
             for (i in 1..halfQty * 2 + 1) {
-                listThumbPath.add("${base}${conn}${x10.position}/${x10.parts}/thumb_$i.png")
+//                listThumbPath.add("${base}${conn}${x10.position}/${x10.parts}/thumb_$i.png")
+                listThumbPath.add("${base}${x10.position}/${x10.parts}/thumb_$i.png")
             }
             x10.colorArray.split(",").forEach { color ->
                 val paths = (1..qty).map { i ->
-                    "${base}${conn}${x10.position}/${x10.parts}/$color/$i.png"
+//                    "${base}${conn}${x10.position}/${x10.parts}/$color/$i.png"
+                    "${base}${x10.position}/${x10.parts}/$color/$i.png"
                 }
                 colors.add(ColorModel(color, ArrayList(paths)))
             }

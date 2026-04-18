@@ -24,7 +24,9 @@ import com.example.basefragment.databinding.FragmentSettingBinding.inflate
 import com.example.basefragment.databinding.FragmentSuccessCosplayBinding
 import com.example.basefragment.ui.main.setting.SettingViewModel
 import com.example.basefragment.utils.state.RateState
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class SuccessCosplayFragment : BaseFragment<FragmentSuccessCosplayBinding, SuccessCosplayViewModel>( FragmentSuccessCosplayBinding::inflate, SuccessCosplayViewModel::class.java) {
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {

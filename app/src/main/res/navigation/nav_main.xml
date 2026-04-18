@@ -55,6 +55,14 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"
             />
+<action
+            android:id="@+id/action_home_to_webview"
+            app:destination="@id/webViewPlayFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
 
         <action
             android:id="@+id/action_home_to_setting"
@@ -247,4 +255,10 @@
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right" />
     </fragment>
+    <fragment
+        android:id="@+id/webViewPlayFragment"
+        android:name="com.example.basefragment.ui.main.webviewPlay.WebViewPlayFragment"
+        android:label="fragment_web_view_play"
+        tools:layout="@layout/fragment_web_view_play" />
+
 </navigation>

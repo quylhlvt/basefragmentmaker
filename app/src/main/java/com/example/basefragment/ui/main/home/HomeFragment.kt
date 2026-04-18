@@ -1,6 +1,5 @@
 package com.example.basefragment.ui.main.home
 
-import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
@@ -17,7 +16,6 @@ import com.example.basefragment.databinding.FragmentHomeBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
@@ -30,13 +28,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
             // Click vào "Choose Character"
             btnCreate.onClick {
                 // Navigate tới CategoryFragment
-                 findNavController().navigate(R.id.action_home_to_createPony)
+                findNavController().navigate(R.id.action_home_to_createPony)
             }
 
             // Click vào "Quick Mix"
             btnQuickMaker.onClick {
                 // Navigate tới QuickMixFragment
-                 findNavController().navigate(R.id.action_home_to_quick)
+                findNavController().navigate(R.id.action_home_to_quick)
             }
             btnMyAlbum.onClick {
                 findNavController().navigate(R.id.action_home_to_myPony)
@@ -44,8 +42,11 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
             btnRandom.onClick {
                 findNavController().navigate(R.id.action_home_to_random)
             }
-                btnCosPlay.onClick {
+            btnCosPlay.onClick {
                 findNavController().navigate(R.id.action_home_to_cosplay)
+            }
+            btnWebviewPlay.onClick {
+                findNavController().navigate(R.id.action_home_to_webview)
             }
             actionBar.btnActionBarRight.onClick {
                 toSettingFromHome()

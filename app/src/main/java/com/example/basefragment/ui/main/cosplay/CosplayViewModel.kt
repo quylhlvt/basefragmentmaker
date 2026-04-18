@@ -39,6 +39,7 @@ class CosplayViewModel @Inject constructor(
         val selections   : ArrayList<SelectionIndex>,
         val resolvedPaths: List<String?>
     )
+
     fun setCachedBitmap(bmp: Bitmap) { _cachedBitmap = bmp }
     override fun onCleared() {
         super.onCleared()

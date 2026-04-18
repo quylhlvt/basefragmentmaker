@@ -65,8 +65,8 @@ class CustomizeViewModel @Inject constructor(
 
     /** Khởi tạo với template mới (không có saved selections). */
     fun initNew(templateIndex: Int) {
-        if (isInitialized) return
-        isInitialized = true
+        // ✅ Dùng state check thay vì flag — safe với process death
+        if (_state.value.listData.isNotEmpty()) return
         editingCustomizedId = null
         val template = appDataManager.getCharacterByIndex(templateIndex) ?: return
         val sorted   = sortBodyParts(template.listPath)
@@ -81,8 +81,7 @@ class CustomizeViewModel @Inject constructor(
 
     /** Khởi tạo để EDIT character đã lưu. */
     fun initEdit(templateIndex: Int, savedSelections: List<SelectionIndex>, isFlipped: Boolean) {
-        if (isInitialized) return  // ✅
-        isInitialized = true
+        if (_state.value.listData.isNotEmpty()) return
         val template = appDataManager.getCharacterByIndex(templateIndex) ?: return
         val sorted   = sortBodyParts(template.listPath)
         _state.value = CustomizeState(
@@ -97,21 +96,14 @@ class CustomizeViewModel @Inject constructor(
     // CustomizeViewModel.kt — thêm hàm initWithSelections
 // Xóa hàm initWithSelections sai đi, thay bằng:
     fun initWithSelections(templateIndex: Int, savedSelections: ArrayList<SelectionIndex>) {
-        if (isInitialized) return  // ✅ thêm guard
-        isInitialized = true
+        if (_state.value.listData.isNotEmpty()) return
         val template = appDataManager.getCharacterByIndex(templateIndex) ?: return
-        val sorted   = sortBodyParts(template.listPath)  // sort theo zIndex
-
-        // selections từ Quick dùng index của template.listPath gốc (unsorted)
-        // cần remap sang index của sorted list
+        val sorted   = sortBodyParts(template.listPath)
         val remapped = sorted.mapIndexed { sortedIdx, bp ->
-            // tìm index gốc của bp này trong template.listPath
             val originalIdx = template.listPath.indexOf(bp)
-            // lấy selection tương ứng với index gốc đó
             val sel = savedSelections.getOrElse(originalIdx) { SelectionIndex(originalIdx, 0, 0) }
             SelectionIndex(sortedIdx, sel.colorIndex, sel.pathIndex)
         }
-
         _state.value = CustomizeState(
             template        = template,
             listData        = sorted,
@@ -127,8 +119,7 @@ class CustomizeViewModel @Inject constructor(
         savedSelections: List<SelectionIndex>,
         isFlipped: Boolean
     ) {
-        if (isInitialized) return  // ✅ thêm guard, không gọi initEdit nữa
-        isInitialized = true
+        if (_state.value.listData.isNotEmpty()) return
         editingCustomizedId = customizedId
         val template = appDataManager.getCharacterByIndex(templateIndex) ?: return
         val sorted   = sortBodyParts(template.listPath)
