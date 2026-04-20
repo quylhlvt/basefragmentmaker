@@ -1,0 +1,17 @@
+<component name="libraryTable">
+  <library name="Gradle: com.github.bumptech.glide:gifdecoder:5.0.5@aar" external-system-id="GRADLE">
+    <ANNOTATIONS>
+      <root url="jar://$USER_HOME$/.gradle/caches/8.13/transforms/501d04826f8f6fbba55cd15707d6a07f/transformed/gifdecoder-5.0.5/annotations.zip!/" />
+    </ANNOTATIONS>
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/8.13/transforms/501d04826f8f6fbba55cd15707d6a07f/transformed/gifdecoder-5.0.5/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.13/transforms/501d04826f8f6fbba55cd15707d6a07f/transformed/gifdecoder-5.0.5/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.bumptech.glide/gifdecoder/5.0.5/365fbfaf027d06114238ad6a328d312ad07311af/gifdecoder-5.0.5-javadoc.jar!/" />
+    </JAVADOC>
+    <SOURCES>
+      <root url="jar://$USER_HOME$/.gradle/caches/modules-2/files-2.1/com.github.bumptech.glide/gifdecoder/5.0.5/983ace5607f4920378ed606b6feed7dd8ce427e6/gifdecoder-5.0.5-sources.jar!/" />
+    </SOURCES>
+  </library>
+</component>

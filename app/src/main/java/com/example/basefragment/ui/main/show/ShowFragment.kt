@@ -25,6 +25,7 @@ import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.setImageActionBar
+import com.example.basefragment.data.model.custom.SelectionIndex
 import com.example.basefragment.databinding.FragmentShowBinding
 import com.example.basefragment.ui.main.customize.ColorAdapter
 import com.example.basefragment.ui.main.customize.NavAdapter
@@ -39,8 +40,20 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
     FragmentShowBinding::inflate,
     ShowViewModel::class.java
 ) {
-    // ── Layer views cho ảnh TARGET render lên rlCharacter ────────────────────
-    private val layerViews     = arrayListOf<AppCompatImageView>()
+    companion object {
+        const val ARG_TEMPLATE_INDEX = "template_index"
+        const val ARG_SELECTIONS     = "selections"
+
+        fun newArgs(
+            templateIndex  : Int,
+            savedSelections: ArrayList<SelectionIndex>? = null
+        ) = Bundle().apply {
+            putInt(ARG_TEMPLATE_INDEX, templateIndex)
+            savedSelections?.let { putSerializable(ARG_SELECTIONS, it) }
+        }
+    }
+
+    private val layerViews      = arrayListOf<AppCompatImageView>()
     private val navToLayerIndex = mutableMapOf<String, Int>()
 
     private val adapterNav   by lazy { NavAdapter() }
@@ -49,23 +62,24 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
 
     private val pendingLoads = AtomicInteger(0)
 
-    // ── INFLATE ───────────────────────────────────────────────────────────────
-
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): FragmentShowBinding = FragmentShowBinding.inflate(inflater, container, false)
 
-    // ── INIT ──────────────────────────────────────────────────────────────────
-
     override fun initView() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
         }
         setupAdapters()
-        if (viewModel.state.value.listData.isEmpty()) {
-            viewModel.randomize()
+
+        val templateIndex = arguments?.getInt(ARG_TEMPLATE_INDEX, -1) ?: -1
+        @Suppress("UNCHECKED_CAST")
+        val savedSelections = arguments?.getSerializable(ARG_SELECTIONS) as? ArrayList<SelectionIndex>
+
+        if (templateIndex >= 0 && savedSelections != null) {
+            viewModel.initWithSelections(templateIndex, savedSelections)
         }
     }
 
@@ -75,8 +89,6 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         binding.rcvPart.adapter  = adapterPart
     }
 
-    // ── LISTENERS ─────────────────────────────────────────────────────────────
-
     override fun viewListener() {
         binding.actionBar.btnActionBarLeft.onClick { popBack() }
 
@@ -85,49 +97,43 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         adapterPart.onClick  = { idx, type ->
             when (type) {
                 "none" -> viewModel.selectPath(0)
-                "dice" -> { /* không cho dice ở màn đoán */ }
+
                 else   -> viewModel.selectPath(idx)
             }
         }
-
-        // imgRandom không dùng ở màn Show → ẩn đi
-        binding.imgRandom.visibility = View.GONE
     }
-
-    // ── OBSERVE ───────────────────────────────────────────────────────────────
 
     override fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.state.collectLatest { state ->
 
-                    // Build layer views lần đầu hoặc khi listData thay đổi
-                    if (state.listData.isNotEmpty() &&
-                        layerViews.size != state.listData.size) {
-                        buildLayerViews(state.listData)
+                // ✅ Tách thành 2 collector riêng
+                launch {
+                    viewModel.state.collectLatest { state ->
+                        if (state.listData.isNotEmpty() &&
+                            layerViews.size != state.listData.size) {
+                            buildLayerViews(state.listData)
+                        }
+                        renderUserLayers(state)
+                        updateAdapters(state)
                     }
+                }
 
-                    // Render nhân vật TARGET lên rlCharacter
-                    renderTargetLayers(state)
+                launch {
+                    // ✅ collect thay vì collectLatest → không bị cancel
+                    viewModel.state.collect { state ->
+                        updateProgress(state.matchPercent)
+                    }
+                }
 
-                    // Update adapters (user chọn theo userSelections)
-                    updateAdapters(state)
-
-                    // Update progress
-                    updateProgress(state.matchPercent)
+                launch {
+                    viewModel.onComplete.collect {
+                        // findNavController().navigate(R.id.action_show_to_next)
+                    }
                 }
             }
         }
-
-        // Navigate khi đạt 100%
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.onComplete.collect {
-//                findNavController().navigate(R.id.action_show_to_next)
-            }
-        }
     }
-
-    // ── BUILD LAYER VIEWS ─────────────────────────────────────────────────────
 
     private fun buildLayerViews(
         parts: List<com.example.basefragment.data.model.custom.BodyPartModel>
@@ -150,18 +156,9 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         }
     }
 
-    // ── RENDER TARGET (nhân vật đáp án — user nhìn để đoán) ──────────────────
-
-    private fun renderTargetLayers(state: ShowState) {
-        // Dùng cache bitmap nếu đã render xong
-        val cached = viewModel.cachedBitmap
-        if (cached != null && !cached.isRecycled) {
-            showCachedBitmap(cached)
-            return
-        }
-
+    private fun renderUserLayers(state: ShowState) {
         val pathsToLoad = state.listData.mapIndexedNotNull { i, bp ->
-            val path       = viewModel.resolveTargetPathAt(i)
+            val path       = viewModel.resolveUserPathAt(i)
             val layerIndex = navToLayerIndex[bp.nav] ?: return@mapIndexedNotNull null
             val view       = layerViews.getOrNull(layerIndex) ?: return@mapIndexedNotNull null
 
@@ -173,25 +170,22 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
                 }
                 return@mapIndexedNotNull null
             }
+
             if (view.tag == path && view.visibility == View.VISIBLE) return@mapIndexedNotNull null
             Triple(view, path, layerIndex)
         }
 
-        if (pathsToLoad.isEmpty()) {
-            viewModel.onLoadingComplete()
-            cacheTargetBitmap()
-            return
-        }
+        if (pathsToLoad.isEmpty()) return
 
         pendingLoads.set(pathsToLoad.size)
         pathsToLoad.forEach { (view, path, _) ->
             view.tag        = path
             view.visibility = View.VISIBLE
-            loadTargetImage(view, path)
+            loadImage(view, path)
         }
     }
 
-    private fun loadTargetImage(view: ImageView, path: String) {
+    private fun loadImage(view: ImageView, path: String) {
         Glide.with(binding.rlCharacter)
             .load(path)
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
@@ -204,96 +198,57 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
                     e: GlideException?, model: Any?,
                     target: Target<android.graphics.drawable.Drawable>?,
                     isFirstResource: Boolean
-                ): Boolean { onTargetLoadFinished(); return false }
+                ): Boolean { onLoadFinished(); return false }
 
                 override fun onResourceReady(
                     resource: android.graphics.drawable.Drawable?, model: Any?,
                     target: Target<android.graphics.drawable.Drawable>?,
                     dataSource: DataSource?, isFirstResource: Boolean
-                ): Boolean { onTargetLoadFinished(); return false }
+                ): Boolean { onLoadFinished(); return false }
             })
             .into(view)
     }
 
-    private fun onTargetLoadFinished() {
+    private fun onLoadFinished() {
         if (pendingLoads.decrementAndGet() <= 0) {
             pendingLoads.set(0)
-            view?.post {
-                viewModel.onLoadingComplete()
-                cacheTargetBitmap()
-            }
+            view?.post { viewModel.onLoadingComplete() }
         }
     }
-
-    private fun cacheTargetBitmap() {
-        val root = binding.rlCharacter
-        if (root.width == 0 || root.height == 0) return
-        val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
-        val canvas = Canvas(bitmap)
-        layerViews.forEach { iv ->
-            if (iv.visibility != View.VISIBLE) return@forEach
-            val drawable = iv.drawable ?: return@forEach
-            drawable.setBounds(0, 0, root.width, root.height)
-            drawable.draw(canvas)
-        }
-        viewModel.setCachedBitmap(bitmap)
-    }
-
-    private fun showCachedBitmap(bitmap: Bitmap) {
-        // Chỉ replace nếu chưa hiển thị bitmap này
-        val firstChild = binding.rlCharacter.getChildAt(0)
-        if (firstChild is AppCompatImageView && firstChild.drawable != null
-            && firstChild.tag == "cached") return
-
-        binding.rlCharacter.removeAllViews()
-        binding.rlCharacter.addView(AppCompatImageView(requireContext()).apply {
-            layoutParams = ViewGroup.LayoutParams(
-                ViewGroup.LayoutParams.MATCH_PARENT,
-                ViewGroup.LayoutParams.MATCH_PARENT
-            )
-            scaleType = ImageView.ScaleType.FIT_CENTER
-            setImageBitmap(bitmap)
-            tag = "cached"
-        })
-    }
-
-    // ── ADAPTERS ──────────────────────────────────────────────────────────────
 
     private fun updateAdapters(state: ShowState) {
-        adapterNav.setPos(state.currentNavIndex)
+        // ── Nav ──────────────────────────────────────────────────────────────
         adapterNav.submitList(state.listData)
+        adapterNav.setPos(state.currentNavIndex)  // ✅ sau submitList
 
-        adapterColor.setPos(state.currentColorIndex)
+        // ── Color ─────────────────────────────────────────────────────────────
         binding.rcvColor.isVisible = state.hasMultipleColors
         if (state.hasMultipleColors) {
             adapterColor.submitList(state.currentColors)
+            adapterColor.setPos(state.currentColorIndex)  // ✅ sau submitList
             binding.rcvColor.post {
                 binding.rcvColor.smoothScrollToPosition(state.currentColorIndex)
             }
         }
 
-        adapterPart.setPos(state.currentPathIndex)
+        // ── Part ──────────────────────────────────────────────────────────────
         adapterPart.submitList(state.currentPaths)
+        adapterPart.setPos(state.currentPathIndex)  // ✅ sau submitList
         binding.rcvPart.post {
             binding.rcvPart.smoothScrollToPosition(state.currentPathIndex.coerceAtLeast(0))
         }
     }
-
-    // ── PROGRESS ──────────────────────────────────────────────────────────────
 
     private fun updateProgress(percent: Float) {
         binding.progressMatch.progress = percent.toInt()
         binding.tvPercent.text = "${percent.toInt()}%"
     }
 
-    // ── RESUME ────────────────────────────────────────────────────────────────
-
     override fun onResume() {
         super.onResume()
-        val cached = viewModel.cachedBitmap
-        if (cached != null && !cached.isRecycled) {
-            showCachedBitmap(cached)
-        }
+        // không cần cache — user đang chọn liên tục
+
+
     }
 
     override fun bindViewModel() {}

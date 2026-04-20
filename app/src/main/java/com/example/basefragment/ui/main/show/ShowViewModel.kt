@@ -49,20 +49,14 @@ class ShowViewModel @Inject constructor(
     }
 
     // ── INIT ──────────────────────────────────────────────────────────────────
-
-    fun randomize() {
-        _cachedBitmap?.recycle()
-        _cachedBitmap = null
-
+    fun initWithSelections(templateIndex: Int, savedSelections: ArrayList<SelectionIndex>) {
         viewModelScope.launch(Dispatchers.IO) {
             val templates = appDataManager.templates.value
-            if (templates.isEmpty()) return@launch
+            val template  = templates.getOrNull(templateIndex) ?: return@launch
+            val sorted    = template.listPath.sortedBy { it.zIndex }
 
-            val idx      = templates.indices.random()
-            val template = templates[idx]
-            val sorted   = template.listPath.sortedBy { it.zIndex }
-            val target   = buildRandomSelections(sorted)
-            val user     = buildDefaultSelections(sorted)
+            val target = savedSelections.toList()
+            val user   = buildDefaultSelections(sorted) // ✅ giờ đã chọn layer hợp lệ đầu tiên
 
             _state.value = ShowState(
                 template         = template,
@@ -71,10 +65,11 @@ class ShowViewModel @Inject constructor(
                 userSelections   = user,
                 currentNavIndex  = 0,
                 isLoading        = true,
-                matchPercent     = calcPercent(sorted.size, target, user)
+                matchPercent     = calcPercent(sorted.size, target, user) // ✅ tính lại đúng
             )
         }
     }
+
 
     // ── USER SELECTION ────────────────────────────────────────────────────────
 
@@ -135,7 +130,21 @@ class ShowViewModel @Inject constructor(
 
     private fun buildDefaultSelections(
         parts: List<com.example.basefragment.data.model.custom.BodyPartModel>
-    ): List<SelectionIndex> = parts.mapIndexed { i, _ -> SelectionIndex(i, 0, 0) }
+    ): List<SelectionIndex> = parts.mapIndexed { i, bp ->
+        if (i == 0) {
+            // ✅ Nav đầu tiên: chọn path hợp lệ đầu tiên
+            val colorIdx = 0
+            val paths = bp.listPath.getOrNull(colorIdx)?.listPath ?: emptyList()
+            val pathIdx = paths.indexOfFirst { it != "none" && it != "dice" }
+                .takeIf { it >= 0 } ?: 0
+            SelectionIndex(i, colorIdx, pathIdx)
+        } else {
+            // ✅ Các nav còn lại: để none (pathIndex trỏ vào "none")
+            val paths = bp.listPath.getOrNull(0)?.listPath ?: emptyList()
+            val noneIdx = paths.indexOfFirst { it == "none" }.takeIf { it >= 0 } ?: 0
+            SelectionIndex(i, 0, noneIdx)
+        }
+    }
 
     /**
      * Tính % số nav khớp hoàn toàn (cả colorIndex lẫn pathIndex).
@@ -147,10 +156,11 @@ class ShowViewModel @Inject constructor(
         user  : List<SelectionIndex>
     ): Float {
         if (total == 0) return 0f
-        val matched = target.indices.count { i ->
-            val t = target.getOrNull(i) ?: return@count false
-            val u = user.getOrNull(i)   ?: return@count false
-            t.colorIndex == u.colorIndex && t.pathIndex == u.pathIndex
+        var matched = 0
+        for (i in 0 until total) {  // ✅ loop theo total, không theo target.indices
+            val t = target.getOrNull(i) ?: continue
+            val u = user.getOrNull(i)   ?: continue
+            if (t.colorIndex == u.colorIndex && t.pathIndex == u.pathIndex) matched++
         }
         return (matched.toFloat() / total.toFloat()) * 100f
     }
@@ -168,13 +178,13 @@ class ShowViewModel @Inject constructor(
                 while (updated.size < navIdx) updated.add(SelectionIndex(updated.size, 0, 0))
                 updated.add(new)
             }
-            val percent = calcPercent(state.totalNav, state.targetSelections, updated)
+
+            // ✅ Dùng listData.size thay vì totalNav
+            val percent = calcPercent(state.listData.size, state.targetSelections, updated)
             state.copy(userSelections = updated, matchPercent = percent)
         }
 
-        // Kiểm tra đạt 100% sau khi update
-        val currentPercent = _state.value.matchPercent
-        if (currentPercent >= 100f) {
+        if (_state.value.matchPercent >= 100f) {
             viewModelScope.launch { _onComplete.emit(Unit) }
         }
     }

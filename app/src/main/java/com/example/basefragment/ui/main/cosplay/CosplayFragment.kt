@@ -32,6 +32,7 @@ import com.example.basefragment.databinding.FragmentSettingBinding
 import com.example.basefragment.databinding.FragmentSettingBinding.inflate
 import com.example.basefragment.ui.main.customize.CustomizeFragment
 import com.example.basefragment.ui.main.setting.SettingViewModel
+import com.example.basefragment.ui.main.show.ShowFragment
 import com.example.basefragment.utils.state.RateState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
@@ -42,8 +43,10 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
-class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>( FragmentCosplayBinding::inflate, CosplayViewModel::class.java) {
-
+class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
+    FragmentCosplayBinding::inflate,
+    CosplayViewModel::class.java
+) {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupBackPressHandler()
@@ -96,9 +99,8 @@ override fun viewListener() {
 
     binding.show.onClick {
         val item = viewModel.randomItem.value ?: return@onClick
-        val args = CustomizeFragment.newArgs(
+        val args = ShowFragment.newArgs(
             templateIndex   = item.templateIndex,
-            isEdit          = false,
             savedSelections = item.selections
         )
         findNavController().navigate(R.id.action_cosplay_to_show, args)

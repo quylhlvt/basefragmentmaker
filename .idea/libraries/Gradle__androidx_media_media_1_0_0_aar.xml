@@ -1,0 +1,14 @@
+<component name="libraryTable">
+  <library name="Gradle: androidx.media:media:1.0.0@aar" external-system-id="GRADLE">
+    <ANNOTATIONS>
+      <root url="jar://$USER_HOME$/.gradle/caches/8.13/transforms/c4aba7ddb5e2c6cd788e8be85ad1b3e0/transformed/media-1.0.0/annotations.zip!/" />
+    </ANNOTATIONS>
+    <CLASSES>
+      <root url="jar://$USER_HOME$/.gradle/caches/8.13/transforms/c4aba7ddb5e2c6cd788e8be85ad1b3e0/transformed/media-1.0.0/jars/classes.jar!/" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.13/transforms/c4aba7ddb5e2c6cd788e8be85ad1b3e0/transformed/media-1.0.0/res" />
+      <root url="file://$USER_HOME$/.gradle/caches/8.13/transforms/c4aba7ddb5e2c6cd788e8be85ad1b3e0/transformed/media-1.0.0/AndroidManifest.xml" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
