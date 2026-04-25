@@ -141,8 +141,11 @@ class WebViewFragment : BaseFragment<FragmentWebViewBinding, WebViewViewModel>(
     }
 
     override fun viewListener() {
-        binding.exit.setOnClickListener {
-            findNavController().popBackStack()
+        binding.exit.apply {
+            bringToFront()
+            setOnClickListener {
+                findNavController().popBackStack()
+            }
         }
     }
     override fun observeData() {}

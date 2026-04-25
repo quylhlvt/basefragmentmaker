@@ -211,7 +211,7 @@
                         </option>
                         <option name="myPositions">
                           <map>
-                            <entry key="action_cosplay_to_custom">
+                            <entry key="action_random_to_custom">
                               <value>
                                 <LayoutPositions />
                               </value>
@@ -290,6 +290,18 @@
                               </value>
                             </entry>
                           </map>
+                        </option>
+                      </LayoutPositions>
+                    </value>
+                  </entry>
+                  <entry key="webViewFragment">
+                    <value>
+                      <LayoutPositions>
+                        <option name="myPosition">
+                          <Point>
+                            <option name="x" value="485" />
+                            <option name="y" value="370" />
+                          </Point>
                         </option>
                       </LayoutPositions>
                     </value>
