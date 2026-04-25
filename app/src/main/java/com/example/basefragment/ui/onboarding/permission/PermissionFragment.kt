@@ -11,6 +11,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.basefragment.R
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.onClick
@@ -29,11 +30,11 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionViewModel>(
     FragmentPermissionBinding::inflate, PermissionViewModel::class.java
-) {
+), BackPressHandler  {
     override fun viewListener() {
-        binding.swPermission.onClick(800) { handlePermissionRequest(isStorage = true) }
-        binding.swNotification.onClick(800) { handlePermissionRequest(isStorage = false) }
-        binding.tvContinue.onClick(1500) { handleContinue() }
+        binding.swPermission.onClick(1000) { handlePermissionRequest(isStorage = true) }
+        binding.swNotification.onClick(1000) { handlePermissionRequest(isStorage = false) }
+        binding.tvContinue.onClick(1000) { handleContinue() }
     }
 
 
@@ -143,5 +144,10 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
         @androidx.annotation.ColorRes colorRes: Int,
         font: Int = R.font.itim_regular
     ) = StringHelper.changeColor(requireContext(), getString(textRes), colorRes, font)
+
+    override fun onBackPressed(): Boolean {
+        requireActivity().finish()
+        return true
+    }
 
 }

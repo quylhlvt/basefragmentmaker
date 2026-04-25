@@ -12,6 +12,7 @@ import androidx.navigation.fragment.findNavController
 import androidx.viewpager2.widget.ViewPager2
 import androidx.viewpager2.widget.ViewPager2.OnPageChangeCallback
 import com.example.basefragment.R
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.toHome
@@ -31,7 +32,7 @@ import kotlin.text.compareTo
 class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
     FragmentIntroBinding::inflate,
     IntroViewModel::class.java
-) {
+), BackPressHandler  {
     @Inject
     lateinit var introAdapter: IntroAdapter
 
@@ -108,5 +109,10 @@ class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
                 viewModel.getPage(binding.viewPager2.currentItem, introAdapter.itemCount)
             }
         })
+    }
+
+    override fun onBackPressed(): Boolean {
+        requireActivity().finish()
+        return  true
     }
 }

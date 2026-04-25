@@ -31,7 +31,6 @@ class ShowViewModel @Inject constructor(
     private val _onComplete = MutableSharedFlow<Unit>(replay = 0)
     val onComplete = _onComplete.asSharedFlow()
 
-    private var isInitialized = false
 
     // ── INIT — gọi từ Fragment sau khi nhận args từ CosplayFragment ───────────
 
@@ -40,8 +39,9 @@ class ShowViewModel @Inject constructor(
      * [targetSelections]: selections random từ CosplayViewModel (đáp án)
      */
     fun init(templateIndex: Int, targetSelections: ArrayList<SelectionIndex>) {
-        if (isInitialized) return
-        isInitialized = true
+
+        if (_state.value.listData.isNotEmpty()) return  // safe với process death
+
 
         val template = appDataManager.getCharacterByIndex(templateIndex) ?: return
         val sorted   = template.listPath.sortedBy { it.zIndex }

@@ -31,8 +31,21 @@ class RateDialog(private val activity: Activity) : DialogFragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         isCancelable = false
-
+        dialog?.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent)
+            setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
         initView()
+        dialog?.window?.apply {
+            setBackgroundDrawableResource(android.R.color.transparent)
+            setLayout(
+                ViewGroup.LayoutParams.MATCH_PARENT,
+                ViewGroup.LayoutParams.MATCH_PARENT
+            )
+        }
         initAction()
     }
 

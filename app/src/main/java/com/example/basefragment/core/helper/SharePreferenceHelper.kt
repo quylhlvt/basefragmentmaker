@@ -9,6 +9,7 @@ import android.os.Bundle
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import javax.inject.Singleton
+import androidx.core.content.edit
 
 
 @Singleton
@@ -25,10 +26,8 @@ object SharedPreferencesManager {
     private const val PERMISSION_CAMERA = "CAMERA_KEY"
     private const val COUNT_BACK_KEY = "COUNT_BACK_KEY"
     private const val RATE_KEY = "RATE_KEY"
-    fun isSplashScreen(): Boolean = getBooleanDataByKey(SPLASH_SCREEN)
-    fun setSplashScreen(isSkipped: Boolean) {
-        saveBooleanDataByKey(SPLASH_SCREEN, isSkipped)
-    }
+
+
     fun isLanguageKey(): String=
         getStringDataByKey(
             LANGUAGE_KEY
@@ -81,18 +80,18 @@ object SharedPreferencesManager {
         sharedPreferences.getBoolean(key, false)
 
     private fun saveBooleanDataByKey(key: String?, data: Boolean) {
-        editor.putBoolean(key, data).apply()
+        sharedPreferences.edit(commit = true) { putBoolean(key, data) }
     }
 
     private fun saveStringDataByKey(key: String?, data: String?) {
-        editor.putString(key, data).apply()
+        sharedPreferences.edit(commit = true) { putString(key, data) }
     }
 
     private fun getStringDataByKey(key: String?): String =
         sharedPreferences.getString(key, "") ?: ""
 
     private fun saveIntDataByKey(key: String?, data: Int) {
-        editor.putInt(key, data).apply()
+        sharedPreferences.edit(commit = true) { putInt(key, data) }
     }
 
     private fun getIntDataByKey(key: String?): Int = sharedPreferences.getInt(key, 0)

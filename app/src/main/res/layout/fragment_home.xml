@@ -203,6 +203,34 @@
                 app:strokeJoinStyle="miter"
                 android:layout_marginHorizontal="5dp"
                 />
+ <ImageView
+                android:id="@+id/btnWeb"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginHorizontal="16dp"
+                android:layout_marginTop="10dp"
+                android:adjustViewBounds="true"
+                android:src="@drawable/img_frame_home3"
+                app:layout_constraintTop_toBottomOf="@+id/btnRandom" />
+
+            <!--            tv3-->
+            <TextView
+                android:id="@+id/tv6"
+                style="@style/single_marquee"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:gravity="center"
+                android:text="WebSite"
+                android:textColor="@color/white"
+                android:textSize="24sp"
+                app:layout_constraintBottom_toBottomOf="@+id/btnWeb"
+                app:layout_constraintEnd_toStartOf="@+id/gl063"
+                app:layout_constraintStart_toStartOf="@+id/btnWeb"
+                app:layout_constraintTop_toTopOf="@+id/btnWeb"
+                app:strokeColor="@color/white"
+                app:strokeJoinStyle="miter"
+                android:layout_marginHorizontal="5dp"
+                />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
 

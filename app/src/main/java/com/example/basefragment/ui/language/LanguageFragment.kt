@@ -74,7 +74,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
 
     override fun initView() {
         // Set isFromSetting trước khi dùng
-        isFromSetting = (findNavController().currentDestination?.id == R.id.language)
+        isFromSetting = findNavController().previousBackStackEntry?.destination?.id == R.id.setting
 
         binding.apply {
             actionBar.btnActionBarRight.gone()

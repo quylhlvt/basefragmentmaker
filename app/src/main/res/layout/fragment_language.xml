@@ -13,7 +13,7 @@
         android:adjustViewBounds="true"
         android:elevation="-1dp"
         android:scaleType="fitXY"
-        android:src="@drawable/img_bg_app" />
+        android:src="@drawable/img_bg_lang" />
 
     <FrameLayout
         android:id="@+id/layoutActionBar"
@@ -27,6 +27,28 @@
             layout="@layout/layout_actionbar" />
     </FrameLayout>
 
+    <ImageView
+        android:id="@+id/bg_tt"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:layout_constraintDimensionRatio="2.8:0.68"
+        android:layout_marginHorizontal="40dp"
+        app:layout_constraintTop_toBottomOf="@+id/layoutActionBar"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent" />
+    <com.example.basefragment.core.custom.StrokeTextView
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        app:layout_constraintTop_toTopOf="@+id/bg_tt"
+        app:layout_constraintBottom_toBottomOf="@+id/bg_tt"
+        android:layout_marginHorizontal="5dp"
+        app:strokeWidth="2dp"
+        style="@style/single_marquee"
+        app:strokeColor="@color/app_color"
+        android:text="@string/language"
+        android:textSize="36sp"
+        android:gravity="center"/>
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/recycleLanguage"
         android:layout_width="match_parent"
@@ -36,7 +58,7 @@
         app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
         android:layout_marginHorizontal="16dp"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/layoutActionBar"
+        app:layout_constraintTop_toBottomOf="@+id/bg_tt"
         tools:listitem="@layout/item_language" />
 
 

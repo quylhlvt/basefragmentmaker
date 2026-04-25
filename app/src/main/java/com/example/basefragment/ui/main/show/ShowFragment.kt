@@ -116,37 +116,32 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
 
     // ── OBSERVE ───────────────────────────────────────────────────────────────
 
+    // ShowFragment.observeData() — THÊM guard này
+    // ✅ FIX — thêm flag giống CustomizeFragment
+    private var hasTriggeredReInit = false
+
     override fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collectLatest { state ->
+                    if (state.listData.isEmpty()) {
+                        if (!hasTriggeredReInit) {
+                            hasTriggeredReInit = true
+                            readArgsAndInit()
+                        }
+                        return@collectLatest
+                    }
+                    hasTriggeredReInit = false  // reset khi có data
 
-                    // Build layer views lần đầu hoặc khi listData thay đổi
-                    if (state.listData.isNotEmpty() &&
-                        layerViews.size != state.listData.size) {
+                    if (layerViews.size != state.listData.size) {
                         buildLayerViews(state.listData)
                     }
-
-                    // Render nhân vật theo userSelections (giống renderLayers ở CustomizeFragment)
                     renderLayers(state)
-
-                    // Update adapters
                     updateAdapters(state)
-
-                    // Flip
                     val scale = if (state.isFlipped) -1f else 1f
                     layerViews.forEach { it.scaleX = scale }
-
-                    // Update progress
                     updateMatchUI(state.matchPercent)
                 }
-            }
-        }
-
-        // Navigate khi đạt 100%
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.onComplete.collect {
-//                findNavController().navigate(R.id.action_show_to_next)
             }
         }
     }
@@ -319,18 +314,26 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         super.onResume()
         pendingLoads.set(0)
 
+        val currentState = viewModel.state.value
+
+        // ✅ THÊM: process death — state rỗng, trigger re-init
+        if (currentState.listData.isEmpty()) {
+            if (!hasTriggeredReInit) {
+                hasTriggeredReInit = true
+                readArgsAndInit()
+            }
+            return
+        }
+
         val needRebuild = layerViews.isEmpty() ||
                 layerViews.firstOrNull()?.isAttachedToWindow == false
 
         if (needRebuild) {
-            val currentState = viewModel.state.value
-            if (currentState.listData.isNotEmpty()) {
-                buildLayerViews(currentState.listData)
-                renderLayers(currentState)
-                updateAdapters(currentState)
-                val scale = if (currentState.isFlipped) -1f else 1f
-                layerViews.forEach { it.scaleX = scale }
-            }
+            buildLayerViews(currentState.listData)
+            renderLayers(currentState)
+            updateAdapters(currentState)
+            val scale = if (currentState.isFlipped) -1f else 1f
+            layerViews.forEach { it.scaleX = scale }
         }
     }
 

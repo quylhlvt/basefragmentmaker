@@ -54,6 +54,7 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
 
     private val pendingLoads = AtomicInteger(0)
     private var canSave      = false
+    private var hasTriggeredReInit = false
 
     // ── INFLATE ───────────────────────────────────────────────────────────────
 
@@ -136,15 +137,20 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collectLatest { state ->
-                    // ✅ Bỏ điều kiện isEmpty() — luôn rebuild nếu listData có data
-                    // và layerViews chưa đúng (view bị destroy khi navigate đi)
-                    if (state.listData.isNotEmpty() &&
-                        layerViews.size != state.listData.size) {
+                    if (state.listData.isEmpty()) {
+                        if (!hasTriggeredReInit) {
+                            hasTriggeredReInit = true
+                            readArgsAndInit()
+                        }
+                        return@collectLatest
+                    }
+                    hasTriggeredReInit = false  // reset khi state đã có data
+
+                    if (layerViews.size != state.listData.size) {
                         buildLayerViews(state.listData)
                     }
                     renderLayers(state)
                     updateAdapters(state)
-
                     val scale = if (state.isFlipped) -1f else 1f
                     layerViews.forEach { it.scaleX = scale }
                 }
@@ -259,8 +265,16 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
         super.onResume()
         pendingLoads.set(0)
 
-        // ✅ Chỉ rebuild nếu view bị detach (quay lại từ màn khác)
-        // Kiểm tra view còn attached không thay vì kiểm tra isNotEmpty()
+        val state = viewModel.state.value
+        if (state.listData.isEmpty()) {
+            if (!hasTriggeredReInit) {
+                hasTriggeredReInit = true
+                readArgsAndInit()
+            }
+            return
+        }
+        // ✅ Nếu state empty thì để observeData xử lý re-init
+
         val needRebuild = layerViews.isEmpty() ||
                 layerViews.firstOrNull()?.isAttachedToWindow == false
 
@@ -268,17 +282,15 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
             layerViews.clear()
             navToLayerIndex.clear()
             binding.rlCharacter.removeAllViews()
-            val currentState = viewModel.state.value
-            if (currentState.listData.isNotEmpty()) {
-                buildLayerViews(currentState.listData)
-                renderLayers(currentState)
-                updateAdapters(currentState)
-                val scale = if (currentState.isFlipped) -1f else 1f
-                layerViews.forEach { it.scaleX = scale }
-            }
+            buildLayerViews(state.listData)
+            renderLayers(state)
+            updateAdapters(state)
+            val scale = if (state.isFlipped) -1f else 1f
+            layerViews.forEach { it.scaleX = scale }
         } else {
-            // View vẫn attached → chỉ reset pendingLoads, không rebuild
-            setSaveEnabled(true)
+            // ✅ Force re-render để reload ảnh bị mất khỏi memory
+            layerViews.forEach { it.tag = null }
+            renderLayers(state)
         }
     }
 

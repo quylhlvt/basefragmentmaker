@@ -1,30 +1,49 @@
 package com.example.basefragment.ui.main.home
 
+import android.Manifest
+import android.content.pm.PackageManager
 import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.toSettingFromHome
+import com.example.basefragment.core.helper.RateHelper
+import com.example.basefragment.core.helper.RateHelper.showRateDialog
 import com.example.basefragment.databinding.FragmentHomeBinding
+import com.example.basefragment.utils.state.RateState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
+import java.lang.System.exit
 
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     FragmentHomeBinding::inflate, HomeViewModel::class.java
-) {
+), BackPressHandler {
     private val mainViewModel: ViewModelActivity by activityViewModels()
-
+    private var countRate =0
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            findNavController().navigate(R.id.action_home_to_web)
+        } else {
+            showToast(R.string.permission_camera_denied)
+        }
+    }
     override fun viewListener() {
         binding.apply {
             // Click vào "Choose Character"
@@ -46,6 +65,21 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
             }
                 btnCosPlay.onClick {
                 findNavController().navigate(R.id.action_home_to_cosplay)
+            }
+            btnWeb.onClick {
+                when {
+                    ContextCompat.checkSelfPermission(
+                        requireContext(),
+                        Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED -> {
+                        // Đã có quyền → navigate luôn
+                        findNavController().navigate(R.id.action_home_to_web)
+                    }
+                    else -> {
+                        // Chưa có → xin quyền
+                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+                    }
+                }
             }
             actionBar.btnActionBarRight.onClick {
                 toSettingFromHome()
@@ -69,7 +103,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
             tv2.isSelected = true
             tv3.isSelected = true
         }
-        sharedPreferences.setBackRequest(sharedPreferences.isBackRequest() + 1)
         deleteTempFolder()
 //        binding.textView.text = "Home Fragment"
 //        binding.btnTest.setOnClickListener {
@@ -148,6 +181,26 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
 //                }
 //            }
         }
+    }
+    override fun onBackPressed(): Boolean {
+        countRate = sharedPreferences.isBackRequest() + 1
+        sharedPreferences.setBackRequest(countRate)
+
+        android.util.Log.d("HomeFragment1", "countRate=$countRate, isRateRequest=${sharedPreferences.isRateRequest()}, check=${countRate % 2 == 0}")
+
+        if (!sharedPreferences.isRateRequest() && countRate % 2 == 0) {
+            showRateDialog(requireActivity(), sharedPreferences) { state ->
+                if (state != RateState.CANCEL) {
+                    showToast(R.string.have_rated)
+                }
+                requireActivity().finish()
+                exit(0)
+            }
+        } else {
+            requireActivity().finish()
+            exit(0)
+        }
+        return true
     }
 
 }
