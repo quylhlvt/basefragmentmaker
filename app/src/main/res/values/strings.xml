@@ -88,4 +88,6 @@
     <string name="cat_random">Cat Random</string>
     <string name="my_creation">My Creation</string>
     <string name="category">Category</string>
+    <string name="image">Image</string>
+    <string name="color">Color</string>
 </resources>

@@ -4,11 +4,9 @@ import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
-import android.net.Uri
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +23,9 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.custom.Draw
+import com.example.basefragment.core.custom.DrawableDraw
+import com.example.basefragment.core.custom.listener.listenerdraw.OnDrawListener
 import com.example.basefragment.core.dialog.ChooseColorDialog
 import com.example.basefragment.core.dialog.DialogSpeech
 import com.example.basefragment.core.extention.checkPermissions
@@ -36,7 +37,6 @@ import com.example.basefragment.core.extention.hideNavigation
 import com.example.basefragment.core.extention.hideSoftKeyboard
 import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.onClick
-import com.example.basefragment.core.extention.openImagePicker
 import com.example.basefragment.core.extention.setFont
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.visible
@@ -50,13 +50,8 @@ import com.example.basefragment.ui.main.add_character.adapter.TextFontAdapter
 import com.example.basefragment.ui.onboarding.permission.PermissionViewModel
 import com.example.basefragment.utils.DataLocal
 import com.example.basefragment.utils.key.ValueKey
-import com.example.basefragment.data.model.addcharacter.draw.Draw
-import com.pfp.ocmaker.create.maker.data.model.draw.DrawableDraw
-import com.example.basefragment.core.listener.listenerdraw.OnDrawListener
-import com.example.basefragment.data.datalocal.manager.AppDataManager
 import com.example.basefragment.data.datalocal.manager.CharacterImageManager
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -95,10 +90,10 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
     private val layoutNavigationList by lazy {
         arrayListOf(
-            binding.lnlBackground,
+            binding.lnlBackground.root,
             binding.lnlSticker,
             binding.lnlSpeech,
-            binding.scvText,
+            binding.lnlText.scvText,
         )
     }
 
@@ -196,7 +191,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                                 delay(200)
                                 viewModel.layoutParams.topMargin = viewModel.originalMarginBottom
                                 flFunction.layoutParams = viewModel.layoutParams
-                                edtText.clearFocus()
+                                lnlText.edtText.clearFocus()
                             }
                             requireActivity().hideNavigation(true)
                         }
@@ -205,7 +200,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             }
         }
     }
-    
+
 
     override fun bindViewModel() {
         // Can be used for additional bindings with viewModelActivity if needed
@@ -221,14 +216,14 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
             }
 
-            btnBackgroundImage.onClick { viewModel.setTypeBackground(ValueKey.IMAGE_BACKGROUND) }
-            btnBackgroundColor.onClick { viewModel.setTypeBackground(ValueKey.COLOR_BACKGROUND) }
+            lnlBackground.btnBackgroundImage.onClick { viewModel.setTypeBackground(ValueKey.IMAGE_BACKGROUND) }
+            lnlBackground.btnBackgroundColor.onClick { viewModel.setTypeBackground(ValueKey.COLOR_BACKGROUND) }
             btnBackground.onClick { viewModel.setTypeNavigation(ValueKey.BACKGROUND_NAVIGATION) }
             btnSticker.onClick { viewModel.setTypeNavigation(ValueKey.STICKER_NAVIGATION) }
             btnSpeech.onClick { viewModel.setTypeNavigation(ValueKey.SPEECH_NAVIGATION) }
             btnText.onClick { viewModel.setTypeNavigation(ValueKey.TEXT_NAVIGATION) }
 
-            edtText.addTextChangedListener(object : TextWatcher {
+            lnlText.edtText.addTextChangedListener(object : TextWatcher {
                 override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
                 override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
                     tvGetText.text = p0.toString()
@@ -237,7 +232,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                 override fun afterTextChanged(p0: Editable?) {}
             })
 
-            edtText.setOnEditorActionListener { _, i, _ ->
+            lnlText.edtText.setOnEditorActionListener { _, i, _ ->
                 if (i == EditorInfo.IME_ACTION_DONE) {
                     viewModel.setIsFocusEditText(false)
                       hideSoftKeyboard()
@@ -247,11 +242,11 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                 }
             }
 
-            edtText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+            lnlText.edtText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
                 viewModel.setIsFocusEditText(hasFocus)
             }
 
-            btnDoneText.onClick { handleDoneText() }
+            lnlText.btnDoneText.onClick { handleDoneText() }
 
             main.onClick {
                 viewModel.setIsFocusEditText(false)
@@ -302,13 +297,13 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
     private fun initRcv() {
         binding.apply {
-            rcvBackgroundImage.apply {
+            lnlBackground.rcvBackgroundImage.apply {
                 adapter = backgroundImageAdapter
                 itemAnimator = null
-                setHasFixedSize(true)    // ← thêm dòng này
+                setHasFixedSize(true)
                 setItemViewCacheSize(10)
             }
-            rcvBackgroundColor.apply {
+            lnlBackground.rcvBackgroundColor.apply {
                 adapter = backgroundColorAdapter
                 itemAnimator = null
             }
@@ -324,11 +319,11 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                 setHasFixedSize(true)    // ← thêm dòng này
                 setItemViewCacheSize(10)
             }
-            rcvFont.apply {
+            lnlText.rcvFont.apply {
                 adapter = textFontAdapter
                 itemAnimator = null
             }
-            rcvTextColor.apply {
+            lnlText.rcvTextColor.apply {
                 adapter = textColorAdapter
                 itemAnimator = null
             }
@@ -337,6 +332,8 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     }
 
     override fun initView() {
+        binding.lnlBackground.btnBackgroundColorTv.isSelected = true
+        binding.lnlBackground.btnBackgroundImageTv.isSelected = true
         requireActivity().hideNavigation(true)
         showLoadingSafe() // ← thêm ngay đây, hiện loading trước tiên
         binding.tvGetText.setTextColor(requireContext().getColor(R.color.black))
@@ -472,32 +469,18 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             when (type) {
                 ValueKey.IMAGE_BACKGROUND -> {
                     requireActivity().hideNavigation(true)
-
-                    rcvBackgroundImage.visible()
-                    rcvBackgroundColor.gone()
-                    btnBackgroundImage.apply {
-                        setTextColor(requireContext().getColor(R.color.white))
-                        setBackgroundResource(R.drawable.img_bg_image_addcharacter)
-                    }
-                    btnBackgroundColor.apply {
-                        setTextColor(requireContext().getColor(R.color.app_color))
-                        setBackgroundResource(R.drawable.img_bg_color_addcharacter)
-                    }
+                    lnlBackground.rcvBackgroundImage.visible()
+                    lnlBackground.rcvBackgroundColor.gone()
+                    lnlBackground.btnBackgroundImage.setBackgroundResource(R.drawable.img_bg_image_addcharacter)
+                    lnlBackground.btnBackgroundColor.setBackgroundResource(R.drawable.img_bg_color_addcharacter)
                     backgroundImageAdapter.submitList(viewModel.backgroundImageList)
                 }
-
                 ValueKey.COLOR_BACKGROUND -> {
                     requireActivity().hideNavigation(true)
-                    rcvBackgroundImage.gone()
-                    rcvBackgroundColor.visible()
-                    btnBackgroundImage.apply {
-                        setTextColor(requireContext().getColor(R.color.app_color))
-                        setBackgroundResource(R.drawable.img_bg_color_addcharacter)
-                    }
-                    btnBackgroundColor.apply {
-                        setTextColor(requireContext().getColor(R.color.white))
-                        setBackgroundResource(R.drawable.img_bg_image_addcharacter)
-                    }
+                    lnlBackground.rcvBackgroundImage.gone()
+                    lnlBackground.rcvBackgroundColor.visible()
+                    lnlBackground.btnBackgroundColor.setBackgroundResource(R.drawable.img_bg_image_addcharacter)
+                    lnlBackground.btnBackgroundImage.setBackgroundResource(R.drawable.img_bg_color_addcharacter)
                     backgroundColorAdapter.submitList(viewModel.backgroundColorList)
                 }
             }
@@ -511,7 +494,6 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             } else {
                 DataLocal.bottomNavigationNotSelect[index] to false
             }
-
             button.setImageResource(res)
             layoutNavigationList[index].isVisible = status
         }
@@ -638,7 +620,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
     private fun handleFontClick(font: Int, position: Int) {
         binding.apply {
-            edtText.setFont(font)
+            lnlText.edtText.setFont(font)
             tvGetText.setFont(font)
             viewModel.updateTextFontSelected(position)
             textFontAdapter.submitItem(position, viewModel.textFontList)
@@ -647,7 +629,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
     private fun handleTextColorClick(color: Int, position: Int) {
         binding.apply {
-            edtText.setTextColor(color)
+            lnlText.edtText.setTextColor(color)
             tvGetText.setTextColor(color)
             viewModel.updateTextColorSelected(position)
             textColorAdapter.submitItem(position, viewModel.textColorList)
@@ -658,10 +640,10 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     private fun handleDoneText() {
         hideSoftKeyboard()
         binding.apply {
-            if (edtText.text.toString().trim() == "") {
+            if (lnlText.edtText.text.toString().trim() == "") {
                 showToast(getString(R.string.null_edt))
             } else {
-                tvGetText.text = edtText.text.toString().trim()
+                tvGetText.text = lnlText.edtText.text.toString().trim()
                 val bitmap = BitmapHelper.getBitmapFromEditText(tvGetText)
                 val drawableEmoji = viewModel.loadDrawableEmoji(bitmap, isText = true)
                 drawView.addDraw(drawableEmoji)
@@ -670,9 +652,9 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                 val font = viewModel.textFontList.first().color
                 val color = viewModel.textColorList[1].color
 
-                edtText.text = null
-                edtText.setFont(font)
-                edtText.setTextColor(color)
+                lnlText.edtText.text = null
+                lnlText.edtText.setFont(font)
+                lnlText.edtText.setTextColor(color)
 
                 viewModel.updateTextFontSelected(0)
                 viewModel.updateTextColorSelected(1)

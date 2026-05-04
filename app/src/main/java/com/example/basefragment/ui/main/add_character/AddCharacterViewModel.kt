@@ -5,14 +5,15 @@ import android.graphics.Bitmap
 import android.view.ViewGroup
 import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.ViewModel
+import com.example.basefragment.core.custom.Draw
+import com.example.basefragment.core.custom.DrawableDraw
 import com.example.basefragment.data.model.addcharacter.SelectedAddModel
 import com.example.basefragment.utils.DataLocal
-import com.example.basefragment.data.model.addcharacter.draw.Draw
-import com.pfp.ocmaker.create.maker.data.model.draw.DrawableDraw
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
@@ -24,7 +25,7 @@ class AddCharacterViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
-    // Lists for adapters (converted từ ViewModelActivity data)
+    // ========== Adapter Lists ==========
     var backgroundImageList: ArrayList<SelectedAddModel> = arrayListOf()
     var backgroundColorList: ArrayList<SelectedAddModel> = arrayListOf()
     var stickerList: ArrayList<SelectedAddModel> = arrayListOf()
@@ -32,61 +33,79 @@ class AddCharacterViewModel @Inject constructor(
     var textFontList: ArrayList<SelectedAddModel> = arrayListOf()
     var textColorList: ArrayList<SelectedAddModel> = arrayListOf()
 
-    // StateFlows
-    private val _typeNavigation = MutableStateFlow<Int>(-1)
-    val typeNavigation = _typeNavigation.asStateFlow()
+    // ========== StateFlows ==========
 
-    private val _typeBackground = MutableStateFlow<Int>(-1)
-    val typeBackground = _typeBackground.asStateFlow()
+    // Dùng -1 làm giá trị "chưa set", Fragment sẽ bỏ qua khi collect
+    private val _typeNavigation = MutableStateFlow(-1)
+    val typeNavigation: StateFlow<Int> = _typeNavigation.asStateFlow()
 
-    private val _isFocusEditText = MutableStateFlow<Boolean>(false)
-    val isFocusEditText = _isFocusEditText.asStateFlow()
+    // IMAGE_BACKGROUND hoặc COLOR_BACKGROUND
+    private val _typeBackground = MutableStateFlow(-1)
+    val typeBackground: StateFlow<Int> = _typeBackground.asStateFlow()
 
-    private val _isLoading = MutableStateFlow(false)
-    val isLoading = _isLoading.asStateFlow()
+    private val _isFocusEditText = MutableStateFlow(false)
+    val isFocusEditText: StateFlow<Boolean> = _isFocusEditText.asStateFlow()
 
     private val _backgroundImagePath = MutableStateFlow<String?>(null)
-    val backgroundImagePath = _backgroundImagePath
+    val backgroundImagePath: StateFlow<String?> = _backgroundImagePath.asStateFlow()
 
-    fun setBackgroundImage(path: String?) {
-        _backgroundImagePath.value = path
-    }
-
+    // ========== Draw state ==========
     var currentDraw: Draw? = null
     var drawViewList: ArrayList<Draw> = arrayListOf()
 
-    // Layout params
+    // ========== Layout params ==========
     lateinit var layoutParams: ViewGroup.MarginLayoutParams
     var originalMarginBottom: Int = 0
 
-    // Path default
+    // ========== Misc ==========
     var pathDefault = ""
 
-    // ========== Functions ==========
+    // ========== Setters ==========
 
-    fun setTypeNavigation(type: Int) {
-        _typeNavigation.value = type
+//    fun setTypeNavigation(type: Int) {
+//        _typeNavigation.value = type
+//    }
+
+    /**
+     * Dùng value= thay vì tryEmit — StateFlow không bao giờ drop emission.
+     * Nếu bấm cùng type 2 lần liên tiếp, StateFlow sẽ KHÔNG emit lại
+     * (vì value không đổi). Để force re-emit khi bấm lại cùng tab,
+     * ta reset về -1 trước rồi mới set giá trị mới.
+     */
+    fun setTypeBackground(type: Int) {
+        if (_typeBackground.value == type) {
+            // Đang chọn lại cùng tab → reset trước để trigger collect
+            _typeBackground.value = -1
+        }
+        _typeBackground.value = type
     }
 
-    fun setTypeBackground(type: Int) {
-        _typeBackground.value = type
+    fun setTypeNavigation(type: Int) {
+        if (_typeNavigation.value == type) {
+            _typeNavigation.value = -1
+        }
+        _typeNavigation.value = type
     }
 
     fun setIsFocusEditText(status: Boolean) {
         _isFocusEditText.value = status
     }
 
+    fun setBackgroundImage(path: String?) {
+        _backgroundImagePath.value = path
+    }
+
+    // ========== Data loading ==========
+
     /**
-     * Load data từ ViewModelActivity (đã có sẵn backgrounds, stickers, speeches)
-     * Chỉ cần convert sang SelectedAddModel và load colors/fonts từ DataLocal
+     * Load data từ ViewModelActivity.
+     * Chạy trên Main thread — convert list chỉ tốn < 1ms nên không cần IO.
      */
-    // Đổi thành hàm thường, không suspend, không withContext
     fun loadDataFromMainViewModel(
         backgrounds: List<String>,
         stickers: List<String>,
         speeches: List<String>
     ) {
-        // Chạy thẳng trên Main — convert list chỉ tốn < 1ms
         backgroundImageList.clear()
         backgroundImageList.addAll(backgrounds.map { SelectedAddModel(path = it) })
 
@@ -108,93 +127,73 @@ class AddCharacterViewModel @Inject constructor(
         textColorList.getOrNull(1)?.isSelected = true
     }
 
-    /**
-     * Update background image selection
-     */
+    // ========== Selection helpers ==========
+
     suspend fun updateBackgroundImageSelected(position: Int) {
         withContext(Dispatchers.Default) {
             backgroundColorList = backgroundColorList
                 .map { it.copy(isSelected = false) }
                 .toCollection(ArrayList())
-
             backgroundImageList.forEachIndexed { index, model ->
                 model.isSelected = index == position
             }
         }
     }
 
-    /**
-     * Update background color selection
-     */
     suspend fun updateBackgroundColorSelected(position: Int) {
         withContext(Dispatchers.Default) {
             backgroundImageList = backgroundImageList
                 .map { it.copy(isSelected = false) }
                 .toCollection(ArrayList())
-
             backgroundColorList.forEachIndexed { index, model ->
                 model.isSelected = index == position
             }
         }
     }
 
-    /**
-     * Update text font selection
-     */
     fun updateTextFontSelected(position: Int) {
         textFontList = textFontList
             .map { it.copy(isSelected = false) }
             .toCollection(ArrayList())
-
         textFontList.forEachIndexed { index, model ->
             model.isSelected = index == position
         }
     }
 
-    /**
-     * Update text color selection
-     */
     fun updateTextColorSelected(position: Int) {
         textColorList = textColorList
             .map { it.copy(isSelected = false) }
             .toCollection(ArrayList())
-
         textColorList.forEachIndexed { index, model ->
             model.isSelected = index == position
         }
     }
 
-    /**
-     * Update current draw
-     */
+    // ========== Draw helpers ==========
+
     fun updateCurrentCurrentDraw(draw: Draw) {
         currentDraw = draw
     }
 
-    /**
-     * Add draw to list
-     */
     fun addDrawView(draw: Draw) {
         drawViewList.add(draw)
     }
 
-    /**
-     * Delete draw from list
-     */
     fun deleteDrawView(draw: Draw) {
         drawViewList.removeIf { it == draw }
     }
 
-    /**
-     * Update default path
-     */
+    fun resetDraw() {
+        drawViewList.clear()
+        currentDraw = null
+    }
+
     fun updatePathDefault(path: String) {
         pathDefault = path
     }
 
-    /**
-     * Load drawable emoji from bitmap
-     */
+    // ========== Drawable / Emoji ==========
+
     fun loadDrawableEmoji(
         bitmap: Bitmap,
         isCharacter: Boolean = false,
@@ -202,42 +201,14 @@ class AddCharacterViewModel @Inject constructor(
     ): DrawableDraw {
         val drawable = bitmap.toDrawable(context.resources)
         val timestamp = SimpleDateFormat("dd_MM_yyyy_hh_mm_ss").format(Date())
-        val drawableEmoji = DrawableDraw(drawable, "${timestamp}.png")
+        val drawableEmoji = DrawableDraw(drawable, "$timestamp.png")
         drawableEmoji.isCharacter = isCharacter
         drawableEmoji.isText = isText
         return drawableEmoji
     }
 
-    /**
-     * Reset all draws
-     */
-    fun resetDraw() {
-        drawViewList.clear()
-        currentDraw = null
-    }
+    // ========== Cleanup ==========
 
-    /**
-     * Save image from view
-     */
-//    fun saveImageFromView(view: View): Flow<SaveState> = flow {
-//        emit(SaveState.Loading)
-//        try {
-//            val bitmap = BitmapHelper.createBimapFromView(view)
-//            MediaHelper.saveBitmapToInternalStorage(
-//                context,
-//                ValueKey.DOWNLOAD_ALBUM,
-//                bitmap
-//            ).collect { state ->
-//                emit(state)
-//            }
-//        } catch (e: Exception) {
-//            emit(SaveState.Error(e.message ?: "Unknown error"))
-//        }
-//    }.flowOn(Dispatchers.IO)
-
-    /**
-     * Clear all data
-     */
     fun clearAllData() {
         backgroundImageList.clear()
         backgroundColorList.clear()
@@ -252,6 +223,5 @@ class AddCharacterViewModel @Inject constructor(
 
     override fun onCleared() {
         super.onCleared()
-        // Clean up if needed
     }
 }

@@ -122,7 +122,7 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
                 // overlay.left = marginStart = 18dp (vị trí gốc của overlay trong container clip)
                 // fraction=1 → overlay dịch trái về x=0 → translateX = -overlay.left
                 // fraction=0 → overlay dịch phải ra ngoài → translateX = total - overlay.left
-                val overlayLeft = overlay.left.toFloat() - dpToPx(requireContext(),20)  // lấy trực tiếp từ view, không cần tính dp
+                val overlayLeft = overlay.left.toFloat() - dpToPx(requireContext(),18)  // lấy trực tiếp từ view, không cần tính dp
 
                 val translateX = (total - overlayLeft) * (1f - fraction) - overlayLeft * fraction
                 // rút gọn: translateX = (total - overlayLeft) * (1f - fraction) - overlayLeft * fraction

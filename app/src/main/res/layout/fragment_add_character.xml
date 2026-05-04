@@ -63,29 +63,29 @@
         app:layout_constraintDimensionRatio="36:39"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/flActionBar"/>
+        app:layout_constraintTop_toBottomOf="@id/flActionBar" />
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/flSave"
-        android:layout_marginBottom="-20dp"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintBottom_toBottomOf="@+id/flSpce">
+        android:layout_marginBottom="-20dp"
+        app:layout_constraintBottom_toBottomOf="@+id/flSpce"
+        app:layout_constraintTop_toTopOf="parent">
+
         <ImageView
             android:id="@+id/imvBackground"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop"
             android:adjustViewBounds="true"
-            />
+            android:scaleType="centerCrop" />
 
         <!--        drawView-->
-        <com.example.basefragment.core.custom.drawview.DrawView
+        <com.example.basefragment.core.custom.DrawView
             android:id="@+id/drawView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:elevation="1dp"
-            />
+            android:elevation="1dp" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!--    flFunction-->
@@ -93,91 +93,19 @@
         android:id="@+id/flFunction"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:paddingTop="10dp"
         android:background="@drawable/img_bg_layer"
+        android:elevation="3dp"
         android:layerType="hardware"
+        android:paddingTop="10dp"
         app:layout_constraintBottom_toTopOf="@+id/lnlBottom"
         app:layout_constraintTop_toBottomOf="@+id/flSpce">
 
         <!--        lnlBackground-->
-        <LinearLayout
+        <include
             android:id="@+id/lnlBackground"
+            layout="@layout/layout_background_tab"
             android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            android:weightSum="220"
-            >
-
-
-
-            <LinearLayout
-                android:layout_weight="32"
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:weightSum="2"
-                android:layout_marginHorizontal="12dp"
-                android:layout_marginTop="8dp"
-                android:orientation="horizontal">
-
-                <!--                btnBackgroundImage-->
-                <TextView
-                    android:id="@+id/btnBackgroundImage"
-                    style="@style/single_marquee"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginEnd="4dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/img_bg_image_addcharacter"
-                    android:gravity="center"
-                    android:paddingVertical="8dp"
-                    android:text="Image"
-                    android:textColor="@color/white"
-                    android:textSize="14sp" />
-
-                <!--                btnBackgroundColor-->
-                <TextView
-                    style="@style/single_marquee"
-                    android:id="@+id/btnBackgroundColor"
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="4dp"
-                    android:layout_weight="1"
-                    android:background="@drawable/img_bg_color_addcharacter"
-                    android:gravity="center"
-                    android:paddingVertical="8dp"
-                    android:text="Color"
-                    android:textColor="@color/app_color"
-                    android:textSize="14sp" />
-            </LinearLayout>
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="0dp"
-                android:layout_weight="188">
-                <!--            rcvBackgroundImage-->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:id="@+id/rcvBackgroundImage"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="4.5dp"
-                    android:paddingHorizontal="7.5dp"
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="5"
-                    tools:listitem="@layout/item_background_image" />
-
-                <!--            rcvBackgroundColor-->
-                <androidx.recyclerview.widget.RecyclerView
-                    android:visibility="gone"
-                    android:id="@+id/rcvBackgroundColor"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:layout_marginTop="4.5dp"
-                    android:paddingHorizontal="7.5dp"
-                    app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                    app:spanCount="5"
-                    tools:listitem="@layout/item_background_color" />
-            </FrameLayout>
-
-        </LinearLayout>
+            android:layout_height="match_parent" />
 
         <!--        lnlSticker-->
         <LinearLayout
@@ -185,8 +113,7 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:orientation="vertical"
-            android:visibility="gone"
-            >
+            android:visibility="gone">
 
 
             <!--            rcvSticker-->
@@ -223,131 +150,15 @@
         </LinearLayout>
 
 
-        <!--        scvText-->
-        <LinearLayout
-            android:visibility="gone"
-            android:id="@+id/scvText"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:orientation="vertical"
-            >
-            <FrameLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="8dp">
-
-
-
-                <!--                    btnDoneText-->
-                <ImageView
-                    android:id="@+id/btnDoneText"
-                    android:layout_width="24dp"
-                    android:layout_height="24dp"
-                    android:layout_gravity="end|center_vertical"
-                    android:layout_marginEnd="16dp"
-                    android:src="@drawable/ic_done_1"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    />
-            </FrameLayout>
-            <ScrollView
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:scrollbars="none"
-                >
-
-                <LinearLayout
-                    android:layout_marginTop="16dp"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-
-
-                    <TextView
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="@string/text"
-                        android:textColor="@color/app_color"
-                        android:textSize="18sp" />
-                    <!--            edtText-->
-                    <EditText
-                        android:id="@+id/edtText"
-                        android:layout_width="match_parent"
-                        android:layout_height="42dp"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_marginTop="4dp"
-                        android:background="@drawable/bg_8_solid_white"
-                        android:ellipsize="end"
-                        android:hint="@string/type_your_content"
-                        android:imeOptions="actionDone"
-                        android:inputType="text"
-                        android:fontFamily="@font/itim_regular"
-                        android:maxLength="30"
-                        android:paddingHorizontal="16dp"
-                        android:singleLine="true"
-                        android:textColorHint="#99868686"
-                        android:textSize="14sp" />
-                    <TextView
-                        android:layout_marginTop="16dp"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Font"
-                        android:textColor="@color/app_color"
-                        android:textSize="18sp" />
-
-                    <!--            rcvFont-->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rcvFont"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginStart="12dp"
-                        android:layout_marginTop="4dp"
-                        android:orientation="horizontal"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        app:layout_constraintTop_toBottomOf="@+id/titleFont"
-                        tools:listitem="@layout/item_font" />
-
-                    <TextView
-                        android:layout_marginTop="16dp"
-                        android:layout_marginHorizontal="16dp"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_gravity="center"
-                        android:text="Font"
-                        android:textColor="@color/app_color"
-                        android:textSize="18sp" />
-
-                    <!--            rcvTextColor-->
-                    <androidx.recyclerview.widget.RecyclerView
-                        android:id="@+id/rcvTextColor"
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:layout_marginStart="16dp"
-                        android:layout_marginTop="4dp"
-                        android:orientation="horizontal"
-                        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-                        app:layout_constraintTop_toBottomOf="@+id/titleColor"
-                        tools:listitem="@layout/item_text_color" />
-
-                    <Space
-                        android:layout_width="match_parent"
-                        android:layout_height="30dp" />
-
-                </LinearLayout>
-            </ScrollView>
-        </LinearLayout>
-
+        <include
+            android:id="@+id/lnlText"
+            layout="@layout/layout_text_panel" />
     </FrameLayout>
 
     <FrameLayout
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:background="@color/app_color"
+        android:background="@color/app_color6"
         app:layout_constraintBottom_toBottomOf="@+id/lnlBottom"
         app:layout_constraintEnd_toEndOf="@+id/lnlBottom"
         app:layout_constraintStart_toStartOf="@+id/lnlBottom"
@@ -400,7 +211,6 @@
             android:background="?attr/selectableItemBackgroundBorderless"
             android:src="@drawable/ic_text" />
     </LinearLayout>
-
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
