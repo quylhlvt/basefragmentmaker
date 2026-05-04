@@ -10,41 +10,40 @@ import com.example.basefragment.data.model.addcharacter.SelectedAddModel
 import com.example.basefragment.databinding.ItemBackgroundColorBinding
 
 
-class BackgroundColorAdapter :
-    BaseAdapter<SelectedAddModel, ItemBackgroundColorBinding>(ItemBackgroundColorBinding::inflate) {
+class BackgroundColorAdapter : BaseAdapter<SelectedAddModel, ItemBackgroundColorBinding>(
+    ItemBackgroundColorBinding::inflate
+) {
     var onChooseColorClick: (() -> Unit) = {}
-    var onBackgroundColorClick: ((Int, Int) -> Unit) = {_,_ ->}
-
+    var onBackgroundColorClick: ((Int, Int) -> Unit) = { _, _ -> }
     var currentSelected = -1
+
     override fun onBind(binding: ItemBackgroundColorBinding, item: SelectedAddModel, position: Int) {
         binding.apply {
-            vFocus1.isVisible = item.isSelected
+            // ← chỉ dùng currentSelected, không dùng item.isSelected
+            vFocus1.isVisible = currentSelected == position
+
             if (position == 0) {
-        
-                vFocus1.isVisible = item.isSelected
                 loadImage(root, R.drawable.ic_choose_color, imvColor)
-                root.onClick { onChooseColorClick.invoke() }
+                root.onClick { onChooseColorClick() }
             } else {
                 imvColor.setBackgroundColor(item.color)
-                root.onClick { onBackgroundColorClick.invoke(item.color, position) }
+                root.onClick { onBackgroundColorClick(item.color, position) }
             }
         }
     }
 
-    fun submitItem(position: Int, list: ArrayList<SelectedAddModel>){
+    fun selectItem(position: Int) {
         if (position == currentSelected) return
-        if (position != currentSelected){
-            if (currentSelected >= 0 && currentSelected < items.size) {
-                items[currentSelected] = items[currentSelected].copy(isSelected = false)
-                notifyItemChanged(currentSelected)
-            }
+        val old = currentSelected
+        currentSelected = position
+        if (old >= 0) notifyItemChanged(old)
+        if (position >= 0) notifyItemChanged(position)
+    }
 
-            if (position >= 0 && position < items.size) {
-                items[position] = items[position].copy(isSelected = true)
-                notifyItemChanged(position)
-            }
-
-            currentSelected = position
-        }
+    fun clearSelection() {
+        if (currentSelected < 0) return
+        val old = currentSelected
+        currentSelected = -1
+        notifyItemChanged(old)
     }
 }

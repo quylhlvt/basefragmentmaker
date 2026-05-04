@@ -16,6 +16,7 @@ import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.safeNavigate
 import com.example.basefragment.core.extention.setImageActionBar
+import com.example.basefragment.core.extention.setTextActionBar
 import com.example.basefragment.databinding.FragmentChoosePonyBinding
 import com.example.basefragment.ui.main.customize.CustomizeFragment.Companion.ARG_TEMPLATE_INDEX
 import dagger.hilt.android.AndroidEntryPoint
@@ -37,6 +38,10 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
 
     override fun initView() {
         setImageActionBar(binding.actionBar.btnActionBarLeft, R.drawable.back_app)
+        setTextActionBar(
+            binding.actionBar.tvCenter,
+            getString(R.string.category)
+        )
 
         adapter = ChoosePonyAdapter { _, position ->
             findNavController().safeNavigate(

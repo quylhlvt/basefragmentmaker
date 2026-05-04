@@ -8,10 +8,11 @@
     tools:context=".ui.main.home.HomeFragment">
 
     <ImageView
+        android:id="@+id/imageView3"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/img_bg_app" />
+        android:src="@drawable/img_bg_home" />
 
     <!--    layoutActionBar-->
     <FrameLayout
@@ -25,6 +26,16 @@
             layout="@layout/layout_actionbar" />
     </FrameLayout>
 
+    <ImageView
+        android:id="@+id/title_home"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="37dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/img_title_home"
+        app:layout_constraintDimensionRatio="2.84:1.69"
+        app:layout_constraintTop_toBottomOf="@+id/layoutActionBar"
+        tools:layout_editor_absoluteX="37dp" />
 
     <!--    scvMain-->
     <ScrollView
@@ -36,204 +47,221 @@
         android:elevation="1dp"
         android:scrollbars="none"
         app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layoutActionBar">
+        app:layout_constraintTop_toBottomOf="@id/title_home">
 
         <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content"
+            android:layout_marginHorizontal="20dp">
 
-            <!--            gl05-->
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/gl05"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.5" />
-
-            <!--            gl063-->
-            <androidx.constraintlayout.widget.Guideline
-                android:id="@+id/gl063"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical"
-                app:layout_constraintGuide_percent="0.63" />
-
-            <!--            btnCreate-->
-            <ImageView
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/btnCreate"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                android:adjustViewBounds="true"
-                android:src="@drawable/img_frame_home1"
-                app:layout_constraintTop_toTopOf="parent" />
-
-            <!--            tv1-->
-            <TextView
-                android:id="@+id/tv1"
-                style="@style/single_marquee"
-                android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginHorizontal="5dp"
-                android:gravity="center"
-                android:paddingStart="16dp"
-                android:text="@string/pony_maker"
-                android:textColor="@color/white"
-                android:textSize="28sp"
-                app:layout_constraintBottom_toBottomOf="@+id/btnCreate"
-                app:layout_constraintEnd_toEndOf="@+id/gl063"
-                app:layout_constraintStart_toStartOf="@+id/btnCreate"
-                app:layout_constraintTop_toTopOf="@+id/btnCreate"
-                app:strokeJoinStyle="miter" />
+                app:layout_constraintDimensionRatio="3.21:1.16"
+                app:layout_constraintTop_toTopOf="parent">
 
-            <!--            btnQuickMaker-->
-            <ImageView
-                android:id="@+id/btnQuickMaker"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
-                android:adjustViewBounds="true"
-                android:src="@drawable/img_frame_home2"
-                app:layout_constraintTop_toBottomOf="@+id/btnCreate" />
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:src="@drawable/img_bg_home1"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="2.96:1.16"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
-            <!--            tv2-->
-            <TextView
-                android:id="@+id/tv2"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginHorizontal="5dp"
-                android:layout_marginEnd="15dp"
-                android:gravity="center"
-                android:text="@string/trending_custom"
-                android:textColor="@color/white"
-                android:textSize="28sp"
-                app:layout_constraintBottom_toBottomOf="@+id/btnQuickMaker"
-                app:layout_constraintEnd_toEndOf="@+id/btnQuickMaker"
-                app:layout_constraintStart_toEndOf="@id/gl05"
-                app:layout_constraintTop_toTopOf="@+id/btnQuickMaker"
-                app:strokeColor="@color/white"
-                app:strokeJoinStyle="miter"
-                 />
+                <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+                    android:id="@+id/tv1"
+                    style="@style/single_marquee"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginEnd="14dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/img_bg_tv1"
+                    android:fontFamily="@font/baloo2_extrabold"
+                    android:gravity="center"
+                    android:paddingHorizontal="5dp"
+                    android:shadowColor="@color/app_color"
+                    android:shadowDx="5"
+                    android:shadowDy="-5"
+                    android:shadowRadius="5"
+                    android:text="@string/pony_maker"
+                    android:textColor="@color/app_color2"
+                    android:textSize="28dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="2.1:0.86"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:outerStrokeColor="@color/app_color"
+                    app:outerStrokeWidth="1dp" />
 
-            <!--            btnMyAlbum-->
-            <ImageView
-                android:id="@+id/btnMyAlbum"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
-                android:adjustViewBounds="true"
-                android:src="@drawable/img_frame_home3"
-                app:layout_constraintTop_toBottomOf="@+id/btnQuickMaker" />
-
-            <!--            tv3-->
-            <TextView
-                android:id="@+id/tv3"
-                style="@style/single_marquee"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:gravity="center"
-                android:text="@string/my_work"
-                android:textColor="@color/white"
-                android:textSize="24sp"
-                app:layout_constraintBottom_toBottomOf="@+id/btnMyAlbum"
-                app:layout_constraintEnd_toStartOf="@+id/gl063"
-                app:layout_constraintStart_toStartOf="@+id/btnMyAlbum"
-                app:layout_constraintTop_toTopOf="@+id/btnMyAlbum"
-                app:strokeColor="@color/white"
-                app:strokeJoinStyle="miter"
-                android:layout_marginHorizontal="5dp"
-                />
-  <!--            btnMyAlbum-->
-            <ImageView
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:src="@drawable/img_avatar1"
+                    app:layout_constraintDimensionRatio="0.96:1.1"
+                    app:layout_constraintEnd_toStartOf="@+id/tv1"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_marginTop="16dp"
                 android:id="@+id/btnCosPlay"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
-                android:adjustViewBounds="true"
-                android:src="@drawable/img_frame_home3"
-                app:layout_constraintTop_toBottomOf="@+id/btnMyAlbum" />
-
-            <!--            tv3-->
-            <TextView
-                android:id="@+id/tv4"
-                style="@style/single_marquee"
-                android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:gravity="center"
-                android:text="Cosplay"
-                android:textColor="@color/white"
-                android:textSize="24sp"
-                app:layout_constraintBottom_toBottomOf="@+id/btnCosPlay"
-                app:layout_constraintEnd_toStartOf="@+id/gl063"
-                app:layout_constraintStart_toStartOf="@+id/btnCosPlay"
-                app:layout_constraintTop_toTopOf="@+id/btnCosPlay"
-                app:strokeColor="@color/white"
-                app:strokeJoinStyle="miter"
-                android:layout_marginHorizontal="5dp"
-                />
-  <!--            btnMyAlbum-->
-            <ImageView
+                app:layout_constraintDimensionRatio="3.21:1.16"
+                app:layout_constraintTop_toBottomOf="@+id/btnCreate">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:src="@drawable/img_bg_home1"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="2.96:1.16"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+                    android:id="@+id/tv2"
+                    style="@style/single_marquee"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginEnd="14dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/img_bg_tv1"
+                    android:fontFamily="@font/baloo2_extrabold"
+                    android:gravity="center"
+                    android:paddingHorizontal="5dp"
+                    android:shadowColor="@color/app_color"
+                    android:shadowDx="5"
+                    android:shadowDy="-5"
+                    android:shadowRadius="5"
+                    android:text="@string/cosplay"
+                    android:textColor="@color/app_color2"
+                    android:textSize="28dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="2.1:0.86"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:outerStrokeColor="@color/app_color"
+                    app:outerStrokeWidth="1dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:src="@drawable/img_avatar2"
+                    app:layout_constraintDimensionRatio="0.96:1.1"
+                    app:layout_constraintEnd_toStartOf="@+id/tv2"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_marginTop="16dp"
                 android:id="@+id/btnRandom"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
-                android:adjustViewBounds="true"
-                android:src="@drawable/img_frame_home3"
-                app:layout_constraintTop_toBottomOf="@+id/btnCosPlay" />
-
-            <!--            tv3-->
-            <TextView
-                android:id="@+id/tv5"
-                style="@style/single_marquee"
-                android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:gravity="center"
-                android:text="Random"
-                android:textColor="@color/white"
-                android:textSize="24sp"
-                app:layout_constraintBottom_toBottomOf="@+id/btnRandom"
-                app:layout_constraintEnd_toStartOf="@+id/gl063"
-                app:layout_constraintStart_toStartOf="@+id/btnRandom"
-                app:layout_constraintTop_toTopOf="@+id/btnRandom"
-                app:strokeColor="@color/white"
-                app:strokeJoinStyle="miter"
-                android:layout_marginHorizontal="5dp"
-                />
- <ImageView
-                android:id="@+id/btnWeb"
+                app:layout_constraintDimensionRatio="3.21:1.16"
+                app:layout_constraintTop_toBottomOf="@+id/btnCosPlay">
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:src="@drawable/img_bg_home1"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="2.96:1.16"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+                    android:id="@+id/tv3"
+                    style="@style/single_marquee"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginEnd="14dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/img_bg_tv1"
+                    android:fontFamily="@font/baloo2_extrabold"
+                    android:gravity="center"
+                    android:paddingHorizontal="5dp"
+                    android:shadowColor="@color/app_color"
+                    android:shadowDx="5"
+                    android:shadowDy="-5"
+                    android:shadowRadius="5"
+                    android:text="@string/cat_random"
+                    android:textColor="@color/app_color2"
+                    android:textSize="28dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="2.1:0.86"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:outerStrokeColor="@color/app_color"
+                    app:outerStrokeWidth="1dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:src="@drawable/img_avatar3"
+                    app:layout_constraintDimensionRatio="0.96:1.1"
+                    app:layout_constraintEnd_toStartOf="@+id/tv3"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            <androidx.constraintlayout.widget.ConstraintLayout
+                android:layout_marginTop="16dp"
+                android:id="@+id/btnMyAlbum"
                 android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="10dp"
-                android:adjustViewBounds="true"
-                android:src="@drawable/img_frame_home3"
-                app:layout_constraintTop_toBottomOf="@+id/btnRandom" />
-
-            <!--            tv3-->
-            <TextView
-                android:id="@+id/tv6"
-                style="@style/single_marquee"
-                android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:gravity="center"
-                android:text="WebSite"
-                android:textColor="@color/white"
-                android:textSize="24sp"
-                app:layout_constraintBottom_toBottomOf="@+id/btnWeb"
-                app:layout_constraintEnd_toStartOf="@+id/gl063"
-                app:layout_constraintStart_toStartOf="@+id/btnWeb"
-                app:layout_constraintTop_toTopOf="@+id/btnWeb"
-                app:strokeColor="@color/white"
-                app:strokeJoinStyle="miter"
-                android:layout_marginHorizontal="5dp"
-                />
+                app:layout_constraintDimensionRatio="3.21:1.16"
+                app:layout_constraintTop_toBottomOf="@+id/btnRandom">
 
-        </androidx.constraintlayout.widget.ConstraintLayout>
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:src="@drawable/img_bg_home1"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="2.96:1.16"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
 
+                <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+                    android:id="@+id/tv4"
+                    style="@style/single_marquee"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginTop="14dp"
+                    android:layout_marginEnd="14dp"
+                    android:layout_marginBottom="16dp"
+                    android:background="@drawable/img_bg_tv1"
+                    android:fontFamily="@font/baloo2_extrabold"
+                    android:gravity="center"
+                    android:paddingHorizontal="5dp"
+                    android:shadowColor="@color/app_color"
+                    android:shadowDx="5"
+                    android:shadowDy="-5"
+                    android:shadowRadius="5"
+                    android:text="@string/my_creation"
+                    android:textColor="@color/app_color2"
+                    android:textSize="28dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="2.1:0.86"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintTop_toTopOf="parent"
+                    app:outerStrokeColor="@color/app_color"
+                    app:outerStrokeWidth="1dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:src="@drawable/img_avatar4"
+                    app:layout_constraintDimensionRatio="0.96:1.1"
+                    app:layout_constraintEnd_toStartOf="@+id/tv4"
+                    app:layout_constraintStart_toStartOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
+            </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>
 
     <!--    flNativeCollab-->

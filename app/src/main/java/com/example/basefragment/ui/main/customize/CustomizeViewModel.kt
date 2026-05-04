@@ -180,7 +180,13 @@ class CustomizeViewModel @Inject constructor(
         _state.update { it.copy(selections = newSelections, randomCount = it.randomCount + 1) }
     }
 
-    fun resetAll() = _state.update { it.copy(selections = buildDefaultSelections(it.listData)) }
+    fun resetAll() = _state.update {
+        it.copy(
+            selections = buildDefaultSelections(it.listData),
+            isFlipped = false,        // ← reset flip
+            currentNavIndex = 0       // ← reset về nav đầu
+        )
+    }
 
     // ── PATH RESOLUTION ───────────────────────────────────────────────────────
 

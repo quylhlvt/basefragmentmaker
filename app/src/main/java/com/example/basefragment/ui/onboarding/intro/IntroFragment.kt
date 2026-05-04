@@ -83,7 +83,7 @@ class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
                 introAdapter.submitList(state.pagesSplash)
                 binding.apply {
                     viewPager2.currentItem = state.page
-                    btnNextPager.tvButton.text = state.textButton
+                    btnNextPager.tvButton.text = getString(state.textButtonRes)
                 }
             }
         }
@@ -106,6 +106,7 @@ class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
         binding.viewPager2.registerOnPageChangeCallback(object : OnPageChangeCallback() {
             override fun onPageSelected(position: Int) {
                 super.onPageSelected(position)
+
                 viewModel.getPage(binding.viewPager2.currentItem, introAdapter.itemCount)
             }
         })

@@ -2,14 +2,14 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
-    android:layout_height="80dp"
+    android:layout_height="90dp"
     android:background="@color/transparent">
 
     <!--    btnActionBarLeft-->
     <ImageView
         android:id="@+id/btnActionBarLeft"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="10dp"
         android:src="@drawable/back_app"
@@ -21,8 +21,8 @@
     <!--    cvLogo-->
     <androidx.cardview.widget.CardView
         android:id="@+id/cvLogo"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
@@ -41,7 +41,7 @@
     </androidx.cardview.widget.CardView>
 
     <!--    tvStart-->
-    <TextView
+    <com.example.basefragment.core.extention.OuterStrokeShadownTextView
         android:id="@+id/tvStart"
         style="@style/single_marquee"
         android:layout_width="0dp"
@@ -49,20 +49,24 @@
         android:layout_marginHorizontal="16dp"
         android:gravity="start|center_vertical"
         android:text="@string/language"
-        android:textColor="@color/app_color3"
-        android:textSize="24sp"
+        android:textSize="28dp"
+        android:fontFamily="@font/baloo2_bold"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
         app:layout_constraintEnd_toStartOf="@+id/btnActionBarRight"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="@+id/btnActionBarLeft"
-        app:strokeColor="@color/black"
-        app:strokeJoinStyle="miter"
-        app:strokeMiter="5dp"
-        app:strokeWidth="1.3dp" />
+        app:outerStrokeColor="@color/app_color"
+        app:outerStrokeWidth="2dp"
+        android:shadowRadius="5"
+        android:shadowDy="-5"
+        android:shadowDx="5"
+        android:shadowColor="@color/app_color"
+        android:textColor="@color/app_color2"
+        />
 
     <!--    tvCenter-->
-    <TextView
+    <com.example.basefragment.core.extention.OuterStrokeShadownTextView
         android:id="@+id/tvCenter"
         style="@style/single_marquee"
         android:layout_width="0dp"
@@ -70,23 +74,26 @@
         android:layout_marginHorizontal="16dp"
         android:gravity="center"
         android:text="@string/language"
-        android:textColor="@color/app_color3"
-        android:textSize="24sp"
+        android:textSize="28dp"
+        android:fontFamily="@font/baloo2_bold"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
         app:layout_constraintEnd_toStartOf="@+id/btnActionBarRight"
         app:layout_constraintStart_toEndOf="@+id/btnActionBarLeft"
         app:layout_constraintTop_toTopOf="@+id/btnActionBarLeft"
-        app:strokeColor="@color/black"
-        app:strokeJoinStyle="miter"
-        app:strokeMiter="5dp"
-        app:strokeWidth="1.3dp" />
+        app:outerStrokeColor="@color/app_color"
+        app:outerStrokeWidth="2dp"
+        android:shadowRadius="5"
+        android:shadowDy="-5"
+        android:shadowDx="5"
+        android:shadowColor="@color/app_color"
+        android:textColor="@color/app_color2"/>
 
     <!--    btnActionBarCenter-->
     <ImageView
         android:id="@+id/btnActionBarCenter"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
@@ -95,8 +102,8 @@
         app:layout_constraintTop_toTopOf="@+id/btnActionBarLeft" />
     <ImageView
         android:id="@+id/btnActionBarCenter1"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
@@ -106,8 +113,8 @@
     <!--    btnActionBarCenter-->
     <ImageView
         android:id="@+id/btnActionBarCenter2"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
@@ -118,8 +125,8 @@
     <!--    btnActionBarNextToRight-->
     <ImageView
         android:id="@+id/btnActionBarNextToRight"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginEnd="8dp"
         android:layout_marginBottom="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
@@ -130,8 +137,8 @@
     <!--    btnActionBarRight-->
     <ImageView
         android:id="@+id/btnActionBarRight"
-        android:layout_width="32dp"
-        android:layout_height="32dp"
+        android:layout_width="36dp"
+        android:layout_height="36dp"
         android:layout_marginEnd="16dp"
         android:layout_marginBottom="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
@@ -160,6 +167,6 @@
             android:gravity="center"
             android:text="@string/next"
             android:textColor="@color/white"
-            android:textSize="16sp" />
+            android:textSize="16dp" />
     </FrameLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

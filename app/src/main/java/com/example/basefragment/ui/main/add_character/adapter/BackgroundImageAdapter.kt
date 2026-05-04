@@ -12,40 +12,47 @@ import com.example.basefragment.data.model.addcharacter.SelectedAddModel
 import com.example.basefragment.databinding.ItemBackgroundImageBinding
 
 
-class BackgroundImageAdapter : BaseAdapter<SelectedAddModel, ItemBackgroundImageBinding>(ItemBackgroundImageBinding::inflate) {
+class BackgroundImageAdapter : BaseAdapter<SelectedAddModel, ItemBackgroundImageBinding>(
+    ItemBackgroundImageBinding::inflate
+) {
     var onAddImageClick: (() -> Unit) = {}
-    var onBackgroundImageClick: ((String, Int) -> Unit) = {_,_ ->}
+    var onBackgroundImageClick: ((String, Int) -> Unit) = { _, _ -> }
     var currentSelected = -1
 
     override fun onBind(binding: ItemBackgroundImageBinding, item: SelectedAddModel, position: Int) {
         binding.apply {
             tvAddImage.isSelected = true
-            vFocus.isVisible = item.isSelected
+            // ← chỉ dùng currentSelected, không dùng item.isSelected
+            vFocus.isVisible = currentSelected == position
+
             if (position == 0) {
                 lnlAddItem.visible()
                 imvImage.gone()
-                lnlAddItem.onClick { onAddImageClick.invoke() }
+                lnlAddItem.onClick { onAddImageClick() }
             } else {
                 lnlAddItem.gone()
                 imvImage.visible()
-
-                // ✅ Skip load nếu đã load path này rồi
                 if (imvImage.tag != item.path) {
                     imvImage.tag = item.path
                     imvImage.loadFromAsset(item.path)
                 }
-
-                imvImage.onClick { onBackgroundImageClick.invoke(item.path, position) }
+                imvImage.onClick { onBackgroundImageClick(item.path, position) }
             }
         }
     }
 
-    fun submitItem(position: Int, list: ArrayList<SelectedAddModel>){
+    fun selectItem(position: Int) {
         if (position == currentSelected) return
-        items.clear()
-        items.addAll(list)
-        notifyItemChanged(currentSelected)
-        notifyItemChanged(position)
+        val old = currentSelected
         currentSelected = position
+        if (old >= 0) notifyItemChanged(old)
+        if (position >= 0) notifyItemChanged(position)
+    }
+
+    fun clearSelection() {
+        if (currentSelected < 0) return
+        val old = currentSelected
+        currentSelected = -1
+        notifyItemChanged(old)
     }
 }

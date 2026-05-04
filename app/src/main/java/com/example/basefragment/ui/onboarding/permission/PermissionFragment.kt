@@ -24,6 +24,9 @@ import com.example.basefragment.utils.key.RequestKey
 import com.example.basefragment.core.extention.checkPermissions
 import com.example.basefragment.core.extention.goToSettings
 import com.example.basefragment.core.extention.requestPermission
+import com.example.basefragment.core.extention.setImageActionBar
+import com.example.basefragment.core.extention.setTextActionBar
+import com.example.basefragment.databinding.FragmentSettingBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
 
@@ -32,8 +35,8 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
     FragmentPermissionBinding::inflate, PermissionViewModel::class.java
 ), BackPressHandler  {
     override fun viewListener() {
-        binding.swPermission.onClick(1000) { handlePermissionRequest(isStorage = true) }
-        binding.swNotification.onClick(1000) { handlePermissionRequest(isStorage = false) }
+        binding.swPermission.onClick(1500) { handlePermissionRequest(isStorage = true) }
+        binding.swNotification.onClick(1500) { handlePermissionRequest(isStorage = false) }
         binding.tvContinue.onClick(1000) { handleContinue() }
     }
 
@@ -43,6 +46,11 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
     ): FragmentPermissionBinding = FragmentPermissionBinding.inflate(inflater, container, false)
 
     override fun initView() {
+
+        binding.apply {
+        setupActionBar()
+        }
+
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             binding.btnStorage.visible()
             binding.btnNotification.gone()
@@ -56,6 +64,15 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
 //        binding.btnTest.setOnClickListener {
 //            showSnackbar("Xin chào từ Home!")
 //        }
+    }
+    private fun FragmentPermissionBinding.setupActionBar() {
+        actionBar.apply {
+            tvStart.select()
+            setTextActionBar(
+                tvStart,
+                getString(R.string.permission)
+            )
+        }
     }
     override fun onStart() {
         super.onStart()
@@ -123,11 +140,11 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) R.string.to_access_13 else R.string.to_access
 
         binding.txtPermission.text = TextUtils.concat(
-            createColoredText(R.string.allow, R.color.black),
+            createColoredText(R.string.allow, R.color.app_color),
             " ",
-            createColoredText(R.string.app_name, R.color.app_color3),
+            createColoredText(R.string.app_name, R.color.app_color),
             " ",
-            createColoredText(textRes, R.color.black)
+            createColoredText(textRes, R.color.app_color)
         )
     }
 
@@ -142,7 +159,7 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
     private fun createColoredText(
         @androidx.annotation.StringRes textRes: Int,
         @androidx.annotation.ColorRes colorRes: Int,
-        font: Int = R.font.itim_regular
+        font: Int = R.font.baloo2_bold
     ) = StringHelper.changeColor(requireContext(), getString(textRes), colorRes, font)
 
     override fun onBackPressed(): Boolean {

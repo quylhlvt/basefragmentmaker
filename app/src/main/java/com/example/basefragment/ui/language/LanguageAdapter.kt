@@ -4,8 +4,11 @@ import android.annotation.SuppressLint
 import android.content.Context
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseAdapter
+import com.example.basefragment.core.extention.gone
+import com.example.basefragment.core.extention.invisible
 import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.visible
 import com.example.basefragment.data.model.language.LanguageModel
 import com.example.basefragment.databinding.ItemLanguageBinding
 
@@ -27,9 +30,8 @@ class LanguageAdapter (val context: Context) : BaseAdapter<LanguageModel, ItemLa
             }
             loadImage(root, ratio, btnRadio, false)
 
-            flMain.setBackgroundResource(if (item.activate) R.drawable.frame_select_language else R.drawable.frame_unselect_language)
+           if (item.activate) flFocus.visible() else flFocus.invisible()
 
-            tvLang.setTextColor(color)
 
             root.onClick {
                 onItemClick.invoke(item.code)

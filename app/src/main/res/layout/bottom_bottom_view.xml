@@ -14,7 +14,8 @@
         android:gravity="center"
         android:includeFontPadding="false"
         android:padding="16dp"
-        android:textColor="@color/app_color3"
-        android:textSize="16dp"
+        android:fontFamily="@font/baloo2_bold"
+        android:textColor="@color/app_color"
+        android:textSize="16sp"
         tools:text="Next" />
 </FrameLayout>

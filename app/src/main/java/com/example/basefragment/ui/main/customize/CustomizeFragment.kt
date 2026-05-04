@@ -15,6 +15,7 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.Priority
 import com.bumptech.glide.load.DataSource
@@ -25,6 +26,7 @@ import com.bumptech.glide.request.target.Target
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.saveToFile
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.data.model.custom.BodyPartModel
@@ -40,20 +42,23 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     FragmentCustomizeBinding::inflate,
     CustomizeViewModel::class.java
 ) {
+    private val arrShowColor = mutableListOf<Boolean>()
+
+    private var isColorVisible = true
 
     // viewModel đã được inject sẵn bởi BaseFragment — không cần khai báo lại
     // sharedViewModel dùng viewModelActivity từ BaseFragment
     private val sharedViewModel: ViewModelActivity get() = viewModelActivity
 
-    private val layerViews      = arrayListOf<AppCompatImageView>()
+    private val layerViews = arrayListOf<AppCompatImageView>()
     private val navToLayerIndex = mutableMapOf<String, Int>()
 
-    private val adapterNav   by lazy { NavAdapter() }
+    private val adapterNav by lazy { NavAdapter() }
     private val adapterColor by lazy { ColorAdapter() }
-    private val adapterPart  by lazy { PartAdapter() }
+    private val adapterPart by lazy { PartAdapter() }
 
     private val pendingLoads = AtomicInteger(0)
-    private var canSave      = false
+    private var canSave = false
     private var hasTriggeredReInit = false
 
     // ── INFLATE ───────────────────────────────────────────────────────────────
@@ -68,71 +73,111 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
 
     override fun initView() {
         binding.actionBar.apply {
-            setImageActionBar(btnActionBarLeft,   R.drawable.back_app)
-            setImageActionBar(btnActionBarCenter,  R.drawable.ic_reset_all_custom)
+            setImageActionBar(btnActionBarLeft, R.drawable.back_app)
+            setImageActionBar(btnActionBarCenter, R.drawable.ic_reset_all_custom)
             setImageActionBar(btnActionBarCenter2, R.drawable.ic_flip_all_custom)
-            setImageActionBar(btnActionBarRight,   R.drawable.next_app)
+            setImageActionBar(btnActionBarRight, R.drawable.next_app)
         }
         setupAdapters()
+
         readArgsAndInit()
     }
 
     // CustomizeFragment.kt - readArgsAndInit() — FIX chính ở đây
     private fun readArgsAndInit() {
-        val templateIndex   = arguments?.getInt(ARG_TEMPLATE_INDEX, 0) ?: 0
-        val isEdit          = arguments?.getBoolean(ARG_IS_EDIT, false) ?: false
-        val isFlipped       = arguments?.getBoolean(ARG_IS_FLIPPED, false) ?: false
-        val customizedId    = arguments?.getString(ARG_CUSTOMIZED_ID)
+        val templateIndex = arguments?.getInt(ARG_TEMPLATE_INDEX, 0) ?: 0
+        val isEdit = arguments?.getBoolean(ARG_IS_EDIT, false) ?: false
+        val isFlipped = arguments?.getBoolean(ARG_IS_FLIPPED, false) ?: false
+        val customizedId = arguments?.getString(ARG_CUSTOMIZED_ID)
 
         @Suppress("UNCHECKED_CAST")
-        val savedSelections = arguments?.getSerializable(ARG_SELECTIONS) as? ArrayList<SelectionIndex>
+        val savedSelections =
+            arguments?.getSerializable(ARG_SELECTIONS) as? ArrayList<SelectionIndex>
 
         when {
             isEdit && savedSelections != null -> {
                 viewModel.initEditWithCustomizedId(
-                    templateIndex   = templateIndex,
-                    customizedId    = customizedId ?: "",
+                    templateIndex = templateIndex,
+                    customizedId = customizedId ?: "",
                     savedSelections = savedSelections,
-                    isFlipped       = isFlipped
+                    isFlipped = isFlipped
                 )
             }
             // ✅ Từ Quick sang: có selections, không phải edit
             savedSelections != null -> {
                 viewModel.initWithSelections(templateIndex, savedSelections)
             }
+
             else -> {
                 viewModel.initNew(templateIndex)
             }
         }
     }
+
     private fun setupAdapters() {
-        binding.rcvNav.adapter   = adapterNav
+        binding.rcvNav.adapter = adapterNav
         binding.rcvColor.adapter = adapterColor
-        binding.rcvPart.adapter  = adapterPart
+        binding.rcvPart.adapter = adapterPart
     }
 
     // ── ACTIONS ───────────────────────────────────────────────────────────────
 
     override fun viewListener() {
-        adapterNav.onClick   = { viewModel.selectNav(it) }
+        adapterNav.onClick = { viewModel.selectNav(it) }
         adapterColor.onClick = { viewModel.selectColor(it) }
-        adapterPart.onClick  = { idx, type ->
+        adapterPart.onClick = { idx, type ->
             when (type) {
                 "none" -> viewModel.selectNone()
                 "dice" -> viewModel.selectDiceCurrent()
-                else   -> viewModel.selectPath(idx)
+                else -> viewModel.selectPath(idx)
             }
         }
 
-        binding.imgRandom.setOnClickListener                     { viewModel.randomizeAll() }
-        binding.actionBar.btnActionBarCenter.setOnClickListener  { viewModel.resetAll() }
-        binding.actionBar.btnActionBarCenter2.setOnClickListener { viewModel.toggleFlip() }
-        binding.actionBar.btnActionBarRight.setOnClickListener   { if (canSave) performSave() }
-        binding.actionBar.btnActionBarLeft.setOnClickListener    { findNavController().popBackStack() }
+        binding.apply {
+            end.onClick {
+                val navPos = viewModel.state.value.currentNavIndex
+                if (navPos < arrShowColor.size) arrShowColor[navPos] = false
+                llColor.animate().alpha(0f).setDuration(200).withEndAction {
+                    llColor.visibility = View.INVISIBLE
+                }.start()
+            }
+            imgChangColor.onClick {
+                val navPos = viewModel.state.value.currentNavIndex
+                if (!viewModel.state.value.hasMultipleColors) return@onClick
+                if (navPos < arrShowColor.size) arrShowColor[navPos] = true
+                if (llColor.isVisible) return@onClick
+                llColor.visibility = View.VISIBLE
+                llColor.alpha = 0f
+                llColor.animate().alpha(1f).setDuration(200).start()
+            }
+
+
+            imgRandom.onClick { viewModel.randomizeAll() }
+            actionBar.btnActionBarCenter.setOnClickListener {
+                showConfirmDialog(
+                    title = getString(R.string.reset),
+                    message = getString(R.string.do_you_want_to_reset_all),
+                    onYes = {
+                        arrShowColor.fill(true)
+                        viewModel.resetAll()
+                    }
+                )
+            }
+            actionBar.btnActionBarCenter2.setOnClickListener { viewModel.toggleFlip() }
+            actionBar.btnActionBarRight.setOnClickListener { if (canSave) performSave() }
+            actionBar.btnActionBarLeft.setOnClickListener {
+                showConfirmDialog(
+                    title = getString(R.string.exit),
+                    message = getString(R.string.haven_t_saved_it_yet_do_you_want_to_exit),
+                    onYes = {
+                        findNavController().popBackStack()
+                    })
+            }
+        }
+
     }
 
     // ── OBSERVE ───────────────────────────────────────────────────────────────
-
     override fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
@@ -185,14 +230,14 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     private fun renderLayers(state: CustomizeState) {
         // ✅ Reset counter trước khi đếm lại
         val pathsToLoad = state.listData.mapIndexedNotNull { i, bp ->
-            val path       = viewModel.resolvePathAt(i)
+            val path = viewModel.resolvePathAt(i)
             val layerIndex = navToLayerIndex[bp.nav] ?: return@mapIndexedNotNull null
-            val view       = layerViews.getOrNull(layerIndex) ?: return@mapIndexedNotNull null
+            val view = layerViews.getOrNull(layerIndex) ?: return@mapIndexedNotNull null
 
             if (path == null) {
                 if (view.visibility != View.GONE) {
                     view.visibility = View.GONE
-                    view.tag        = null
+                    view.tag = null
                     Glide.with(binding.rlCharacter).clear(view)
                 }
                 return@mapIndexedNotNull null
@@ -214,7 +259,7 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
         setSaveEnabled(false)
 
         pathsToLoad.forEach { (view, path, _) ->
-            view.tag        = path
+            view.tag = path
             view.visibility = View.VISIBLE
             view.scaleX = if (viewModel.state.value.isFlipped) -1f else 1f
             loadImageIntoView(view, path, skipCount = true) // skipCount vì đã set ở trên
@@ -239,13 +284,17 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
                 override fun onLoadFailed(
                     e: GlideException?, model: Any?,
                     target: Target<Drawable>?, isFirstResource: Boolean
-                ): Boolean { onLoadFinished(); return false }
+                ): Boolean {
+                    onLoadFinished(); return false
+                }
 
                 override fun onResourceReady(
                     resource: Drawable?, model: Any?,
                     target: Target<Drawable>?, dataSource: DataSource?,
                     isFirstResource: Boolean
-                ): Boolean { onLoadFinished(); return false }
+                ): Boolean {
+                    onLoadFinished(); return false
+                }
             })
             .into(view)
     }
@@ -296,7 +345,7 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
 
     private fun setSaveEnabled(enabled: Boolean) {
         canSave = enabled
-        binding.actionBar.btnActionBarRight.alpha     = if (enabled) 1f else 0.5f
+        binding.actionBar.btnActionBarRight.alpha = if (enabled) 1f else 0.5f
         binding.actionBar.btnActionBarRight.isEnabled = enabled
     }
 
@@ -305,19 +354,42 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     private fun updateAdapters(state: CustomizeState) {
         adapterNav.setPos(state.currentNavIndex)
         adapterNav.submitList(state.listData)
+        binding.imgChangColor.isVisible = state.hasMultipleColors
 
         // ── Color ──────────────────────────────────────────────────────────────
         adapterColor.setPos(state.currentColorIndex)
-        binding.rcvColor.isVisible = state.hasMultipleColors
+
+        // Khởi tạo arrShowColor khi data load lần đầu
+        if (arrShowColor.size != state.listData.size) {
+            arrShowColor.clear()
+            repeat(state.listData.size) { arrShowColor.add(true) }
+        }
+
+        val navPos = state.currentNavIndex
+
         if (state.hasMultipleColors) {
             adapterColor.submitList(state.currentColors)
             binding.rcvColor.post {
                 binding.rcvColor.smoothScrollToPosition(state.currentColorIndex)
             }
+            // Y hệt updateColorSectionVisibility trong Activity
+            if (navPos < arrShowColor.size && arrShowColor[navPos]) {
+                binding.llColor.animate().alpha(1f).setDuration(150).withStartAction {
+                    binding.llColor.visibility = View.VISIBLE
+                }.start()
+            } else {
+                binding.llColor.animate().alpha(0f).setDuration(150).withEndAction {
+                    binding.llColor.visibility = View.GONE
+                }.start()
+            }
+        } else {
+            binding.llColor.animate().alpha(0f).setDuration(150).withEndAction {
+                binding.llColor.visibility = View.GONE
+            }.start()
         }
 
         // ── Part ───────────────────────────────────────────────────────────────
-        val bp    = state.listData.getOrNull(state.currentNavIndex)
+        val bp = state.listData.getOrNull(state.currentNavIndex)
         val thumb = buildThumbList(bp, state.currentPaths)
         adapterPart.listThumb = thumb
         adapterPart.setPos(state.currentPathIndex)
@@ -336,7 +408,7 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
         return paths.map { path ->
             when (path) {
                 "none", "dice" -> path
-                else           -> thumbs.getOrElse(idx++) { path }
+                else -> thumbs.getOrElse(idx++) { path }
             }
         }
     }
@@ -344,16 +416,16 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     // ── SAVE ──────────────────────────────────────────────────────────────────
 
     private fun performSave() {
-        val bitmap    = renderLayersToBitmap() ?: return
+        val bitmap = renderLayersToBitmap() ?: return
         val savedPath = bitmap.saveToFile(requireContext(), "avatar") ?: return
 
         val result = viewModel.onSaveComplete(savedPath)
         result?.let { (template, selections) ->
             sharedViewModel.saveCharacterWithSelections(
-                character  = template,
+                character = template,
                 selections = selections,
-                imageSave  = savedPath,
-                isFlipped  = viewModel.state.value.isFlipped
+                imageSave = savedPath,
+                isFlipped = viewModel.state.value.isFlipped
             )
         }
         findNavController().navigate(
@@ -396,10 +468,10 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
 
     companion object {
         const val ARG_TEMPLATE_INDEX = "template_index"
-        const val ARG_IS_EDIT        = "is_edit"
-        const val ARG_IS_FLIPPED     = "is_flipped"
-        const val ARG_SELECTIONS     = "selections"
-        const val ARG_CUSTOMIZED_ID  = "customized_id"
+        const val ARG_IS_EDIT = "is_edit"
+        const val ARG_IS_FLIPPED = "is_flipped"
+        const val ARG_SELECTIONS = "selections"
+        const val ARG_CUSTOMIZED_ID = "customized_id"
 
         fun newArgs(
             templateIndex: Int,

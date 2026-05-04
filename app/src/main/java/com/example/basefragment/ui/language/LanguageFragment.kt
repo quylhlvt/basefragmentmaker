@@ -77,10 +77,15 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         isFromSetting = findNavController().previousBackStackEntry?.destination?.id == R.id.setting
 
         binding.apply {
-            actionBar.btnActionBarRight.gone()
             actionBar.apply {
+                btnActionBarRight.gone()
                 btnActionBarLeft.setImageResource(R.drawable.back_app)
             }
+            layoutTitle.apply {
+                txtLang.isSelected =true
+            }
+
+
         }
         initRcv()
 
@@ -101,15 +106,19 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
                     viewModel.isFirstLanguage.collect { isFirst ->
                         if (isFirst) {
                             binding.actionBar.apply {
-                                tvStart.visible()
+//                                tvStart.visible()
+
                                 btnActionBarRight.invisible()
                                 btnActionBarRight.setImageResource(R.drawable.select_language)
                             }
                         } else {
-                            binding.actionBar.apply {
-                                btnActionBarLeft.visible()
-                                tvCenter.visible()
-                                btnActionBarRight.setImageResource(R.drawable.select_language)
+                            binding.apply {
+                                actionBar.apply {
+                                    btnActionBarLeft.visible()
+//                                tvCenter.visible()
+                                    btnActionBarRight.setImageResource(R.drawable.select_language)
+                                }
+                                imageBgLang.setImageResource(R.drawable.img_bg_home)
                             }
                         }
                     }

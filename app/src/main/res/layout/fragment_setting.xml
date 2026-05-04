@@ -1,17 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.setting.SettingFragment">
+
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/img_bg_app"
-        android:scaleType="fitXY"
+        android:adjustViewBounds="true"
         android:elevation="-1dp"
-        android:adjustViewBounds="true"/>
+        android:scaleType="fitXY"
+        android:src="@drawable/img_bg_home" />
+
     <FrameLayout
         android:id="@+id/layoutActionBar"
         android:layout_width="match_parent"
@@ -23,219 +25,225 @@
             layout="@layout/layout_actionbar" />
     </FrameLayout>
 
-    <ScrollView
+    <FrameLayout
+        android:elevation="2dp"
+        android:layout_marginHorizontal="20dp"
+        android:id="@+id/layoutTitleBar"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_marginTop="20dp"
-        android:layout_marginBottom="4dp"
-        android:paddingHorizontal="16dp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/layoutActionBar">
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/layoutActionBar">
 
-        <LinearLayout
+        <include
+            android:id="@+id/layoutTitle"
+            layout="@layout/layout_title_form" />
+    </FrameLayout>
+
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_marginTop="-30dp"
+        android:paddingVertical="50dp"
+        android:elevation="1dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="24dp"
+        android:background="@drawable/img_bg_setting"
+        android:orientation="vertical"
+        app:layout_constraintTop_toBottomOf="@id/layoutTitleBar">
+
+        <!--            btnLang-->
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnLang"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
+            android:layout_height="56dp"
+            android:layout_marginHorizontal="20dp"
+            android:background="@drawable/frame_bg_setting"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            app:layout_constraintDimensionRatio="2.81:0.52"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <!--            btnLang-->
-            <LinearLayout
-                android:id="@+id/btnLang"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:background="@drawable/frame_bg_setting"
+
+            <ImageView
+                android:id="@+id/ic_lang"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="9.5dp"
+                android:layout_marginBottom="14.5dp"
+                android:src="@drawable/ic_lang_set"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+                android:id="@+id/txt1"
+                style="@style/single_marquee"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="7dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/baloo2_extrabold"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:weightSum="10">
+                android:text="@string/language"
+                android:textColor="@color/white"
+                android:textSize="18dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/ic_lang"
+                app:outerStrokeColor="@color/app_color"
+                app:outerStrokeWidth="1.3dp" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="16dp"
-                    android:layout_weight="1">
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginVertical="17dp"
-                        android:src="@drawable/ic_lang_set" />
-                </FrameLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnRate"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="20dp"
+            android:background="@drawable/frame_bg_setting"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            app:layout_constraintDimensionRatio="2.81:0.52"
+            app:layout_constraintTop_toBottomOf="@+id/btnLang">
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="8"
-                    android:fontFamily="@font/itim_regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/language"
-                    android:textColor="@color/app_color"
-                    android:textSize="16sp" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
+            <ImageView
+                android:id="@+id/ic_rate"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="9.5dp"
+                android:layout_marginBottom="14.5dp"
+                android:src="@drawable/ic_rate"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="start|center_vertical"
-                        android:src="@drawable/ic_more_set" />
-                </FrameLayout>
-
-            </LinearLayout>
-
-            <!--            btnLang-->
-            <LinearLayout
-                android:id="@+id/btnRate"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/frame_bg_setting"
+            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+                android:id="@+id/txt2"
+                style="@style/single_marquee"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="7dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/baloo2_extrabold"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:weightSum="10">
+                android:text="@string/rate_us"
+                android:textColor="@color/white"
+                android:textSize="18dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/ic_rate"
+                app:outerStrokeColor="@color/app_color"
+                app:outerStrokeWidth="1.3dp" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="16dp"
-                    android:layout_weight="1">
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnShare"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="20dp"
+            android:background="@drawable/frame_bg_setting"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            app:layout_constraintDimensionRatio="2.81:0.52"
+            app:layout_constraintTop_toBottomOf="@+id/btnRate">
 
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginVertical="17dp"
-                        android:src="@drawable/ic_rate_set" />
-                </FrameLayout>
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="8"
-                    android:fontFamily="@font/itim_regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/rate_us"
-                    android:textColor="@color/app_color"
-                    android:textSize="16sp" />
+            <ImageView
+                android:id="@+id/ic_share"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="9.5dp"
+                android:layout_marginBottom="14.5dp"
+                android:src="@drawable/ic_share_set"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
+            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+                android:id="@+id/txt3"
 
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="start|center_vertical"
-                        android:src="@drawable/ic_more_set" />
-                </FrameLayout>
-            </LinearLayout>
-
-            <!--            btnShare-->
-            <LinearLayout
-                android:id="@+id/btnShare"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/frame_bg_setting"
+                style="@style/single_marquee"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="7dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/baloo2_extrabold"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:weightSum="10">
+                android:text="@string/share_app"
+                android:textColor="@color/white"
+                android:textSize="18dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/ic_share"
+                app:outerStrokeColor="@color/app_color"
+                app:outerStrokeWidth="1.3dp" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="16dp"
-                    android:layout_weight="1">
+        </androidx.constraintlayout.widget.ConstraintLayout>
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/btnPolicy"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginHorizontal="20dp"
+            android:background="@drawable/frame_bg_setting"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:weightSum="10"
+            app:layout_constraintDimensionRatio="2.81:0.52"
+            app:layout_constraintTop_toBottomOf="@+id/btnShare">
 
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginVertical="17dp"
-                        android:src="@drawable/ic_share_set" />
-                </FrameLayout>
 
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="8"
-                    android:fontFamily="@font/itim_regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/share_app"
-                    android:textColor="@color/app_color"
-                    android:textSize="16sp" />
+            <ImageView
+                android:id="@+id/ic_policy"
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                android:layout_gravity="center_vertical"
+                android:layout_marginStart="20dp"
+                android:layout_marginTop="9.5dp"
+                android:layout_marginBottom="14.5dp"
+                android:src="@drawable/ic_policy_set"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintDimensionRatio="1:1"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="start|center_vertical"
-                        android:src="@drawable/ic_more_set" />
-                </FrameLayout>
-            </LinearLayout>
-
-            <!--            btnPolicy-->
-            <LinearLayout
-                android:id="@+id/btnPolicy"
-                android:layout_width="match_parent"
-                android:layout_height="56dp"
-                android:layout_marginTop="20dp"
-                android:background="@drawable/frame_bg_setting"
+            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+                android:id="@+id/txt4"
+                style="@style/single_marquee"
+                android:layout_width="0dp"
+                android:layout_height="match_parent"
+                android:layout_marginTop="7dp"
+                android:layout_marginEnd="12dp"
+                android:layout_marginBottom="12dp"
+                android:fontFamily="@font/baloo2_extrabold"
                 android:gravity="center_vertical"
-                android:orientation="horizontal"
-                android:weightSum="10">
+                android:text="@string/privacy_policy"
+                android:textColor="@color/white"
+                android:textSize="18dp"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@+id/ic_policy"
+                app:outerStrokeColor="@color/app_color"
+                app:outerStrokeWidth="1.3dp" />
 
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="16dp"
-                    android:layout_weight="1">
-
-                    <ImageView
-                        android:layout_width="22dp"
-                        android:layout_height="22dp"
-                        android:layout_gravity="center_vertical"
-                        android:layout_marginVertical="17dp"
-                        android:src="@drawable/ic_policy_set" />
-                </FrameLayout>
-
-                <TextView
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_marginStart="10dp"
-                    android:layout_weight="8"
-                    android:fontFamily="@font/itim_regular"
-                    android:gravity="center_vertical"
-                    android:text="@string/privacy_amp_policy"
-                    android:textColor="@color/app_color"
-                    android:textSize="16sp" />
-
-                <FrameLayout
-                    android:layout_width="0dp"
-                    android:layout_height="match_parent"
-                    android:layout_weight="1">
-
-                    <ImageView
-                        android:layout_width="24dp"
-                        android:layout_height="24dp"
-                        android:layout_gravity="start|center_vertical"
-                        android:src="@drawable/ic_more_set" />
-                </FrameLayout>
-            </LinearLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
 
-        </LinearLayout>
 
-    </ScrollView>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

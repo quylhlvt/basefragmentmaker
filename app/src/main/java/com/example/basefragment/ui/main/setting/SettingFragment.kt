@@ -57,22 +57,34 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>( 
 
     override fun initView() {
         binding.apply {
+
             setupActionBar()
+            setupActionTiltleBar()
             setupRateButton()
         }
     }
 
     private fun FragmentSettingBinding.setupActionBar() {
         actionBar.apply {
-            tvCenter.select()
             setImageActionBar(
                 btnActionBarLeft,
                 R.drawable.back_app
             )
-            setTextActionBar(
-                tvCenter,
-                getString(R.string.settings)
-            )
+        }
+    }
+ private fun FragmentSettingBinding.setupActionTiltleBar() {
+        layoutTitleBar.apply {
+            layoutTitle.apply {
+                txt1.isSelected = true
+                txt2.isSelected = true
+                txt3.isSelected = true
+                txt4.isSelected = true
+                setTextActionBar(
+                    txtLang,
+                    getString(R.string.settings)
+                )
+                txtLang.isSelected =true
+            }
         }
     }
 

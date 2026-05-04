@@ -215,9 +215,9 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         binding.apply {
             actionBar.apply {
                 btnActionBarLeft.onClick { confirmExit() }
-                btnActionBarCenter.onClick { confirmReset() }
+                btnActionBarCenter1.onClick { confirmReset() }
                 btnActionBarRight.onClick { handleSave() }
-                setImageActionBar(btnActionBarCenter2, R.drawable.ic_show_all_custom)
+//                setImageActionBar(btnActionBarCenter2, R.drawable.ic_show_all_custom)
 
             }
 
@@ -295,7 +295,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     private fun initActionBar() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
-            setImageActionBar(btnActionBarCenter, R.drawable.ic_reset_all_custom)
+            setImageActionBar(btnActionBarCenter1, R.drawable.ic_reset_all_custom)
             setImageActionBar(btnActionBarRight, R.drawable.next_app)
         }
     }
@@ -344,8 +344,23 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         initRcv()
         initDrawView()
         initData()
+        setupBackPress()
     }
-
+    private fun setupBackPress() {
+        requireActivity().onBackPressedDispatcher.addCallback(
+            viewLifecycleOwner,
+            object : androidx.activity.OnBackPressedCallback(true) {
+                override fun handleOnBackPressed() {
+                    if (viewModel.isFocusEditText.value) {
+                        hideSoftKeyboard()
+                        viewModel.setIsFocusEditText(false)
+                    } else {
+                        confirmExit()
+                    }
+                }
+            }
+        )
+    }
     private fun initData() {
         viewModel.loadDataFromMainViewModel(
             viewModelActivity.backgrounds.value,
@@ -536,9 +551,11 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                     requireContext().getColor(R.color.transparent)
                 )
 
-                hideLoadingSafe()
+                // ← Reset đúng cách — clear isSelected trong list rồi mới notify
+                backgroundImageAdapter.clearSelection()
+                backgroundColorAdapter.clearSelection()
 
-                // ✅ Thêm lại character ảnh ban đầu sau khi reset
+                hideLoadingSafe()
                 addDrawable(imagepath, true)
             },
             onNo = { hideLoadingSafe() }
@@ -556,12 +573,8 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             viewModel.updateBackgroundImageSelected(position)
             withContext(Dispatchers.Main) {
-                if (backgroundColorAdapter.currentSelected != -1) {
-                    val oldPos = backgroundColorAdapter.currentSelected
-                    backgroundColorAdapter.currentSelected = -1
-                    backgroundColorAdapter.notifyItemChanged(oldPos)
-                }
-                backgroundImageAdapter.submitItem(position, viewModel.backgroundImageList)
+                backgroundColorAdapter.clearSelection()
+                backgroundImageAdapter.selectItem(position)
             }
         }
     }
@@ -616,12 +629,8 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                 viewModel.updateBackgroundColorSelected(position)
                 withContext(Dispatchers.Main) {
-                    if (backgroundImageAdapter.currentSelected != -1) {
-                        val oldPos = backgroundImageAdapter.currentSelected
-                        backgroundImageAdapter.currentSelected = -1
-                        backgroundImageAdapter.notifyItemChanged(oldPos)
-                    }
-                    backgroundColorAdapter.submitItem(position, viewModel.backgroundColorList)
+                    backgroundImageAdapter.clearSelection()
+                    backgroundColorAdapter.selectItem(position)
                 }
             }
         }

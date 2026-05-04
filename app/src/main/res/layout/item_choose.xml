@@ -6,7 +6,9 @@
     app:cardCornerRadius="40dp"
     android:background="@color/transparent"
     android:layout_marginHorizontal="8dp"
-    app:cardBackgroundColor="@color/shadown_item_cate"
+    app:strokeColor="@color/app_color"
+    app:strokeWidth="1.6dp"
+    app:cardBackgroundColor="@color/app_color4"
     android:layout_marginBottom="8dp"
     >
     <androidx.constraintlayout.widget.ConstraintLayout
@@ -31,9 +33,9 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             app:cardCornerRadius="40dp"
-            app:strokeWidth="10dp"
+            app:strokeWidth="0dp"
             app:strokeColor="#FFF5FE"
-            app:cardBackgroundColor="#FBE1FA"
+            app:cardBackgroundColor="@color/app_color3"
             android:outlineAmbientShadowColor="#E8C0F5"
 
            >

@@ -52,35 +52,35 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
                  findNavController().navigate(R.id.action_home_to_createPony)
             }
 
-            // Click vào "Quick Mix"
-            btnQuickMaker.onClick {
-                // Navigate tới QuickMixFragment
-                 findNavController().navigate(R.id.action_home_to_quick)
-            }
+//            // Click vào "Quick Mix"
+//            btnQuickMaker.onClick {
+//                // Navigate tới QuickMixFragment
+//                 findNavController().navigate(R.id.action_home_to_quick)
+//            }
             btnMyAlbum.onClick {
                 findNavController().navigate(R.id.action_home_to_myPony)
             }
             btnRandom.onClick {
                 findNavController().navigate(R.id.action_home_to_random)
             }
-                btnCosPlay.onClick {
+            btnCosPlay.onClick {
                 findNavController().navigate(R.id.action_home_to_cosplay)
             }
-            btnWeb.onClick {
-                when {
-                    ContextCompat.checkSelfPermission(
-                        requireContext(),
-                        Manifest.permission.CAMERA
-                    ) == PackageManager.PERMISSION_GRANTED -> {
-                        // Đã có quyền → navigate luôn
-                        findNavController().navigate(R.id.action_home_to_web)
-                    }
-                    else -> {
-                        // Chưa có → xin quyền
-                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
-                    }
-                }
-            }
+//            btnWeb.onClick {
+//                when {
+//                    ContextCompat.checkSelfPermission(
+//                        requireContext(),
+//                        Manifest.permission.CAMERA
+//                    ) == PackageManager.PERMISSION_GRANTED -> {
+//                        // Đã có quyền → navigate luôn
+//                        findNavController().navigate(R.id.action_home_to_web)
+//                    }
+//                    else -> {
+//                        // Chưa có → xin quyền
+//                        cameraPermissionLauncher.launch(Manifest.permission.CAMERA)
+//                    }
+//                }
+//            }
             actionBar.btnActionBarRight.onClick {
                 toSettingFromHome()
             }
@@ -93,15 +93,16 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     ): FragmentHomeBinding = FragmentHomeBinding.inflate(inflater, container, false)
 
     override fun initView() {
-        binding.actionBar.apply {
-            setImageActionBar(btnActionBarRight, R.drawable.ic_settings)
-            setImageActionBar(btnActionBarLeft, R.drawable.logo_app)
-        }
         binding.apply {
-            tv1.isSelected = true
+            tv1.post { tv1.isSelected = true }
+            tv2.post { tv2.isSelected = true }
+            tv3.post { tv3.isSelected = true }
+            tv4.post { tv4.isSelected = true }
 
-            tv2.isSelected = true
-            tv3.isSelected = true
+            actionBar.apply {
+                setImageActionBar(btnActionBarRight, R.drawable.ic_settings)
+//            setImageActionBar(btnActionBarLeft, R.drawable.logo_app)
+            }
         }
         deleteTempFolder()
 //        binding.textView.text = "Home Fragment"

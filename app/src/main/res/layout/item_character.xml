@@ -27,7 +27,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="8dp"
             android:text="Character"
-            android:textSize="16sp"
+            android:textSize="16dp"
             android:textStyle="bold"
             android:textColor="@android:color/black" />
 

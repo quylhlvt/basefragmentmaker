@@ -2,9 +2,9 @@
     <string name="app_name">baseFragment</string>
     <string name="next">Next</string>
     <string name="language">Language</string>
-    <string name="title_1">Make Character</string>
-    <string name="title_2">Character Diversity</string>
-    <string name="title_3">Variety Items</string>
+    <string name="title_1">Create Different Styles However you like</string>
+    <string name="title_2">Make Your Perfect Avatar</string>
+    <string name="title_3">Collection of variety items</string>
     <string name="not_select_lang">Please select a language</string>
     <string name="pony_maker">Pony Maker</string>
     <string name="trending_custom">Trending Custom</string>
@@ -35,7 +35,6 @@
     <string name="do_you_want_to_reset_all">Do you want to reset all?</string>
     <string name="reset">Reset</string>
     <string name="exit">Exit</string>
-    <string name="privacy_amp_policy"><![CDATA[Privacy & Policy]]></string>
     <string name="rate_us">Rate Us</string>
     <string name="share_app">Share App</string>
     <string name="image_has_been_saved_successfully">Image has been saved successfully!</string>
@@ -86,4 +85,7 @@
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="cosplay">Cosplay</string>
     <string name="permission_camera_denied">Cần quyền camera để sử dụng tính năng này</string>
+    <string name="cat_random">Cat Random</string>
+    <string name="my_creation">My Creation</string>
+    <string name="category">Category</string>
 </resources>

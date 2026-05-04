@@ -14,34 +14,98 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseAdapter
+import com.example.basefragment.core.extention.visible
 import com.example.basefragment.data.model.custom.BodyPartModel
 import com.example.basefragment.data.model.custom.ColorModel
 import com.example.basefragment.databinding.ItemColorBinding
-import com.example.basefragment.databinding.ItemNavBinding
-import com.example.basefragment.databinding.ItemPartBinding
+import com.example.basefragment.databinding.ItemLayerBinding
+import com.bumptech.glide.load.engine.GlideException
+import com.bumptech.glide.request.RequestListener
+import com.bumptech.glide.request.target.Target
+import android.graphics.drawable.Drawable
+import com.bumptech.glide.load.DataSource
+import com.example.basefragment.core.extention.gone
+import com.example.basefragment.core.extention.invisible
+import com.example.basefragment.databinding.ItemBottomCustomBinding
 
 // ── NAV ADAPTER ───────────────────────────────────────────────────────────────
 // ── NAV ADAPTER ───────────────────────────────────────────────────────────────
-class NavAdapter : BaseAdapter<BodyPartModel, ItemNavBinding>(ItemNavBinding::inflate) {
+class NavAdapter :
+    BaseAdapter<BodyPartModel, ItemBottomCustomBinding>(ItemBottomCustomBinding::inflate) {
 
-    var posNav  = 0
+    var posNav = 0
     var onClick: ((Int) -> Unit)? = null
 
     fun setPos(pos: Int) {
         val old = posNav; posNav = pos
-        if (old != pos) { notifyItemChanged(old); notifyItemChanged(pos) }
+        if (old != pos) {
+            notifyItemChanged(old); notifyItemChanged(pos)
+        }
     }
 
-    override fun onBind(binding: ItemNavBinding, item: BodyPartModel, position: Int) {
-        binding.ivSelected.isVisible = posNav == position
-        Glide.with(binding.ivIcon)
+    override fun onBind(binding: ItemBottomCustomBinding, item: BodyPartModel, position: Int) {
+        binding.apply {
+            val ctx = root.context
+        if (posNav == position) {
+            focus.visible()
+            cardLayer.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    ctx,
+                    R.color.app_color4
+                )
+            )
+            cardLayerImg.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    ctx,
+                    R.color.app_color5
+                )
+            )
+            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
+        } else {
+            focus.invisible()
+            cardLayer.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    ctx,
+                    R.color.app_color8
+                )
+            )
+                cardLayerImg.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    ctx,
+                    R.color.app_color9
+                )
+            )
+            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
+        }
+        Glide.with(imvImage)
             .load(item.nav)
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .override(256)
             .dontAnimate()
-            .into(binding.ivIcon)
-        binding.root.setOnClickListener { onClick?.invoke(position) }
-    }
+            .listener(object : RequestListener<Drawable> {
+                override fun onLoadFailed(
+                    e: GlideException?, model: Any?,
+                    target: Target<Drawable>?, isFirstResource: Boolean
+                ): Boolean {
+                    sflShimmer.stopShimmer()
+                    sflShimmer.gone()
+                    return false
+                }
+
+                override fun onResourceReady(
+                    resource: Drawable?, model: Any?,
+                    target: Target<Drawable>?, dataSource: DataSource?,
+                    isFirstResource: Boolean
+                ): Boolean {
+                    sflShimmer.stopShimmer()
+                    sflShimmer.gone()
+                    return false
+                }
+            })
+            .into(imvImage)
+
+        root.setOnClickListener { onClick?.invoke(position) }
+    }}
 }
 
 // ── COLOR ADAPTER ─────────────────────────────────────────────────────────────
@@ -52,7 +116,9 @@ class ColorAdapter : BaseAdapter<ColorModel, ItemColorBinding>(ItemColorBinding:
 
     fun setPos(pos: Int) {
         val old = posColor; posColor = pos
-        if (old != pos) { notifyItemChanged(old); notifyItemChanged(pos) }
+        if (old != pos) {
+            notifyItemChanged(old); notifyItemChanged(pos)
+        }
     }
 
     override fun onBind(binding: ItemColorBinding, item: ColorModel, position: Int) {
@@ -71,46 +137,103 @@ class ColorAdapter : BaseAdapter<ColorModel, ItemColorBinding>(ItemColorBinding:
 }
 
 // ── PART ADAPTER ──────────────────────────────────────────────────────────────
-class PartAdapter : BaseAdapter<String, ItemPartBinding>(ItemPartBinding::inflate) {
+class PartAdapter : BaseAdapter<String, ItemLayerBinding>(ItemLayerBinding::inflate) {
 
-    var posPath:   Int          = 0
+    var posPath: Int = 0
     var listThumb: List<String> = emptyList()
-    var onClick:   ((Int, String) -> Unit)? = null
+    var onClick: ((Int, String) -> Unit)? = null
 
     fun setPos(pos: Int) {
         val old = posPath; posPath = pos
-        if (old != pos) { notifyItemChanged(old); notifyItemChanged(pos) }
+        if (old != pos) {
+            notifyItemChanged(old); notifyItemChanged(pos)
+        }
     }
 
-    override fun onBind(binding: ItemPartBinding, item: String, position: Int) {
-        val ctx = binding.root.context
-        if (posPath == position) {
-            binding.materialCard.setCardBackgroundColor(ContextCompat.getColor(ctx, R.color.app_color2))
-            binding.materialCard.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
-        } else {
-            binding.materialCard.setCardBackgroundColor(ContextCompat.getColor(ctx, R.color.white))
-            binding.materialCard.strokeColor = ContextCompat.getColor(ctx, R.color.white)
-        }
+    override fun onBind(binding: ItemLayerBinding, item: String, position: Int) {
+        binding.apply {
+            val ctx = root.context
 
+        if (posPath == position) {
+            focus.visible()
+            cardLayer.cardElevation = 8f
+            cardLayer.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    ctx,
+                    R.color.app_color4
+                )
+            )
+            cardLayerImg.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    ctx,
+                    R.color.app_color5
+                )
+            )
+            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
+        } else {
+            focus.invisible()
+            cardLayer.cardElevation = 0f
+            cardLayer.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    ctx,
+                    R.color.app_color8
+                )
+            )
+            cardLayerImg.setCardBackgroundColor(
+                ContextCompat.getColor(
+                    ctx,
+                    R.color.app_color9
+                )
+            )
+            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
+        }
+        sflShimmer.visible()
+        sflShimmer.startShimmer()
         val thumbPath = listThumb.getOrElse(position) { item }
         when (item) {
             "none" -> {
-                Glide.with(binding.imv).clear(binding.imv)
-                binding.imv.setImageResource(R.drawable.ic_none)
+                Glide.with(imvImage).clear(imvImage)
+                imvImage.setImageResource(R.drawable.ic_none)
+                sflShimmer.stopShimmer()
+                sflShimmer.gone()
             }
+
             "dice" -> {
-                Glide.with(binding.imv).clear(binding.imv)
-                binding.imv.setImageResource(R.drawable.ic_dice)
+                Glide.with(imvImage).clear(imvImage)
+                imvImage.setImageResource(R.drawable.ic_dice)
+                sflShimmer.stopShimmer()
+                sflShimmer.gone()
             }
+
             else -> {
-                Glide.with(binding.imv)
+                Glide.with(imvImage)
                     .load(thumbPath)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                     .override(256)
                     .dontAnimate()
-                    .into(binding.imv)
+                    .listener(object : RequestListener<Drawable> {
+                        override fun onLoadFailed(
+                            e: GlideException?, model: Any?,
+                            target: Target<Drawable>?, isFirstResource: Boolean
+                        ): Boolean {
+                            sflShimmer.stopShimmer()
+                            sflShimmer.gone()
+                            return false
+                        }
+
+                        override fun onResourceReady(
+                            resource: Drawable?, model: Any?,
+                            target: Target<Drawable>?, dataSource: DataSource?,
+                            isFirstResource: Boolean
+                        ): Boolean {
+                            sflShimmer.stopShimmer()
+                            sflShimmer.gone()
+                            return false
+                        }
+                    })
+                    .into(imvImage)
             }
         }
-        binding.root.setOnClickListener { onClick?.invoke(position, item) }
-    }
+        root.setOnClickListener { onClick?.invoke(position, item) }
+    }}
 }
