@@ -63,6 +63,7 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="0dp"
+        android:layout_marginHorizontal="7dp"
         android:layout_weight="188">
 
         <androidx.recyclerview.widget.RecyclerView
@@ -70,7 +71,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="4.5dp"
-            android:paddingHorizontal="7.5dp"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:spanCount="5"
             tools:listitem="@layout/item_background_image" />
@@ -80,7 +80,6 @@
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:layout_marginTop="4.5dp"
-            android:paddingHorizontal="7.5dp"
             android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
             app:spanCount="5"

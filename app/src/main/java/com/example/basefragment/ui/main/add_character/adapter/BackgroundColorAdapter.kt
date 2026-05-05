@@ -1,11 +1,14 @@
 package com.example.basefragment.ui.main.add_character.adapter
 
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseAdapter
 import com.example.basefragment.core.extention.gone
+import com.example.basefragment.core.extention.loadFromAsset
 import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.visible
 import com.example.basefragment.data.model.addcharacter.SelectedAddModel
 import com.example.basefragment.databinding.ItemBackgroundColorBinding
 
@@ -18,17 +21,37 @@ class BackgroundColorAdapter : BaseAdapter<SelectedAddModel, ItemBackgroundColor
     var currentSelected = -1
 
     override fun onBind(binding: ItemBackgroundColorBinding, item: SelectedAddModel, position: Int) {
+        val context = binding.root.context
+
         binding.apply {
             // ← chỉ dùng currentSelected, không dùng item.isSelected
-            vFocus1.isVisible = currentSelected == position
+                if (currentSelected == position) {
+                    shadown.visible()
+                    materialParent.apply {    strokeColor = ContextCompat.getColor(context, R.color.app_color)
+                    setCardBackgroundColor(
+                        ContextCompat.getColor(context, R.color.app_color4)
+                    )}
+                } else {
+                    shadown.gone()
+                    materialParent.apply { strokeColor = ContextCompat.getColor(context, R.color.app_color7)
+                    setCardBackgroundColor(
+                        ContextCompat.getColor(context, R.color.app_color8)
+                    )
+                // tắt elevation mặc định để dùng custom shadow
+                }
+            }
 
             if (position == 0) {
-                loadImage(root, R.drawable.ic_choose_color, imvColor)
-                root.onClick { onChooseColorClick() }
+                imvAddColor.visible()
+                imvColor.gone()
+                root.onClick { onChooseColorClick()}
             } else {
-                imvColor.setBackgroundColor(item.color)
-                root.onClick { onBackgroundColorClick(item.color, position) }
+                imvAddColor.gone()
+                imvColor.visible()
+                    imvColor.setBackgroundColor(item.color)
+                    root.onClick { onBackgroundColorClick(item.color, position) }
             }
+
         }
     }
 

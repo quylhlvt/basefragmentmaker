@@ -25,6 +25,7 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.saveToFile
@@ -41,7 +42,7 @@ import java.util.concurrent.atomic.AtomicInteger
 class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewModel>(
     FragmentCustomizeBinding::inflate,
     CustomizeViewModel::class.java
-) {
+), BackPressHandler {
     private val arrShowColor = mutableListOf<Boolean>()
 
     private var isColorVisible = true
@@ -166,12 +167,7 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
             actionBar.btnActionBarCenter2.setOnClickListener { viewModel.toggleFlip() }
             actionBar.btnActionBarRight.setOnClickListener { if (canSave) performSave() }
             actionBar.btnActionBarLeft.setOnClickListener {
-                showConfirmDialog(
-                    title = getString(R.string.exit),
-                    message = getString(R.string.haven_t_saved_it_yet_do_you_want_to_exit),
-                    onYes = {
-                        findNavController().popBackStack()
-                    })
+               confirmExit()
             }
         }
 
@@ -463,9 +459,23 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     // ── BASE OVERRIDES ────────────────────────────────────────────────────────
 
     override fun bindViewModel() {}
-
+    //--------------------------------Backpress
+    override fun onBackPressed(): Boolean {
+        confirmExit()
+       return true
+    }
     // ── COMPANION ─────────────────────────────────────────────────────────────
-
+    private fun confirmExit() {
+        showConfirmDialog(
+            message = getString(R.string.haven_t_saved_it_yet_do_you_want_to_exit),
+            title = getString(R.string.exit),
+            onYes = {
+                hideLoadingSafe()
+                findNavController().navigateUp()
+            },
+            onNo = { hideLoadingSafe() }
+        )
+    }
     companion object {
         const val ARG_TEMPLATE_INDEX = "template_index"
         const val ARG_IS_EDIT = "is_edit"

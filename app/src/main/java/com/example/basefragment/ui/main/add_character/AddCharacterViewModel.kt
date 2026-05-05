@@ -24,7 +24,8 @@ import javax.inject.Inject
 class AddCharacterViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
-
+    var isInitialized = false
+    var isRestoringDraws = false
     // ========== Adapter Lists ==========
     var backgroundImageList: ArrayList<SelectedAddModel> = arrayListOf()
     var backgroundColorList: ArrayList<SelectedAddModel> = arrayListOf()
@@ -51,7 +52,7 @@ class AddCharacterViewModel @Inject constructor(
 
     // ========== Draw state ==========
     var currentDraw: Draw? = null
-    var drawViewList: ArrayList<Draw> = arrayListOf()
+    var drawViewList: ArrayList<DrawableDraw> = arrayListOf()
 
     // ========== Layout params ==========
     lateinit var layoutParams: ViewGroup.MarginLayoutParams
@@ -59,6 +60,7 @@ class AddCharacterViewModel @Inject constructor(
 
     // ========== Misc ==========
     var pathDefault = ""
+    var savedBackgroundColor: Int? = null
 
     // ========== Setters ==========
 
@@ -176,7 +178,9 @@ class AddCharacterViewModel @Inject constructor(
     }
 
     fun addDrawView(draw: Draw) {
-        drawViewList.add(draw)
+        if (draw is DrawableDraw) {  // ← guard type
+            drawViewList.add(draw)
+        }
     }
 
     fun deleteDrawView(draw: Draw) {

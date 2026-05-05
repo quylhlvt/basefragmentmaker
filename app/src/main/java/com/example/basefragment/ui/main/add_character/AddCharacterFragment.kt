@@ -22,6 +22,7 @@ import androidx.navigation.fragment.findNavController
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.custom.Draw
 import com.example.basefragment.core.custom.DrawableDraw
@@ -64,7 +65,7 @@ import javax.inject.Inject
 class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharacterViewModel>(
     FragmentAddCharacterBinding::inflate,
     AddCharacterViewModel::class.java
-) {
+) , BackPressHandler{
     @Inject
     lateinit var imageManager: CharacterImageManager
     private val permissionViewModel: PermissionViewModel by viewModels()
@@ -79,23 +80,24 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         arguments?.getString("imagePath") ?: ""
     }
 
-    private val buttonNavigationList by lazy {
-        arrayListOf(
-            binding.btnBackground,
-            binding.btnSticker,
-            binding.btnSpeech,
-            binding.btnText,
-        )
-    }
+    // XÓA 2 lazy list này
+// private val buttonNavigationList by lazy { ... }
+// private val layoutNavigationList by lazy { ... }
 
-    private val layoutNavigationList by lazy {
-        arrayListOf(
-            binding.lnlBackground.root,
-            binding.lnlSticker,
-            binding.lnlSpeech,
-            binding.lnlText.scvText,
-        )
-    }
+    // THAY bằng 2 function này
+    private fun buttonNavigationList() = arrayListOf(
+        binding.btnBackground,
+        binding.btnSticker,
+        binding.btnSpeech,
+        binding.btnText,
+    )
+
+    private fun layoutNavigationList() = arrayListOf(
+        binding.lnlBackground.root,
+        binding.lnlSticker,
+        binding.lnlSpeech,
+        binding.lnlText.scvText,
+    )
 
     // Image picker launcher
     private val imagePickerLauncher =
@@ -168,7 +170,6 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                             }
                         }
                     }
-
                     launch {
                         // Type Background
                         viewModel.typeBackground.collect { type ->
@@ -179,19 +180,18 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
                         }
                     }
-
                     launch {
-                        // Focus EditText
                         viewModel.isFocusEditText.collect { status ->
                             if (status) {
-                                viewModel.layoutParams.topMargin =
-                                    dpToPx(requireContext(), -170)
-                                flFunction.layoutParams = viewModel.layoutParams
+                                val params = binding.flFunction.layoutParams as ViewGroup.MarginLayoutParams
+                                params.topMargin = dpToPx(requireContext(), -170)
+                                binding.flFunction.layoutParams = params
                             } else {
+                                val params = binding.flFunction.layoutParams as ViewGroup.MarginLayoutParams
                                 delay(200)
-                                viewModel.layoutParams.topMargin = viewModel.originalMarginBottom
-                                flFunction.layoutParams = viewModel.layoutParams
-                                lnlText.edtText.clearFocus()
+                                params.topMargin = viewModel.originalMarginBottom
+                                binding.flFunction.layoutParams = params
+                                binding.lnlText.edtText.clearFocus()
                             }
                             requireActivity().hideNavigation(true)
                         }
@@ -243,6 +243,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             }
 
             lnlText.edtText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
+                android.util.Log.d("FOCUS_DEBUG", "onFocusChange: hasFocus=$hasFocus")
                 viewModel.setIsFocusEditText(hasFocus)
             }
 
@@ -335,29 +336,73 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         binding.lnlBackground.btnBackgroundColorTv.isSelected = true
         binding.lnlBackground.btnBackgroundImageTv.isSelected = true
         requireActivity().hideNavigation(true)
-        showLoadingSafe() // ← thêm ngay đây, hiện loading trước tiên
+        setupKeyboardListener()
         binding.tvGetText.setTextColor(requireContext().getColor(R.color.black))
         viewModel.layoutParams = binding.flFunction.layoutParams as ViewGroup.MarginLayoutParams
+        if (!viewModel.isInitialized) {
+            viewModel.originalMarginBottom = viewModel.layoutParams.topMargin
+            android.util.Log.d("FOCUS_DEBUG", "originalMarginBottom saved: ${viewModel.originalMarginBottom}")
+        }
         initRcv()
         initDrawView()
-        initData()
-        setupBackPress()
+//        setupBackPress()
+
+        if (!viewModel.isInitialized) {
+            showLoadingSafe()
+            initData()
+            viewModel.isInitialized = true
+        } else {
+            restoreUIState()
+        }
     }
-    private fun setupBackPress() {
-        requireActivity().onBackPressedDispatcher.addCallback(
-            viewLifecycleOwner,
-            object : androidx.activity.OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() {
-                    if (viewModel.isFocusEditText.value) {
-                        hideSoftKeyboard()
-                        viewModel.setIsFocusEditText(false)
-                    } else {
-                        confirmExit()
-                    }
-                }
+    private fun setupKeyboardListener() {
+        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val imeVisible = insets.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime())
+            if (!imeVisible && viewModel.isFocusEditText.value) {
+                // Bàn phím vừa ẩn (do system back) nhưng state vẫn là true → sync lại
+                viewModel.setIsFocusEditText(false)
             }
-        )
+            insets
+        }
     }
+    private fun restoreUIState() {
+        backgroundImageAdapter.submitList(viewModel.backgroundImageList)
+        backgroundColorAdapter.submitList(viewModel.backgroundColorList, true)
+        stickerAdapter.submitList(viewModel.stickerList, true)
+        speechAdapter.submitList(viewModel.speechList)
+        textFontAdapter.submitListReset(viewModel.textFontList)
+        textColorAdapter.submitListReset(viewModel.textColorList)
+
+        val currentNav = viewModel.typeNavigation.value
+        if (currentNav != -1) setupTypeNavigation(currentNav)
+
+        val currentBg = viewModel.typeBackground.value
+        if (currentBg != -1) setupTypeBackground(currentBg)
+
+        // Restore background — ưu tiên image, fallback color
+        val imagePath = viewModel.backgroundImagePath.value
+        val savedColor = viewModel.savedBackgroundColor
+
+        when {
+            imagePath != null -> {
+                binding.imvBackground.setBackgroundColor(
+                    requireContext().getColor(R.color.transparent)
+                )
+                loadImage(requireContext(), imagePath, binding.imvBackground)
+            }
+            savedColor != null -> {
+                binding.imvBackground.setImageBitmap(null)
+                binding.imvBackground.setBackgroundColor(savedColor)
+            }
+        }
+
+        if (viewModel.drawViewList.isNotEmpty()) {
+            viewModel.isRestoringDraws = true
+            binding.drawView.fillData(viewModel.drawViewList)
+            viewModel.isRestoringDraws = false
+        }
+    }
+
     private fun initData() {
         viewModel.loadDataFromMainViewModel(
             viewModelActivity.backgrounds.value,
@@ -423,8 +468,10 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             setLocked(false)
             setOnDrawListener(object : OnDrawListener {
                 override fun onAddedDraw(draw: Draw) {
-                    viewModel.updateCurrentCurrentDraw(draw)
-                    viewModel.addDrawView(draw)
+                    if (!viewModel.isRestoringDraws) {
+                        viewModel.updateCurrentCurrentDraw(draw)
+                        viewModel.addDrawView(draw)
+                    }
                     viewModel.setIsFocusEditText(false)
                 }
 
@@ -488,18 +535,19 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     }
 
     private fun setupTypeNavigation(type: Int) {
-        buttonNavigationList.forEachIndexed { index, button ->
+        buttonNavigationList().forEachIndexed { index, button ->
             val (res, status) = if (index == type) {
                 DataLocal.bottomNavigationSelected[index] to true
             } else {
                 DataLocal.bottomNavigationNotSelect[index] to false
             }
             button.setImageResource(res)
-            layoutNavigationList[index].isVisible = status
+            layoutNavigationList()[index].isVisible = status
         }
     }
 
     private fun confirmExit() {
+        android.util.Log.d("FOCUS_DEBUG", "confirmExit called, isAdded=$isAdded, activity=$activity")
         viewModel.setIsFocusEditText(false)
         showConfirmDialog(
             message = getString(R.string.haven_t_saved_it_yet_do_you_want_to_exit),
@@ -547,11 +595,11 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     // Trong handleSetBackgroundImage()
     private fun handleSetBackgroundImage(path: String, position: Int) {
         viewModel.setBackgroundImage(path)
+        viewModel.savedBackgroundColor = null           // ← clear color khi chọn image
         binding.imvBackground.setBackgroundColor(
             requireContext().getColor(R.color.transparent)
         )
         loadImage(requireContext(), path, binding.imvBackground)
-
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             viewModel.updateBackgroundImageSelected(position)
             withContext(Dispatchers.Main) {
@@ -594,6 +642,8 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     }
 
     private fun handleSpeech(path: String) {
+        binding.lnlText.edtText.clearFocus()
+        binding.main.requestFocus()
         val dialog = DialogSpeech(requireContext(), path)
         dialog.show()
         dialog.onDoneClick = { bitmap ->
@@ -608,6 +658,8 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         binding.apply {
             imvBackground.setImageBitmap(null)
             imvBackground.setBackgroundColor(color)
+            viewModel.savedBackgroundColor = color      // ← lưu lại
+            viewModel.setBackgroundImage(null)          // ← clear image path khi chọn color
             viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
                 viewModel.updateBackgroundColorSelected(position)
                 withContext(Dispatchers.Main) {
@@ -717,6 +769,19 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                 hideLoadingSafe()
                 Toast.makeText(requireContext(), "Có lỗi: ${e.message}", Toast.LENGTH_SHORT).show()
             }
+        }
+    }
+    override fun onBackPressed(): Boolean {
+        android.util.Log.d("FOCUS_DEBUG", "onBackPressed called: isFocusEditText=${viewModel.isFocusEditText.value}")
+
+        return if (viewModel.isFocusEditText.value) {
+            binding.lnlText.edtText.clearFocus()
+            hideSoftKeyboard()
+            viewModel.setIsFocusEditText(false)
+            true // consumed, không back
+        } else {
+            confirmExit()
+            true // consumed, hiện dialog
         }
     }
 

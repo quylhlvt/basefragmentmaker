@@ -42,14 +42,11 @@ class MainActivity : AppCompatActivity() {
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
                 // Kiểm tra xem Fragment hiện tại có xử lý back không
-                val currentFragment = navHostFragment.childFragmentManager.fragments.firstOrNull()
+                val currentFragment = navHostFragment.childFragmentManager.primaryNavigationFragment
 
                 if (currentFragment is BackPressHandler) {
                     val handled = currentFragment.onBackPressed()
-                    if (handled) {
-                        // Fragment đã xử lý, không làm gì
-                        return
-                    }
+                    if (handled) return
                 }
 
                 // Fragment không xử lý hoặc không implement interface
@@ -86,13 +83,13 @@ class MainActivity : AppCompatActivity() {
         applyLanguage()
     }
 
-    // QUAN TRỌNG: xử lý nút Back đúng cách
-    override fun onBackPressed() {
-        if (!navController.popBackStack()) {
-            // Không còn gì trong back stack → thoát app
-            super.onBackPressed()
-        }
-    }
+//    // QUAN TRỌNG: xử lý nút Back đúng cách
+//    override fun onBackPressed() {
+//        if (!navController.popBackStack()) {
+//            // Không còn gì trong back stack → thoát app
+//            super.onBackPressed()
+//        }
+//    }
 
     // Nếu bạn dùng Toolbar + NavigationIcon (mũi tên back)
     override fun onSupportNavigateUp(): Boolean {
