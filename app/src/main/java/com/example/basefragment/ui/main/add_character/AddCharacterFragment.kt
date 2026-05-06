@@ -182,17 +182,35 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                     }
                     launch {
                         viewModel.isFocusEditText.collect { status ->
+                            val params = binding.flFunction.layoutParams
+                                    as ViewGroup.MarginLayoutParams
+
                             if (status) {
-                                val params = binding.flFunction.layoutParams as ViewGroup.MarginLayoutParams
+                                // Lên ngay — không delay
                                 params.topMargin = dpToPx(requireContext(), -170)
                                 binding.flFunction.layoutParams = params
                             } else {
-                                val params = binding.flFunction.layoutParams as ViewGroup.MarginLayoutParams
-                                delay(200)
-                                params.topMargin = viewModel.originalMarginBottom
-                                binding.flFunction.layoutParams = params
-                                binding.lnlText.edtText.clearFocus()
+                                // ✅ Dùng animate thay vì delay thô
+                                // delay thô → coroutine bị cancel giữa chừng → state sai
+                                binding.flFunction.animate()
+                                    .translationY(0f)
+                                    .setDuration(200)
+                                    .withEndAction {
+                                        params.topMargin = viewModel.originalMarginBottom
+                                        binding.flFunction.layoutParams = params
+                                        binding.flFunction.translationY = 0f
+                                    }
+                                    .start()
                             }
+                            requireActivity().hideNavigation(true)
+                        }
+                    }
+
+                    // isSpeechKeyboardVisible — KHÔNG đụng layout, chỉ dùng để guard
+                    launch {
+                        viewModel.isSpeechKeyboardVisible.collect { visible ->
+                            // Không làm gì với layout ở đây
+                            // Chỉ log hoặc xử lý nếu cần
                             requireActivity().hideNavigation(true)
                         }
                     }
@@ -243,10 +261,11 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             }
 
             lnlText.edtText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-                android.util.Log.d("FOCUS_DEBUG", "onFocusChange: hasFocus=$hasFocus")
-                viewModel.setIsFocusEditText(hasFocus)
+                // Guard: chỉ set khi speech không mở VÀ value thực sự thay đổi
+                if (!viewModel.isSpeechKeyboardVisible.value) {
+                    viewModel.setIsFocusEditText(hasFocus)  // setter đã có guard bên trong
+                }
             }
-
             lnlText.btnDoneText.onClick { handleDoneText() }
 
             main.onClick {
@@ -357,11 +376,18 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     }
     private fun setupKeyboardListener() {
         androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
-            val imeVisible = insets.isVisible(androidx.core.view.WindowInsetsCompat.Type.ime())
+            val imeVisible = insets.isVisible(
+                androidx.core.view.WindowInsetsCompat.Type.ime()
+            )
+
+            // Speech đang mở → bỏ qua hoàn toàn
+            if (viewModel.isSpeechKeyboardVisible.value) return@setOnApplyWindowInsetsListener insets
+
+            // Keyboard ẩn đi mà focus vẫn true → reset
             if (!imeVisible && viewModel.isFocusEditText.value) {
-                // Bàn phím vừa ẩn (do system back) nhưng state vẫn là true → sync lại
                 viewModel.setIsFocusEditText(false)
             }
+
             insets
         }
     }
@@ -642,15 +668,27 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     }
 
     private fun handleSpeech(path: String) {
-        binding.lnlText.edtText.clearFocus()
-        binding.main.requestFocus()
+        // Báo hiệu speech keyboard sắp xuất hiện
+        viewModel.setSpeechKeyboardVisible(true)
+        viewModel.setIsFocusEditText(false)
+        hideSoftKeyboard()
+
         val dialog = DialogSpeech(requireContext(), path)
         dialog.show()
+
         dialog.onDoneClick = { bitmap ->
             dialog.dismiss()
-            if (bitmap != null) {
-                addDrawable("", false, bitmap)
-            }
+            if (bitmap != null) addDrawable("", false, bitmap)
+        }
+
+        dialog.setOnDismissListener {
+            binding.root.postDelayed({
+                // Reset cả 2 về false khi dialog đóng
+                viewModel.setSpeechKeyboardVisible(false)
+                viewModel.setIsFocusEditText(false)
+                binding.main.requestFocus()
+                hideSoftKeyboard()
+            }, 300)
         }
     }
 

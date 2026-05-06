@@ -43,7 +43,6 @@
                 android:id="@+id/btnAddColor"
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:layout_margin="3dp"
                 android:src="@drawable/ic_add_color" />
 
         </androidx.cardview.widget.CardView>

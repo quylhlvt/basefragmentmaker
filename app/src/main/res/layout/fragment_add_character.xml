@@ -69,9 +69,8 @@
         android:id="@+id/flSave"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginBottom="-20dp"
         app:layout_constraintBottom_toBottomOf="@+id/flSpce"
-        app:layout_constraintTop_toTopOf="parent">
+        app:layout_constraintTop_toBottomOf="@+id/flActionBar">
 
         <ImageView
             android:id="@+id/imvBackground"

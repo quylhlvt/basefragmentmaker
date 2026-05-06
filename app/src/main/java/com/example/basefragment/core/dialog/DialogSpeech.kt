@@ -30,8 +30,9 @@ class DialogSpeech(val mcontext: Context, val path: String) : BaseDialog<DialogS
         binding.apply {
             edtSpeech.isFocusableInTouchMode = true
             edtSpeech.isFocusable = true
-            edtSpeech.requestFocus()
-
+            edtSpeech.postDelayed({
+                edtSpeech.requestFocus()
+            }, 30)
             loadImage(mcontext, path, imvBubble)
         }
 
@@ -65,6 +66,9 @@ class DialogSpeech(val mcontext: Context, val path: String) : BaseDialog<DialogS
     fun handleDone(){
         binding.apply {
             edtSpeech.clearFocus()
+            val imm = mcontext.getSystemService(Context.INPUT_METHOD_SERVICE) as android.view.inputmethod.InputMethodManager
+            imm.hideSoftInputFromWindow(edtSpeech.windowToken, 0)
+
             edtSpeech.invisible()
             tvGetText.isVisible = !TextUtils.isEmpty(edtSpeech.text.toString().trim())
             val bitmap = BitmapHelper.getBitmapFromEditText(layoutBubble)

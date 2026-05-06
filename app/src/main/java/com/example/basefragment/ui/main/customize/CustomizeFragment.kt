@@ -424,8 +424,14 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
                 isFlipped = viewModel.state.value.isFlipped
             )
         }
+
+        // Thay Directions bằng Bundle trực tiếp
+        val bundle = Bundle().apply {
+            putString("imagePath", savedPath)
+        }
         findNavController().navigate(
-            CustomizeFragmentDirections.actionCustomizeFragmentToAddFragment(imagePath = savedPath)
+            R.id.action_customizeFragment_to_addFragment,
+            bundle
         )
     }
 

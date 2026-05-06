@@ -26,6 +26,7 @@ class AddCharacterViewModel @Inject constructor(
 ) : ViewModel() {
     var isInitialized = false
     var isRestoringDraws = false
+    var isSpeechDialogOpen = false
     // ========== Adapter Lists ==========
     var backgroundImageList: ArrayList<SelectedAddModel> = arrayListOf()
     var backgroundColorList: ArrayList<SelectedAddModel> = arrayListOf()
@@ -33,6 +34,12 @@ class AddCharacterViewModel @Inject constructor(
     var speechList: ArrayList<SelectedAddModel> = arrayListOf()
     var textFontList: ArrayList<SelectedAddModel> = arrayListOf()
     var textColorList: ArrayList<SelectedAddModel> = arrayListOf()
+    private val _isFocusEditText = MutableStateFlow(false)
+    val isFocusEditText: StateFlow<Boolean> = _isFocusEditText.asStateFlow()
+
+    // 2. Keyboard từ Speech dialog
+    private val _isSpeechKeyboardVisible = MutableStateFlow(false)
+    val isSpeechKeyboardVisible: StateFlow<Boolean> = _isSpeechKeyboardVisible.asStateFlow()
 
     // ========== StateFlows ==========
 
@@ -44,8 +51,6 @@ class AddCharacterViewModel @Inject constructor(
     private val _typeBackground = MutableStateFlow(-1)
     val typeBackground: StateFlow<Int> = _typeBackground.asStateFlow()
 
-    private val _isFocusEditText = MutableStateFlow(false)
-    val isFocusEditText: StateFlow<Boolean> = _isFocusEditText.asStateFlow()
 
     private val _backgroundImagePath = MutableStateFlow<String?>(null)
     val backgroundImagePath: StateFlow<String?> = _backgroundImagePath.asStateFlow()
@@ -74,6 +79,15 @@ class AddCharacterViewModel @Inject constructor(
      * (vì value không đổi). Để force re-emit khi bấm lại cùng tab,
      * ta reset về -1 trước rồi mới set giá trị mới.
      */
+    fun setIsFocusEditText(status: Boolean) {
+        if (_isFocusEditText.value == status) return  // ✅ không emit nếu không đổi
+        _isFocusEditText.value = status
+    }
+
+    fun setSpeechKeyboardVisible(status: Boolean) {
+        if (_isSpeechKeyboardVisible.value == status) return  // ✅
+        _isSpeechKeyboardVisible.value = status
+    }
     fun setTypeBackground(type: Int) {
         if (_typeBackground.value == type) {
             // Đang chọn lại cùng tab → reset trước để trigger collect
@@ -87,10 +101,6 @@ class AddCharacterViewModel @Inject constructor(
             _typeNavigation.value = -1
         }
         _typeNavigation.value = type
-    }
-
-    fun setIsFocusEditText(status: Boolean) {
-        _isFocusEditText.value = status
     }
 
     fun setBackgroundImage(path: String?) {
