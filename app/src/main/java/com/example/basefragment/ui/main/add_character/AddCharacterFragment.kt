@@ -13,6 +13,8 @@ import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.Lifecycle
@@ -30,6 +32,7 @@ import com.example.basefragment.core.custom.listener.listenerdraw.OnDrawListener
 import com.example.basefragment.core.dialog.ChooseColorDialog
 import com.example.basefragment.core.dialog.DialogSpeech
 import com.example.basefragment.core.extention.checkPermissions
+import com.example.basefragment.core.extention.dp
 import com.example.basefragment.core.extention.dpToPx
 import com.example.basefragment.core.extention.drawToBitmap
 import com.example.basefragment.core.extention.goToSettings
@@ -65,26 +68,30 @@ import javax.inject.Inject
 class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharacterViewModel>(
     FragmentAddCharacterBinding::inflate,
     AddCharacterViewModel::class.java
-) , BackPressHandler{
+), BackPressHandler {
+
     @Inject
     lateinit var imageManager: CharacterImageManager
+
     private val permissionViewModel: PermissionViewModel by viewModels()
 
+    // ── Keyboard state ──────────────────────────────────────────────────────
+    // Source of truth duy nhất: layout change listener đo thực tế
+    // KHÔNG dùng boolean flag nào trong ViewModel để control layout
+    private var isKeyboardOpen = false
+
+    // ── Adapters ─────────────────────────────────────────────────────────────
     private val backgroundImageAdapter by lazy { BackgroundImageAdapter() }
     private val backgroundColorAdapter by lazy { BackgroundColorAdapter() }
     private val stickerAdapter by lazy { StickerAdapter() }
     private val speechAdapter by lazy { StickerAdapter() }
     private val textFontAdapter by lazy { TextFontAdapter(requireContext()) }
     private val textColorAdapter by lazy { TextColorAdapter() }
+
     private val imagepath: String by lazy {
         arguments?.getString("imagePath") ?: ""
     }
 
-    // XÓA 2 lazy list này
-// private val buttonNavigationList by lazy { ... }
-// private val layoutNavigationList by lazy { ... }
-
-    // THAY bằng 2 function này
     private fun buttonNavigationList() = arrayListOf(
         binding.btnBackground,
         binding.btnSticker,
@@ -99,29 +106,23 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         binding.lnlText.scvText,
     )
 
-    // Image picker launcher
+    // ── Launchers ─────────────────────────────────────────────────────────────
     private val imagePickerLauncher =
         registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (result.resultCode == Activity.RESULT_OK) {
                 val uri = result.data?.data ?: return@registerForActivityResult
-
                 requireContext().contentResolver.takePersistableUriPermission(
-                    uri,
-                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                    uri, Intent.FLAG_GRANT_READ_URI_PERMISSION
                 )
-
                 handleSetBackgroundImage(uri.toString(), 0)
             }
         }
 
-
-    // Permission launcher
     private val permissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val allGranted = permissions.entries.all { it.value }
-            if (allGranted) {
+            if (permissions.entries.all { it.value }) {
                 permissionViewModel.updateStorageGranted(sharedPreferences, true)
-                launchImagePicker() // ✅ ĐÚNG
+                launchImagePicker()
             } else {
                 permissionViewModel.updateStorageGranted(sharedPreferences, false)
             }
@@ -131,182 +132,212 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
             type = "image/*"
-            addFlags(
-                Intent.FLAG_GRANT_READ_URI_PERMISSION or
-                        Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION
-            )
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
         }
         imagePickerLauncher.launch(intent)
     }
 
-
+    // ── Inflate ───────────────────────────────────────────────────────────────
     override fun inflateBinding(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): FragmentAddCharacterBinding = FragmentAddCharacterBinding.inflate(inflater, container, false)
 
-
-
+    // ── Observe ───────────────────────────────────────────────────────────────
     override fun observeData() {
-        binding.apply {
-            viewLifecycleOwner.lifecycleScope.launch {
-                viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                    launch {
-                        viewModel.typeNavigation.collect { type ->
-                            if (type != -1) {
-                                setupTypeNavigation(type)
-                            }
-                            requireActivity().hideNavigation(true)
-
-                        }
-
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                launch {
+                    viewModel.typeNavigation.collect { type ->
+                        if (type != -1) setupTypeNavigation(type)
+                        requireActivity().hideNavigation(true)
                     }
-                    // Trong observeData()
-                    launch {
-                        viewModel.backgroundImagePath.collect { path ->
-                            path?.let {
-                                loadImage(requireContext(), it, binding.imvBackground)  // ✅ Dùng extension
-                            }
-                        }
+                }
+                launch {
+                    viewModel.typeBackground.collect { type ->
+                        if (type != -1) setupTypeBackground(type)
+                        requireActivity().hideNavigation(true)
                     }
-                    launch {
-                        // Type Background
-                        viewModel.typeBackground.collect { type ->
-                            if (type != -1) {
-                                setupTypeBackground(type)
-                            }
-                            requireActivity().hideNavigation(true)
-
-                        }
-                    }
-                    launch {
-                        viewModel.isFocusEditText.collect { status ->
-                            val params = binding.flFunction.layoutParams
-                                    as ViewGroup.MarginLayoutParams
-
-                            if (status) {
-                                // Lên ngay — không delay
-                                params.topMargin = dpToPx(requireContext(), -170)
-                                binding.flFunction.layoutParams = params
-                            } else {
-                                // ✅ Dùng animate thay vì delay thô
-                                // delay thô → coroutine bị cancel giữa chừng → state sai
-                                binding.flFunction.animate()
-                                    .translationY(0f)
-                                    .setDuration(200)
-                                    .withEndAction {
-                                        params.topMargin = viewModel.originalMarginBottom
-                                        binding.flFunction.layoutParams = params
-                                        binding.flFunction.translationY = 0f
-                                    }
-                                    .start()
-                            }
-                            requireActivity().hideNavigation(true)
-                        }
-                    }
-
-                    // isSpeechKeyboardVisible — KHÔNG đụng layout, chỉ dùng để guard
-                    launch {
-                        viewModel.isSpeechKeyboardVisible.collect { visible ->
-                            // Không làm gì với layout ở đây
-                            // Chỉ log hoặc xử lý nếu cần
-                            requireActivity().hideNavigation(true)
-                        }
+                }
+                launch {
+                    viewModel.backgroundImagePath.collect { path ->
+                        path?.let { loadImage(requireContext(), it, binding.imvBackground) }
                     }
                 }
             }
         }
     }
 
+    override fun bindViewModel() {}
 
-    override fun bindViewModel() {
-        // Can be used for additional bindings with viewModelActivity if needed
-    }
-
+    // ── Listeners ─────────────────────────────────────────────────────────────
     override fun viewListener() {
         binding.apply {
-            actionBar.apply {
-                btnActionBarLeft.onClick { confirmExit() }
-                btnActionBarCenter1.onClick { confirmReset() }
-                btnActionBarRight.onClick { handleSave() }
-//                setImageActionBar(btnActionBarCenter2, R.drawable.ic_show_all_custom)
+            // Action bar
+            actionBar.btnActionBarLeft.onClick { confirmExit() }
+            actionBar.btnActionBarCenter1.onClick { confirmReset() }
+            actionBar.btnActionBarRight.onClick { handleSave() }
 
+            // Background tabs
+            lnlBackground.btnBackgroundImage.onClick {
+                viewModel.setTypeBackground(ValueKey.IMAGE_BACKGROUND)
+            }
+            lnlBackground.btnBackgroundColor.onClick {
+                viewModel.setTypeBackground(ValueKey.COLOR_BACKGROUND)
             }
 
-            lnlBackground.btnBackgroundImage.onClick { viewModel.setTypeBackground(ValueKey.IMAGE_BACKGROUND) }
-            lnlBackground.btnBackgroundColor.onClick { viewModel.setTypeBackground(ValueKey.COLOR_BACKGROUND) }
-            btnBackground.onClick { viewModel.setTypeNavigation(ValueKey.BACKGROUND_NAVIGATION) }
-            btnSticker.onClick { viewModel.setTypeNavigation(ValueKey.STICKER_NAVIGATION) }
-            btnSpeech.onClick { viewModel.setTypeNavigation(ValueKey.SPEECH_NAVIGATION) }
-            btnText.onClick { viewModel.setTypeNavigation(ValueKey.TEXT_NAVIGATION) }
+            // Bottom navigation
+            btnBackground.onClick {
+                clearFocus()
+                viewModel.isTextTabActive = false
+                viewModel.setTypeNavigation(ValueKey.BACKGROUND_NAVIGATION)
+            }
+            btnSticker.onClick {
+                clearFocus()
+                viewModel.isTextTabActive = false
+                viewModel.setTypeNavigation(ValueKey.STICKER_NAVIGATION)
+            }
+            btnSpeech.onClick {
+                clearFocus()
+                viewModel.isTextTabActive = false
+                viewModel.setTypeNavigation(ValueKey.SPEECH_NAVIGATION)
+            }
+            btnText.onClick {
+                viewModel.isTextTabActive = true
+                viewModel.setTypeNavigation(ValueKey.TEXT_NAVIGATION)
+            }
 
+            // EditText
             lnlText.edtText.addTextChangedListener(object : TextWatcher {
-                override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {}
-                override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-                    tvGetText.text = p0.toString()
+                override fun beforeTextChanged(s: CharSequence?, start: Int, count: Int, after: Int) {}
+                override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
+                    tvGetText.text = s.toString()
                 }
-
-                override fun afterTextChanged(p0: Editable?) {}
+                override fun afterTextChanged(s: Editable?) {}
             })
 
-            lnlText.edtText.setOnEditorActionListener { _, i, _ ->
-                if (i == EditorInfo.IME_ACTION_DONE) {
-                    viewModel.setIsFocusEditText(false)
-                      hideSoftKeyboard()
+            lnlText.edtText.setOnEditorActionListener { _, actionId, _ ->
+                if (actionId == EditorInfo.IME_ACTION_DONE) {
+                    clearFocus()
                     true
-                } else {
-                    false
-                }
+                } else false
             }
 
-            lnlText.edtText.onFocusChangeListener = View.OnFocusChangeListener { _, hasFocus ->
-                // Guard: chỉ set khi speech không mở VÀ value thực sự thay đổi
-                if (!viewModel.isSpeechKeyboardVisible.value) {
-                    viewModel.setIsFocusEditText(hasFocus)  // setter đã có guard bên trong
-                }
-            }
-            lnlText.btnDoneText.onClick { handleDoneText() }
-
-            main.onClick {
-                viewModel.setIsFocusEditText(false)
+            lnlText.btnDoneText.onClick {
+                handleDoneText()
                 clearFocus()
-                hideSoftKeyboard()
             }
 
-            backgroundImageAdapter.apply {
-                onAddImageClick = { checkStoragePermission() }
-                onBackgroundImageClick = { path, position ->
-                    handleSetBackgroundImage(path, position)
-                }
-            }
+            // Click ngoài → đóng keyboard
+            main.onClick { clearFocus() }
 
-            backgroundColorAdapter.apply {
-                onChooseColorClick = { handleChooseColor() }
-                onBackgroundColorClick = { color, position ->
-                    handleSetBackgroundColor(color, position)
-                }
+            // Adapters
+            backgroundImageAdapter.onAddImageClick = { checkStoragePermission() }
+            backgroundImageAdapter.onBackgroundImageClick = { path, position ->
+                handleSetBackgroundImage(path, position)
             }
-
+            backgroundColorAdapter.onChooseColorClick = { handleChooseColor() }
+            backgroundColorAdapter.onBackgroundColorClick = { color, position ->
+                handleSetBackgroundColor(color, position)
+            }
             stickerAdapter.onItemClick = { path -> addDrawable(path) }
             speechAdapter.onItemClick = { path -> handleSpeech(path) }
-            textFontAdapter.onTextFontClick = { font, position ->
-                handleFontClick(font, position)
-            }
-
-            textColorAdapter.apply {
-                onChooseColorClick = { handleChooseColor(true) }
-                onTextColorClick = { color, position ->
-                    handleTextColorClick(color, position)
-                }
+            textFontAdapter.onTextFontClick = { font, position -> handleFontClick(font, position) }
+            textColorAdapter.onChooseColorClick = { handleChooseColor(isTextColor = true) }
+            textColorAdapter.onTextColorClick = { color, position ->
+                handleTextColorClick(color, position)
             }
         }
 
         initActionBar()
         requireActivity().hideNavigation(true)
-
     }
 
+    // ── Init ──────────────────────────────────────────────────────────────────
+    override fun initView() {
+        binding.lnlBackground.btnBackgroundColorTv.isSelected = true
+        binding.lnlBackground.btnBackgroundImageTv.isSelected = true
+        requireActivity().hideNavigation(true)
+
+        setupKeyboardListener()
+        binding.tvGetText.setTextColor(requireContext().getColor(R.color.black))
+
+        initRcv()
+        initDrawView()
+
+        if (!viewModel.isInitialized) {
+            showLoadingSafe()
+            initData()
+            viewModel.isInitialized = true
+        } else {
+            restoreUIState()
+        }
+    }
+
+    // ── Keyboard ──────────────────────────────────────────────────────────────
+
+    /**
+     * Source of truth duy nhất cho keyboard state và flFunction position.
+     *
+     * Logic:
+     * - Keyboard lên (heightDiff > THRESHOLD):
+     *     → Tab Text + speech dialog không mở → set bottomMargin = -170dp (cố định)
+     *     → Các tab khác hoặc speech dialog đang mở → giữ nguyên (margin = 0)
+     * - Keyboard xuống (heightDiff < -THRESHOLD):
+     *     → Luôn reset margin = 0, bất kể tab nào
+     */
+    private fun setupKeyboardListener() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+
+            if (imeVisible && imeHeight > 0) {
+                onKeyboardOpen()
+            } else {
+                onKeyboardClose()
+            }
+            insets
+        }
+    }
+
+    private fun onKeyboardOpen() {
+        isKeyboardOpen = true
+        if (viewModel.isTextTabActive && !viewModel.isSpeechDialogOpen) {
+            binding.flFunction.translationY = (-170).dp(requireContext()).toFloat()
+        }
+    }
+
+    private fun onKeyboardClose() {
+        isKeyboardOpen = false
+        binding.flFunction.translationY = 0f
+    }
+
+    // ĐỔI TÊN + ĐỔI bottomMargin → topMargin
+    private fun setFlFunctionTopMargin(margin: Int) {
+        (binding.flFunction.layoutParams as ViewGroup.MarginLayoutParams).topMargin = margin
+    }
+    /**
+     * Đóng keyboard và reset view.
+     * Dùng ở mọi nơi cần dismiss keyboard — backpress, click ngoài, done text, tab switch.
+     */
+    private fun collapseKeyboard() {
+        binding.lnlText.edtText.clearFocus()
+        binding.drawView.hideSelect()
+        hideSoftKeyboard()
+        // Reset view ngay lập tức, không đợi layout change
+        setFlFunctionTopMargin(0)
+    }
+    private fun clearFocus() {
+        binding.drawView.hideSelect()
+        hideSoftKeyboard()
+        setFlFunctionTopMargin(0)
+        lifecycleScope.launch {
+            delay(50)
+            binding.lnlText.edtText.clearFocus()
+        }
+    }
+    // ── Data ──────────────────────────────────────────────────────────────────
     private fun initActionBar() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
@@ -318,86 +349,56 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     private fun initRcv() {
         binding.apply {
             lnlBackground.rcvBackgroundImage.apply {
-                adapter = backgroundImageAdapter
-                itemAnimator = null
-                setHasFixedSize(true)
-                setItemViewCacheSize(10)
+                adapter = backgroundImageAdapter; itemAnimator = null
+                setHasFixedSize(true); setItemViewCacheSize(10)
             }
             lnlBackground.rcvBackgroundColor.apply {
-                adapter = backgroundColorAdapter
-                itemAnimator = null
+                adapter = backgroundColorAdapter; itemAnimator = null
             }
             rcvSticker.apply {
-                adapter = stickerAdapter
-                itemAnimator = null
-                setHasFixedSize(true)    // ← thêm dòng này
-                setItemViewCacheSize(10)
+                adapter = stickerAdapter; itemAnimator = null
+                setHasFixedSize(true); setItemViewCacheSize(10)
             }
             rcvSpeech.apply {
-                adapter = speechAdapter
-                itemAnimator = null
-                setHasFixedSize(true)    // ← thêm dòng này
-                setItemViewCacheSize(10)
+                adapter = speechAdapter; itemAnimator = null
+                setHasFixedSize(true); setItemViewCacheSize(10)
             }
-            lnlText.rcvFont.apply {
-                adapter = textFontAdapter
-                itemAnimator = null
-            }
-            lnlText.rcvTextColor.apply {
-                adapter = textColorAdapter
-                itemAnimator = null
-            }
+            lnlText.rcvFont.apply { adapter = textFontAdapter; itemAnimator = null }
+            lnlText.rcvTextColor.apply { adapter = textColorAdapter; itemAnimator = null }
         }
         requireActivity().hideNavigation(true)
     }
 
-    override fun initView() {
-        binding.lnlBackground.btnBackgroundColorTv.isSelected = true
-        binding.lnlBackground.btnBackgroundImageTv.isSelected = true
-        requireActivity().hideNavigation(true)
-        setupKeyboardListener()
-        binding.tvGetText.setTextColor(requireContext().getColor(R.color.black))
-        viewModel.layoutParams = binding.flFunction.layoutParams as ViewGroup.MarginLayoutParams
-        if (!viewModel.isInitialized) {
-            viewModel.originalMarginBottom = viewModel.layoutParams.topMargin
-            android.util.Log.d("FOCUS_DEBUG", "originalMarginBottom saved: ${viewModel.originalMarginBottom}")
-        }
-        initRcv()
-        initDrawView()
-//        setupBackPress()
+    private fun initData() {
+        viewModel.loadDataFromMainViewModel(
+            viewModelActivity.backgrounds.value,
+            viewModelActivity.stickers.value,
+            viewModelActivity.speechs.value
+        )
+        submitAllAdapters()
+        viewModel.setTypeNavigation(ValueKey.BACKGROUND_NAVIGATION)
+        viewModel.setTypeBackground(ValueKey.IMAGE_BACKGROUND)
+        hideLoadingSafe()
 
-        if (!viewModel.isInitialized) {
-            showLoadingSafe()
-            initData()
-            viewModel.isInitialized = true
-        } else {
-            restoreUIState()
-        }
-    }
-    private fun setupKeyboardListener() {
-        androidx.core.view.ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
-            val imeVisible = insets.isVisible(
-                androidx.core.view.WindowInsetsCompat.Type.ime()
-            )
-
-            // Speech đang mở → bỏ qua hoàn toàn
-            if (viewModel.isSpeechKeyboardVisible.value) return@setOnApplyWindowInsetsListener insets
-
-            // Keyboard ẩn đi mà focus vẫn true → reset
-            if (!imeVisible && viewModel.isFocusEditText.value) {
-                viewModel.setIsFocusEditText(false)
+        viewLifecycleOwner.lifecycleScope.launch {
+            addDrawable(imagepath, isCharacter = true)
+            if (viewModel.pathDefault.isNotEmpty()) {
+                addDrawable(viewModel.pathDefault, isCharacter = true)
             }
-
-            insets
         }
     }
-    private fun restoreUIState() {
+
+    private fun submitAllAdapters() {
         backgroundImageAdapter.submitList(viewModel.backgroundImageList)
         backgroundColorAdapter.submitList(viewModel.backgroundColorList, true)
         stickerAdapter.submitList(viewModel.stickerList, true)
         speechAdapter.submitList(viewModel.speechList)
         textFontAdapter.submitListReset(viewModel.textFontList)
         textColorAdapter.submitListReset(viewModel.textColorList)
+    }
+
+    private fun restoreUIState() {
+        submitAllAdapters()
 
         val currentNav = viewModel.typeNavigation.value
         if (currentNav != -1) setupTypeNavigation(currentNav)
@@ -405,15 +406,11 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         val currentBg = viewModel.typeBackground.value
         if (currentBg != -1) setupTypeBackground(currentBg)
 
-        // Restore background — ưu tiên image, fallback color
         val imagePath = viewModel.backgroundImagePath.value
         val savedColor = viewModel.savedBackgroundColor
-
         when {
             imagePath != null -> {
-                binding.imvBackground.setBackgroundColor(
-                    requireContext().getColor(R.color.transparent)
-                )
+                binding.imvBackground.setBackgroundColor(requireContext().getColor(R.color.transparent))
                 loadImage(requireContext(), imagePath, binding.imvBackground)
             }
             savedColor != null -> {
@@ -429,64 +426,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         }
     }
 
-    private fun initData() {
-        viewModel.loadDataFromMainViewModel(
-            viewModelActivity.backgrounds.value,
-            viewModelActivity.stickers.value,
-            viewModelActivity.speechs.value
-        )
-
-        backgroundImageAdapter.submitList(viewModel.backgroundImageList)
-        backgroundColorAdapter.submitList(viewModel.backgroundColorList, true)
-        stickerAdapter.submitList(viewModel.stickerList, true)
-        speechAdapter.submitList(viewModel.speechList)
-        textFontAdapter.submitListReset(viewModel.textFontList)
-        textColorAdapter.submitListReset(viewModel.textColorList)
-        viewModel.setTypeNavigation(ValueKey.BACKGROUND_NAVIGATION)
-        viewModel.setTypeBackground(ValueKey.IMAGE_BACKGROUND)
-        hideLoadingSafe() // ← hide sau khi submit xong
-
-        viewLifecycleOwner.lifecycleScope.launch {
-            addDrawable(imagepath, true)
-            if (viewModel.pathDefault.isNotEmpty()) {
-                addDrawable(viewModel.pathDefault, true)
-            }
-        }
-    }
-    private fun addDrawable(
-        path: String,
-        isCharacter: Boolean = false,
-        bitmapText: Bitmap? = null
-    ) {
-        if (bitmapText != null) {
-            val drawable = viewModel.loadDrawableEmoji(bitmapText, isCharacter)
-            binding.drawView.addDraw(drawable)
-            return
-        }
-
-        Glide.with(this)
-            .asBitmap()
-            .load(path)
-            .override(512, 512)
-            .diskCacheStrategy(DiskCacheStrategy.ALL)  // ← cache bitmap, lần sau load ngay
-            .format(com.bumptech.glide.load.DecodeFormat.PREFER_ARGB_8888)
-            .disallowHardwareConfig()
-            .into(object : com.bumptech.glide.request.target.CustomTarget<Bitmap>() {
-                override fun onResourceReady(
-                    resource: Bitmap,
-                    transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?
-                ) {
-                    val drawable = viewModel.loadDrawableEmoji(resource, isCharacter)
-                    binding.drawView.addDraw(drawable)
-                    requireActivity().hideNavigation(true)
-                }
-                override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
-                override fun onLoadFailed(errorDrawable: android.graphics.drawable.Drawable?) {
-                    showToast("Không thể tải sticker")
-                }
-            })
-    }
-
+    // ── DrawView ──────────────────────────────────────────────────────────────
     private fun initDrawView() {
         requireActivity().hideNavigation(true)
         binding.drawView.apply {
@@ -498,32 +438,13 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                         viewModel.updateCurrentCurrentDraw(draw)
                         viewModel.addDrawView(draw)
                     }
-                    viewModel.setIsFocusEditText(false)
                 }
-
-                override fun onClickedDraw(draw: Draw) {
-                    viewModel.setIsFocusEditText(false)
-                }
-
-                override fun onDeletedDraw(draw: Draw) {
-                    viewModel.deleteDrawView(draw)
-                    viewModel.setIsFocusEditText(false)
-                }
-
-                override fun onDragFinishedDraw(draw: Draw) {
-                    viewModel.setIsFocusEditText(false)
-                }
-
-                override fun onTouchedDownDraw(draw: Draw) {
-                    viewModel.updateCurrentCurrentDraw(draw)
-                    viewModel.setIsFocusEditText(false)
-                }
-
+                override fun onClickedDraw(draw: Draw) {}
+                override fun onDeletedDraw(draw: Draw) { viewModel.deleteDrawView(draw) }
+                override fun onDragFinishedDraw(draw: Draw) {}
+                override fun onTouchedDownDraw(draw: Draw) { viewModel.updateCurrentCurrentDraw(draw) }
                 override fun onZoomFinishedDraw(draw: Draw) {}
-                override fun onFlippedDraw(draw: Draw) {
-                    viewModel.setIsFocusEditText(false)
-                }
-
+                override fun onFlippedDraw(draw: Draw) {}
                 override fun onDoubleTappedDraw(draw: Draw) {}
                 override fun onHideOptionIconDraw() {}
                 override fun onUndoDeleteDraw(draw: List<Draw?>) {}
@@ -537,6 +458,38 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         }
     }
 
+    private fun addDrawable(
+        path: String,
+        isCharacter: Boolean = false,
+        bitmapText: Bitmap? = null
+    ) {
+        if (bitmapText != null) {
+            binding.drawView.addDraw(viewModel.loadDrawableEmoji(bitmapText, isCharacter))
+            return
+        }
+        Glide.with(this)
+            .asBitmap()
+            .load(path)
+            .override(512, 512)
+            .diskCacheStrategy(DiskCacheStrategy.ALL)
+            .format(com.bumptech.glide.load.DecodeFormat.PREFER_ARGB_8888)
+            .disallowHardwareConfig()
+            .into(object : com.bumptech.glide.request.target.CustomTarget<Bitmap>() {
+                override fun onResourceReady(
+                    resource: Bitmap,
+                    transition: com.bumptech.glide.request.transition.Transition<in Bitmap>?
+                ) {
+                    binding.drawView.addDraw(viewModel.loadDrawableEmoji(resource, isCharacter))
+                    requireActivity().hideNavigation(true)
+                }
+                override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
+                override fun onLoadFailed(errorDrawable: android.graphics.drawable.Drawable?) {
+                    showToast("Don't Download sticker")
+                }
+            })
+    }
+
+    // ── UI setup ──────────────────────────────────────────────────────────────
     private fun setupTypeBackground(type: Int) {
         binding.apply {
             when (type) {
@@ -572,59 +525,46 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         }
     }
 
+    // ── Handlers ──────────────────────────────────────────────────────────────
     private fun confirmExit() {
-        android.util.Log.d("FOCUS_DEBUG", "confirmExit called, isAdded=$isAdded, activity=$activity")
-        viewModel.setIsFocusEditText(false)
+        clearFocus()
         showConfirmDialog(
             message = getString(R.string.haven_t_saved_it_yet_do_you_want_to_exit),
             title = getString(R.string.exit),
-            onYes = {
-                hideLoadingSafe()
-                findNavController().navigateUp()
-            },
+            onYes = { hideLoadingSafe(); findNavController().navigateUp() },
             onNo = { hideLoadingSafe() }
         )
     }
 
     private fun confirmReset() {
-        viewModel.setIsFocusEditText(false)
+        clearFocus()
         showConfirmDialog(
             message = getString(R.string.do_you_want_to_reset_all),
             title = getString(R.string.reset),
             onYes = {
                 showLoadingSafe()
-
                 viewModel.loadDataFromMainViewModel(
                     viewModelActivity.backgrounds.value,
                     viewModelActivity.stickers.value,
                     viewModelActivity.speechs.value
                 )
                 viewModel.resetDraw()
-
                 binding.drawView.removeAllDraw()
                 binding.imvBackground.setImageBitmap(null)
-                binding.imvBackground.setBackgroundColor(
-                    requireContext().getColor(R.color.transparent)
-                )
-
-                // ← Reset đúng cách — clear isSelected trong list rồi mới notify
+                binding.imvBackground.setBackgroundColor(requireContext().getColor(R.color.transparent))
                 backgroundImageAdapter.clearSelection()
                 backgroundColorAdapter.clearSelection()
-
                 hideLoadingSafe()
-                addDrawable(imagepath, true)
+                addDrawable(imagepath, isCharacter = true)
             },
             onNo = { hideLoadingSafe() }
         )
     }
 
-    // Trong handleSetBackgroundImage()
     private fun handleSetBackgroundImage(path: String, position: Int) {
         viewModel.setBackgroundImage(path)
-        viewModel.savedBackgroundColor = null           // ← clear color khi chọn image
-        binding.imvBackground.setBackgroundColor(
-            requireContext().getColor(R.color.transparent)
-        )
+        viewModel.savedBackgroundColor = null
+        binding.imvBackground.setBackgroundColor(requireContext().getColor(R.color.transparent))
         loadImage(requireContext(), path, binding.imvBackground)
         viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
             viewModel.updateBackgroundImageSelected(position)
@@ -635,170 +575,138 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         }
     }
 
-    private fun checkStoragePermission() {
-        val perms = permissionViewModel.getStoragePermissions()
-        if (requireContext().checkPermissions(perms)) {
-            launchImagePicker()
-        } else if (permissionViewModel.needGoToSettings(sharedPreferences, true)) {
-            requireActivity().goToSettings()
-        } else {
-            permissionLauncher.launch(perms)
-        }
-    }
-
-
-
-    private fun handleChooseColor(isTextColor: Boolean = false) {
-        val dialog = ChooseColorDialog(requireContext())
-        dialog.show()
-
-        fun dismissDialog() {
-            dialog.dismiss()
-        }
-
-        dialog.onCloseEvent = { dismissDialog() }
-        dialog.onDoneEvent = { color ->
-            dismissDialog()
-            if (!isTextColor) {
-                handleSetBackgroundColor(color, 0)
-            } else {
-                handleTextColorClick(color, 0)
+    private fun handleSetBackgroundColor(color: Int, position: Int) {
+        binding.imvBackground.setImageBitmap(null)
+        binding.imvBackground.setBackgroundColor(color)
+        viewModel.savedBackgroundColor = color
+        viewModel.setBackgroundImage(null)
+        viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
+            viewModel.updateBackgroundColorSelected(position)
+            withContext(Dispatchers.Main) {
+                backgroundImageAdapter.clearSelection()
+                backgroundColorAdapter.selectItem(position)
             }
         }
     }
 
+    private fun checkStoragePermission() {
+        val perms = permissionViewModel.getStoragePermissions()
+        when {
+            requireContext().checkPermissions(perms) -> launchImagePicker()
+            permissionViewModel.needGoToSettings(sharedPreferences, true) -> requireActivity().goToSettings()
+            else -> permissionLauncher.launch(perms)
+        }
+    }
+
+    private fun handleChooseColor(isTextColor: Boolean = false) {
+        val dialog = ChooseColorDialog(requireContext())
+        dialog.show()
+        dialog.onCloseEvent = { dialog.dismiss() }
+        dialog.onDoneEvent = { color ->
+            dialog.dismiss()
+            if (!isTextColor) handleSetBackgroundColor(color, 0)
+            else handleTextColorClick(color, 0)
+        }
+    }
+
+    /**
+     * Speech dialog có EditText riêng với keyboard riêng.
+     * flFunction KHÔNG được đẩy lên khi keyboard của dialog mở.
+     *
+     * Giải pháp: set isSpeechDialogOpen = true TRƯỚC KHI dialog show.
+     * Layout change listener sẽ check flag này và bỏ qua keyboard event.
+     */
     private fun handleSpeech(path: String) {
-        // Báo hiệu speech keyboard sắp xuất hiện
-        viewModel.setSpeechKeyboardVisible(true)
-        viewModel.setIsFocusEditText(false)
-        hideSoftKeyboard()
+        // ✅ Set flag ĐỒNG BỘ trước khi dialog show — không dùng postDelayed
+        viewModel.isSpeechDialogOpen = true
+
+        // Đóng keyboard của fragment trước (nếu đang mở)
+        collapseKeyboard()
 
         val dialog = DialogSpeech(requireContext(), path)
         dialog.show()
 
         dialog.onDoneClick = { bitmap ->
             dialog.dismiss()
-            if (bitmap != null) addDrawable("", false, bitmap)
+            if (bitmap != null) addDrawable("", bitmapText = bitmap)
         }
 
         dialog.setOnDismissListener {
-            binding.root.postDelayed({
-                // Reset cả 2 về false khi dialog đóng
-                viewModel.setSpeechKeyboardVisible(false)
-                viewModel.setIsFocusEditText(false)
-                binding.main.requestFocus()
-                hideSoftKeyboard()
-            }, 300)
-        }
-    }
-
-    private fun handleSetBackgroundColor(color: Int, position: Int) {
-        binding.apply {
-            imvBackground.setImageBitmap(null)
-            imvBackground.setBackgroundColor(color)
-            viewModel.savedBackgroundColor = color      // ← lưu lại
-            viewModel.setBackgroundImage(null)          // ← clear image path khi chọn color
-            viewLifecycleOwner.lifecycleScope.launch(Dispatchers.IO) {
-                viewModel.updateBackgroundColorSelected(position)
-                withContext(Dispatchers.Main) {
-                    backgroundImageAdapter.clearSelection()
-                    backgroundColorAdapter.selectItem(position)
-                }
-            }
+            // ✅ Reset flag khi dialog đóng
+            viewModel.isSpeechDialogOpen = false
+            // Đảm bảo view về đúng vị trí
+            setFlFunctionTopMargin(0)
         }
     }
 
     private fun handleFontClick(font: Int, position: Int) {
-        binding.apply {
-            lnlText.edtText.setFont(font)
-            tvGetText.setFont(font)
-            viewModel.updateTextFontSelected(position)
-            textFontAdapter.submitItem(position, viewModel.textFontList)
-        }
+        binding.lnlText.edtText.setFont(font)
+        binding.tvGetText.setFont(font)
+        viewModel.updateTextFontSelected(position)
+        textFontAdapter.submitItem(position, viewModel.textFontList)
     }
 
     private fun handleTextColorClick(color: Int, position: Int) {
-        binding.apply {
-            lnlText.edtText.setTextColor(color)
-            tvGetText.setTextColor(color)
-            viewModel.updateTextColorSelected(position)
-            textColorAdapter.submitItem(position, viewModel.textColorList)
-        }
+        binding.lnlText.edtText.setTextColor(color)
+        binding.tvGetText.setTextColor(color)
+        viewModel.updateTextColorSelected(position)
+        textColorAdapter.submitItem(position, viewModel.textColorList)
     }
 
     @SuppressLint("SimpleDateFormat")
     private fun handleDoneText() {
-        hideSoftKeyboard()
+        clearFocus()
         binding.apply {
-            if (lnlText.edtText.text.toString().trim() == "") {
+            val text = lnlText.edtText.text.toString().trim()
+            if (text.isEmpty()) {
                 showToast(getString(R.string.null_edt))
-            } else {
-                tvGetText.text = lnlText.edtText.text.toString().trim()
-                val bitmap = BitmapHelper.getBitmapFromEditText(tvGetText)
-                val drawableEmoji = viewModel.loadDrawableEmoji(bitmap, isText = true)
-                drawView.addDraw(drawableEmoji)
-
-                // Reset
-                val font = viewModel.textFontList.first().color
-                val color = viewModel.textColorList[1].color
-
-                lnlText.edtText.text = null
-                lnlText.edtText.setFont(font)
-                lnlText.edtText.setTextColor(color)
-
-                viewModel.updateTextFontSelected(0)
-                viewModel.updateTextColorSelected(1)
-
-                textFontAdapter.submitListReset(viewModel.textFontList)
-                textColorAdapter.submitListReset(viewModel.textColorList)
-
-                tvGetText.text = ""
-                tvGetText.setFont(font)
-                tvGetText.setTextColor(color)
+                return
             }
-        }
-        viewModel.setIsFocusEditText(false)
-    }
+            tvGetText.text = text
+            val bitmap = BitmapHelper.getBitmapFromEditText(tvGetText)
+            drawView.addDraw(viewModel.loadDrawableEmoji(bitmap, isText = true))
 
-    private fun clearFocus() {
-        binding.drawView.hideSelect()
+            // Reset text tab
+            val font = viewModel.textFontList.first().color
+            val color = viewModel.textColorList[1].color
+            lnlText.edtText.text = null
+            lnlText.edtText.setFont(font)
+            lnlText.edtText.setTextColor(color)
+            viewModel.updateTextFontSelected(0)
+            viewModel.updateTextColorSelected(1)
+            textFontAdapter.submitListReset(viewModel.textFontList)
+            textColorAdapter.submitListReset(viewModel.textColorList)
+            tvGetText.text = ""
+            tvGetText.setFont(font)
+            tvGetText.setTextColor(color)
+        }
     }
 
     private fun handleSave() {
-        viewModel.setIsFocusEditText(false)
         clearFocus()
-        hideSoftKeyboard()
-
         viewLifecycleOwner.lifecycleScope.launch {
             showLoadingSafe()
             try {
-                // ✅ Giờ drawToBitmap luôn đúng vì Glide không dùng hardware bitmap nữa
                 val bitmap = binding.flSave.drawToBitmap()
-
-                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault())
-                    .format(java.util.Date())
+                val timestamp = SimpleDateFormat("yyyyMMdd_HHmmss", Locale.getDefault()).format(java.util.Date())
                 val designId = "design_$timestamp"
 
                 val savedImagePath = withContext(Dispatchers.IO) {
                     imageManager.deleteOldImage(designId)
                     val path = imageManager.saveBitmap(bitmap, designId)
-                    if (path != null) {
-                        viewModelActivity.appDataManager.addMyDesignPath(path)
-                    }
+                    if (path != null) viewModelActivity.appDataManager.addMyDesignPath(path)
                     path
                 }
-
                 hideLoadingSafe()
 
                 if (savedImagePath != null) {
-                    val bundle = Bundle().apply {
-                        putString("imagePath", savedImagePath)
-                        putString("idEdit", "")
-                        putInt("imageType", 0)
-                    }
                     findNavController().navigate(
                         R.id.action_addCharacterFragment_to_viewImageFragment,
-                        bundle
+                        Bundle().apply {
+                            putString("imagePath", savedImagePath)
+                            putString("idEdit", "")
+                            putInt("imageType", 0)
+                        }
                     )
                 } else {
                     Toast.makeText(requireContext(), "Lưu thất bại!", Toast.LENGTH_SHORT).show()
@@ -809,18 +717,20 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             }
         }
     }
-    override fun onBackPressed(): Boolean {
-        android.util.Log.d("FOCUS_DEBUG", "onBackPressed called: isFocusEditText=${viewModel.isFocusEditText.value}")
 
-        return if (viewModel.isFocusEditText.value) {
-            binding.lnlText.edtText.clearFocus()
-            hideSoftKeyboard()
-            viewModel.setIsFocusEditText(false)
-            true // consumed, không back
+    // ── Back press ────────────────────────────────────────────────────────────
+    /**
+     * Logic backpress:
+     * - Keyboard đang mở → đóng keyboard, KHÔNG back
+     * - Keyboard đóng → hiện confirm dialog
+     */
+    override fun onBackPressed(): Boolean {
+        return if (isKeyboardOpen) {
+            collapseKeyboard()
+            true // consumed
         } else {
             confirmExit()
-            true // consumed, hiện dialog
+            true // consumed
         }
     }
-
 }

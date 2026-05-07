@@ -26,8 +26,13 @@ object SharedPreferencesManager {
     private const val PERMISSION_CAMERA = "CAMERA_KEY"
     private const val COUNT_BACK_KEY = "COUNT_BACK_KEY"
     private const val RATE_KEY = "RATE_KEY"
+    private const val VERSION_CODE_KEY = "version_code_key"
 
+    fun getVersionCode(): Int = getIntDataByKey(VERSION_CODE_KEY)
 
+    fun setVersionCode(versionCode: Int) {
+        saveIntDataByKey(VERSION_CODE_KEY, versionCode)
+    }
     fun isLanguageKey(): String=
         getStringDataByKey(
             LANGUAGE_KEY

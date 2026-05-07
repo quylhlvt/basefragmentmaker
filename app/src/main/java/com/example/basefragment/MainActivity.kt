@@ -9,6 +9,7 @@ import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
@@ -29,6 +30,7 @@ class MainActivity : AppCompatActivity() {
         hideNavigation(true)
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         initSharedPreferences()
         applyLanguage()
 //        val sharedPrefs = getSharedPreferences("DEFAULT", Context.MODE_PRIVATE)

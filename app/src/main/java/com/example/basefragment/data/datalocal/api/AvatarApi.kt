@@ -14,9 +14,9 @@ import javax.inject.Singleton
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 
 object ApiConfig {
-    const val BASE_URL_1   = "https://lvtglobal.site/"
-    const val BASE_URL_2   = "https://lvt-api-site.io.vn/"
-    const val BASE_CONNECT = "public/app/ST212_Bedroom_Maker/"
+    const val BASE_URL_1   = "https://lvtglobal.tech/"
+    const val BASE_URL_2   = "https://lvt-api-tech.io.vn/"
+    const val BASE_CONNECT = "public/app/ST229_CatAvatarCatMaker/"
 
     // URL đang active (thay đổi khi fallback)
     var BASE_URL = BASE_URL_1
@@ -46,7 +46,7 @@ data class X10(
 // ── SERVICE ───────────────────────────────────────────────────────────────────
 
 interface AvatarApiService {
-    @GET("api/app/ST212_Bedroom_Maker")
+    @GET("api/app/ST229_CatAvatarCatMaker")
     suspend fun getAllData(): Map<String, List<X10>>
 }
 

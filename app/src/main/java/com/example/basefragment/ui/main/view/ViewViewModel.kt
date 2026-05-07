@@ -1,8 +1,14 @@
 package com.example.basefragment.ui.main.view
 
+import android.content.ContentValues
 import android.content.Context
+import android.media.MediaScannerConnection
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.basefragment.core.helper.DownloadHelper
 import com.example.basefragment.data.datalocal.manager.AppDataManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
@@ -18,25 +24,11 @@ import javax.inject.Inject
 class ViewViewModel @Inject constructor(  private val appDataManager: AppDataManager) : ViewModel() {
 
     fun downloadFile(context: Context, path: String, onResult: (Boolean) -> Unit) {
-        viewModelScope.launch(Dispatchers.IO) {
-            val success = runCatching {
-                val src = File(path)
-                if (!src.exists()) return@runCatching false
-                val pictures = android.os.Environment.getExternalStoragePublicDirectory(
-                    android.os.Environment.DIRECTORY_PICTURES
-                )
-                pictures.mkdirs()
-                val dest = File(pictures, src.name)
-                src.copyTo(dest, overwrite = true)
-                android.media.MediaScannerConnection.scanFile(
-                    context, arrayOf(dest.absolutePath), null, null
-                )
-                true
-            }.getOrDefault(false)
-            withContext(Dispatchers.Main) { onResult(success) }
+        viewModelScope.launch {
+            val success = DownloadHelper.downloadToGallery(context, path)
+            onResult(success)
         }
     }
-
 
     fun deleteFile(
         path: String,

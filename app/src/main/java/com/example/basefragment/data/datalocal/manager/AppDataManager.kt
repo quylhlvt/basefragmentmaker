@@ -93,6 +93,7 @@ class AppDataManager @Inject constructor(
                     launch { loadSpeechs() }
                     launch { loadMyDesigns() }
                 }
+
                 isDataLoaded = true
                 Log.d(TAG, "✅ Loaded – templates:${_templates.value.size} custom:${_customizedCharacters.value.size}")
             } catch (e: Exception) {

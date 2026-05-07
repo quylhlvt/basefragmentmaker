@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.example.basefragment.core.helper.NetworkMonitor
 import com.example.basefragment.data.datalocal.manager.AppDataManager
 import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.data.model.custom.SelectionIndex
@@ -13,7 +14,10 @@ import com.example.basefragment.data.usecase.GetCatalogueUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
@@ -23,6 +27,7 @@ import javax.inject.Inject
 class ViewModelActivity @Inject constructor(
     private val getCatalogueUseCase: GetCatalogueUseCase,
     val appDataManager: AppDataManager,
+    private val networkFlow: Flow<Boolean>,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -40,9 +45,19 @@ class ViewModelActivity @Inject constructor(
     val error:                StateFlow<String?>           = appDataManager.error
 
     init { loadInitialData() }
+    val networkOnline: StateFlow<Boolean> = networkFlow
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5_000),
+            initialValue = false
+        )
 
+    fun forceReloadAll() {
+        viewModelScope.launch {
+            appDataManager.forceReloadAll()
+        }
+    }
     // ── INIT ──────────────────────────────────────────────────────────────────
-
     private fun loadInitialData() {
         viewModelScope.launch {
             try {

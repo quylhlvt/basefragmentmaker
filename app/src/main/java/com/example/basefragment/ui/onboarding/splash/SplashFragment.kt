@@ -8,6 +8,7 @@ import android.net.ConnectivityManager
 import android.net.NetworkCapabilities
 import android.os.Build
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,6 +25,7 @@ import com.example.basefragment.core.extention.toIntro
 import com.example.basefragment.core.extention.toLanguage
 import com.example.basefragment.core.helper.SharedPreferencesManager.isLanuageScreen
 import com.example.basefragment.databinding.FragmentSplashBinding
+import com.tencent.mmkv.MMKV
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
@@ -49,12 +51,34 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     // ── INIT ──────────────────────────────────────────────────────────────────
 
     override fun initView() {
+        checkAndClearDataIfNewVersion()
         // Đợi layout đo xong mới animate
         binding.progressWrapper.post {
             startFakeProgress()
         }
     }
+    private fun checkAndClearDataIfNewVersion() {
+        val context = requireContext()
+        val currentVersion = context.packageManager
+            .getPackageInfo(context.packageName, 0).versionCode
+        val savedVersion = sharedPreferences.getVersionCode()
+        Log.d("listAssets", "currentVersion: $currentVersion")
+        Log.d("listAssets", "savedVersion: $savedVersion")
+        if (savedVersion < currentVersion) {
+            // Xóa MMKV cache
+            MMKV.defaultMMKV().apply {
+                removeValueForKey("templates")
+                removeValueForKey("customized")
+                removeValueForKey("api_cache")
+            }
+            sharedPreferences.setVersionCode(currentVersion)
 
+            // Force reload lại từ assets
+            viewLifecycleOwner.lifecycleScope.launch {
+                mainViewModel.forceReloadAll()
+            }
+        }
+    }
     override fun viewListener() {}
 
     override fun observeData() {

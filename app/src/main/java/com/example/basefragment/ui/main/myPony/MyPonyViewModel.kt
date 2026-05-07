@@ -1,14 +1,19 @@
 package com.example.basefragment.ui.main.myPony
 
+import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.net.Uri
+import android.os.Build
+import android.os.Environment
+import android.provider.MediaStore
 import android.util.Log
 import androidx.core.content.FileProvider
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.basefragment.core.helper.DownloadHelper
 import com.example.basefragment.data.datalocal.manager.AppDataManager
 import com.example.basefragment.data.model.mypony.MyAlbumModel
 import com.example.basefragment.utils.share.telegram.TelegramSharing
@@ -271,42 +276,13 @@ class MyPonyViewModel @Inject constructor(
     // ==================== DOWNLOAD ====================
 
     fun downloadFiles(context: Context, paths: ArrayList<String>) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                _downloadState.value = DownloadState.LOADING
-
-                paths.forEach { path ->
-                    downloadFileToPublicStorage(context, path)
-                }
-
-                withContext(Dispatchers.Main) {
-                    _downloadState.value = DownloadState.SUCCESS
-                }
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error downloading files: ${e.message}", e)
-                withContext(Dispatchers.Main) {
-                    _downloadState.value = DownloadState.ERROR
-                }
-            }
+        viewModelScope.launch {
+            _downloadState.value = DownloadState.LOADING
+            val (success, total) = DownloadHelper.downloadMultipleToGallery(context, paths)
+            _downloadState.value = if (success == total) DownloadState.SUCCESS else DownloadState.ERROR
         }
     }
 
-    private suspend fun downloadFileToPublicStorage(context: Context, path: String) {
-        withContext(Dispatchers.IO) {
-            try {
-                val sourceFile = File(path)
-                if (!sourceFile.exists()) {
-                    Log.w(TAG, "⚠️ Source file not found: $path")
-                    return@withContext
-                }
-
-                // TODO: Implement MediaStore API for Android 10+
-                Log.d(TAG, "📥 Download file: ${sourceFile.name}")
-            } catch (e: Exception) {
-                Log.e(TAG, "❌ Error downloading file: ${e.message}", e)
-            }
-        }
-    }
 
     // ==================== WHATSAPP INTEGRATION ====================
 

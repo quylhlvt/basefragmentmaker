@@ -24,6 +24,7 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
     FragmentViewBinding::inflate,
     ViewViewModel::class.java
 ) {
+    private var currentImagePath: String = ""
     private val imagePath: String by lazy { arguments?.getString("imagePath") ?: "" }
     private val imageType: Int    by lazy { arguments?.getInt("imageType", 0) ?: 0 }
     private val idEdit: String    by lazy { arguments?.getString("idEdit") ?: "" }
@@ -35,28 +36,32 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
     ): FragmentViewBinding = FragmentViewBinding.inflate(inflater, container, false)
 
     override fun initView() {
+        currentImagePath = imagePath
         binding.apply {
             setImageActionBar(actionBar.btnActionBarLeft, R.drawable.back_app)
             loadImage(requireContext(), imagePath, imvImage)
+            txtRight.isSelected = true
+            txtLeft.isSelected = true
 
             when (imageType) {
                 // ── Type 0: Từ AddCharacter — success screen ──────────────────
                 0 -> {
                     tvSuccess.visible()
+                    setImageActionBar(actionBar.btnActionBarNextToRight, R.drawable.ic_share)
                     setImageActionBar(actionBar.btnActionBarRight, R.drawable.ic_home)
                     // ✅ Show 2 nút bottom
-                    btnBottomLeft.apply  { visible(); text = getString(R.string.my_work) }
-                    btnBottomRight.apply { visible(); text = getString(R.string.download) }
+                    txtLeft.apply  { visible(); text = getString(R.string.my_creation) }
+                    txtRight.apply { visible(); text = getString(R.string.download) }
                 }
                 // ── Type 1: Avatar từ MyPony ──────────────────────────────────
                 1 -> {
-                    btnBottomLeft.text = getString(R.string.edit)
+                    txtLeft.text = getString(R.string.share)
                     setImageActionBar(actionBar.btnActionBarRight,       R.drawable.ic_delete)
-                    setImageActionBar(actionBar.btnActionBarNextToRight, R.drawable.ic_share)
+                    setImageActionBar(actionBar.btnActionBarNextToRight, R.drawable.ic_edit1)
                 }
                 // ── Type 2: Design từ MyPony ──────────────────────────────────
                 2 -> {
-                    btnBottomLeft.text = getString(R.string.share)
+                    txtLeft.text = getString(R.string.share)
                     setImageActionBar(actionBar.btnActionBarRight, R.drawable.ic_delete)
                 }
             }
@@ -99,8 +104,8 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                 // ── Type 1: Avatar từ MyPony ──────────────────────────────────
                 1 -> {
                     actionBar.btnActionBarRight.onClick       { confirmDelete() }
-                    actionBar.btnActionBarNextToRight.onClick { shareImage() }
-                    btnBottomLeft.onClick                     { navigateToEdit() }
+                    actionBar.btnActionBarNextToRight.onClick { navigateToEdit()  }
+                    btnBottomLeft.onClick                     { shareImage()}
                     btnBottomRight.onClick                    { downloadImage() }
                 }
 
@@ -132,7 +137,7 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
         if (imagePath.isEmpty()) return
         viewModel.downloadFile(requireContext(), imagePath) { success ->
             showToast(
-                if (success) getString(R.string.download_success)
+                if (success) getString(R.string.download_success, getString(R.string.app_name))
                 else getString(R.string.download_failed_please_try_again_later)
             )
         }
@@ -180,6 +185,15 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
     private fun showToast(msg: String) =
         android.widget.Toast.makeText(requireContext(), msg, android.widget.Toast.LENGTH_SHORT).show()
 
-    override fun observeData() {}
+    override fun observeData() {
+        findNavController().currentBackStackEntry
+            ?.savedStateHandle
+            ?.getLiveData<String>("updated_image_path")
+            ?.observe(viewLifecycleOwner) { newPath ->
+                if (newPath.isNullOrEmpty()) return@observe
+                currentImagePath = newPath
+                loadImage(requireContext(), currentImagePath, binding.imvImage)
+            }
+    }
     override fun bindViewModel() {}
 }

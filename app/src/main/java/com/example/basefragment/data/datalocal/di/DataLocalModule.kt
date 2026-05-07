@@ -3,11 +3,14 @@ package com.example.basefragment.data.datalocal.di
 import android.app.Application
 import android.content.Context
 import android.content.SharedPreferences
+import com.example.basefragment.core.helper.NetworkMonitor
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
+import kotlinx.coroutines.flow.Flow
 import javax.inject.Singleton
 
 
@@ -35,5 +38,14 @@ object DataLocalModule {
             this.sharedPreferences = sharedPreferences
             this.editor = editor
         }
+    @Singleton
+    @Provides
+    fun provideNetworkMonitor(
+        @ApplicationContext context: Context
+    ): NetworkMonitor = NetworkMonitor(context)
 
+    @Provides
+    fun provideNetworkFlow(
+        networkMonitor: NetworkMonitor
+    ): Flow<Boolean> = networkMonitor.isOnline
 }

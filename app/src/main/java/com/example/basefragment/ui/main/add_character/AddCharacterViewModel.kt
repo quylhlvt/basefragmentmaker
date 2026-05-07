@@ -2,7 +2,6 @@ package com.example.basefragment.ui.main.add_character
 
 import android.content.Context
 import android.graphics.Bitmap
-import android.view.ViewGroup
 import androidx.core.graphics.drawable.toDrawable
 import androidx.lifecycle.ViewModel
 import com.example.basefragment.core.custom.Draw
@@ -24,9 +23,11 @@ import javax.inject.Inject
 class AddCharacterViewModel @Inject constructor(
     @ApplicationContext private val context: Context
 ) : ViewModel() {
+
+    // ========== Init guard ==========
     var isInitialized = false
     var isRestoringDraws = false
-    var isSpeechDialogOpen = false
+
     // ========== Adapter Lists ==========
     var backgroundImageList: ArrayList<SelectedAddModel> = arrayListOf()
     var backgroundColorList: ArrayList<SelectedAddModel> = arrayListOf()
@@ -34,73 +35,43 @@ class AddCharacterViewModel @Inject constructor(
     var speechList: ArrayList<SelectedAddModel> = arrayListOf()
     var textFontList: ArrayList<SelectedAddModel> = arrayListOf()
     var textColorList: ArrayList<SelectedAddModel> = arrayListOf()
-    private val _isFocusEditText = MutableStateFlow(false)
-    val isFocusEditText: StateFlow<Boolean> = _isFocusEditText.asStateFlow()
 
-    // 2. Keyboard từ Speech dialog
-    private val _isSpeechKeyboardVisible = MutableStateFlow(false)
-    val isSpeechKeyboardVisible: StateFlow<Boolean> = _isSpeechKeyboardVisible.asStateFlow()
-
-    // ========== StateFlows ==========
-
-    // Dùng -1 làm giá trị "chưa set", Fragment sẽ bỏ qua khi collect
+    // ========== Navigation ==========
+    // -1 = chưa set, Fragment bỏ qua
     private val _typeNavigation = MutableStateFlow(-1)
     val typeNavigation: StateFlow<Int> = _typeNavigation.asStateFlow()
 
-    // IMAGE_BACKGROUND hoặc COLOR_BACKGROUND
     private val _typeBackground = MutableStateFlow(-1)
     val typeBackground: StateFlow<Int> = _typeBackground.asStateFlow()
 
-
+    // ========== Background ==========
     private val _backgroundImagePath = MutableStateFlow<String?>(null)
     val backgroundImagePath: StateFlow<String?> = _backgroundImagePath.asStateFlow()
+
+    var savedBackgroundColor: Int? = null
+
+    // ========== Tab state ==========
+    // Chỉ dùng để biết tab nào đang active — KHÔNG dùng để control layout
+    var isTextTabActive: Boolean = false
+    var isSpeechDialogOpen: Boolean = false
 
     // ========== Draw state ==========
     var currentDraw: Draw? = null
     var drawViewList: ArrayList<DrawableDraw> = arrayListOf()
 
-    // ========== Layout params ==========
-    lateinit var layoutParams: ViewGroup.MarginLayoutParams
-    var originalMarginBottom: Int = 0
-
     // ========== Misc ==========
     var pathDefault = ""
-    var savedBackgroundColor: Int? = null
 
-    // ========== Setters ==========
-
-//    fun setTypeNavigation(type: Int) {
-//        _typeNavigation.value = type
-//    }
-
-    /**
-     * Dùng value= thay vì tryEmit — StateFlow không bao giờ drop emission.
-     * Nếu bấm cùng type 2 lần liên tiếp, StateFlow sẽ KHÔNG emit lại
-     * (vì value không đổi). Để force re-emit khi bấm lại cùng tab,
-     * ta reset về -1 trước rồi mới set giá trị mới.
-     */
-    fun setIsFocusEditText(status: Boolean) {
-        if (_isFocusEditText.value == status) return  // ✅ không emit nếu không đổi
-        _isFocusEditText.value = status
-    }
-
-    fun setSpeechKeyboardVisible(status: Boolean) {
-        if (_isSpeechKeyboardVisible.value == status) return  // ✅
-        _isSpeechKeyboardVisible.value = status
-    }
-    fun setTypeBackground(type: Int) {
-        if (_typeBackground.value == type) {
-            // Đang chọn lại cùng tab → reset trước để trigger collect
-            _typeBackground.value = -1
-        }
-        _typeBackground.value = type
-    }
+    // ========== Navigation setters ==========
 
     fun setTypeNavigation(type: Int) {
-        if (_typeNavigation.value == type) {
-            _typeNavigation.value = -1
-        }
+        if (_typeNavigation.value == type) _typeNavigation.value = -1
         _typeNavigation.value = type
+    }
+
+    fun setTypeBackground(type: Int) {
+        if (_typeBackground.value == type) _typeBackground.value = -1
+        _typeBackground.value = type
     }
 
     fun setBackgroundImage(path: String?) {
@@ -109,10 +80,6 @@ class AddCharacterViewModel @Inject constructor(
 
     // ========== Data loading ==========
 
-    /**
-     * Load data từ ViewModelActivity.
-     * Chạy trên Main thread — convert list chỉ tốn < 1ms nên không cần IO.
-     */
     fun loadDataFromMainViewModel(
         backgrounds: List<String>,
         stickers: List<String>,
@@ -188,7 +155,7 @@ class AddCharacterViewModel @Inject constructor(
     }
 
     fun addDrawView(draw: Draw) {
-        if (draw is DrawableDraw) {  // ← guard type
+        if (draw is DrawableDraw) {
             drawViewList.add(draw)
         }
     }
@@ -233,9 +200,5 @@ class AddCharacterViewModel @Inject constructor(
         drawViewList.clear()
         currentDraw = null
         pathDefault = ""
-    }
-
-    override fun onCleared() {
-        super.onCleared()
     }
 }

@@ -66,7 +66,9 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
             setTextActionBar(tvCenter, getString(R.string.my_work))
-            setImageActionBar(btnActionBarRight, R.drawable.ic_not_select_all)
+            setImageActionBar(btnActionBarNextToRight, R.drawable.ic_delete_all)
+            setImageActionBar(btnActionBarRight, R.drawable.ic_select_all)
+            btnActionBarNextToRight.invisible()
             btnActionBarRight.invisible()
         }
     }
@@ -84,16 +86,16 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
                 imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_selected)
                 recycleAvatar.visible()
                 recycleDesign.gone()
-                tvMyAvatar.setTextColor(requireContext().getColor(R.color.white))
-                tvMyDesign.setTextColor(requireContext().getColor(R.color.app_color3))
+//                tvMyAvatar.setTextColor(requireContext().getColor(R.color.white))
+//                tvMyDesign.setTextColor(requireContext().getColor(R.color.app_color3))
                 loadAvatarData()
             } else {
                 imvFocusMyDesign.setImageResource(R.drawable.bg_btn_type_selected)
                 imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_unselected)
                 recycleAvatar.gone()
                 recycleDesign.visible()
-                tvMyAvatar.setTextColor(requireContext().getColor(R.color.app_color3))
-                tvMyDesign.setTextColor(requireContext().getColor(R.color.white))
+//                tvMyAvatar.setTextColor(requireContext().getColor(R.color.app_color3))
+//                tvMyDesign.setTextColor(requireContext().getColor(R.color.white))
                 loadDesignData()
             }
         }
@@ -134,6 +136,8 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             btnDownload.onClick { handleDownload() }
             btnShare.onClick   { handleShare() }
             actionBar.btnActionBarRight.onClick { handleSelectAll() }
+            actionBar.btnActionBarNextToRight.onClick { handleDeleteSelected() }  // ✅ thêm
+
         }
     }
     private fun handleShare() {
@@ -182,7 +186,6 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         binding.recycleAvatar.addOnItemTouchListener(touchListener)
         binding.recycleDesign.addOnItemTouchListener(touchListener)
     }
-
     // ── OBSERVE ───────────────────────────────────────────────────────────────
 // MyPonyFragment.kt — observeData()
     override fun observeData() {
@@ -191,7 +194,7 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             viewModelActivity.customizedCharacters.collect { customized ->
                 val list = customized
                     .filter { it.imageSave.isNotEmpty() && File(it.imageSave).exists() }
-                    .sortedByDescending { it.updatedAt }
+//                    .sortedByDescending { it.updatedAt }
                     .map { MyAlbumModel(path = it.imageSave, idEdit = it.id, type = 1) }
 
                 myAvatarAdapter.submitList(list)
@@ -212,7 +215,7 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.downloadState.collect { state ->
                 when (state) {
-                    MyPonyViewModel.DownloadState.SUCCESS -> showToast(R.string.download_success)
+                    MyPonyViewModel.DownloadState.SUCCESS -> showToast(getString(R.string.download_success, getString(R.string.app_name)))
                     MyPonyViewModel.DownloadState.ERROR   -> showToast(R.string.download_failed_please_try_again_later)
                     else -> {}
                 }
@@ -234,12 +237,14 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
         binding.actionBar.apply {
             if (hasSelection) {
+              btnActionBarNextToRight.visible()
                 btnActionBarRight.visible()
                 tvCenter.text = "Selected $selectedCount/${currentList.size}"
                 btnActionBarRight.setImageResource(
                     if (allSelected) R.drawable.ic_select_all else R.drawable.ic_not_select_all
                 )
             } else {
+                btnActionBarNextToRight.invisible()
                 btnActionBarRight.invisible()
                 tvCenter.text = getString(R.string.my_work)
             }
@@ -310,7 +315,12 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         updateSelectionUI()
         if (updatedList.none { it.isSelected }) resetSelection()
     }
-
+    private fun handleDeleteSelected() {
+        val selected = getSelectedItems()
+        if (selected.isEmpty()) { showToast(R.string.please_select_an_image); return }
+        val paths = ArrayList(selected.map { it.path })
+        confirmDelete(paths, isAvatarTab.value)
+    }
     private fun handleSelectAll() {
         val currentList     = if (isAvatarTab.value) myAvatarAdapter.items else myDesignAdapter.items
         val shouldSelectAll = !currentList.all { it.isSelected }

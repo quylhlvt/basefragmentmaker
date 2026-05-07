@@ -15,8 +15,11 @@ import android.view.WindowManager
 import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.viewbinding.ViewBinding
@@ -28,6 +31,7 @@ import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.databinding.DialogbaseBinding
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.getValue
@@ -93,6 +97,22 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         viewListener()
         bindViewModel()
         observeData()
+        observeNetworkRetry()
+    }
+    private fun observeNetworkRetry() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+                viewModelActivity.networkOnline.collect { isOnline ->
+                    if (isOnline) {
+                        val hasOnlineData = viewModelActivity.templates.value
+                            .any { it.id.startsWith("online_") }
+                        if (!hasOnlineData) {
+                            viewModelActivity.fetchOnlineTemplates()
+                        }
+                    }
+                }
+            }
+        }
     }
     override fun onAttach(context: Context) {
         super.onAttach(context)

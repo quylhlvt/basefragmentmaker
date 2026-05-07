@@ -22,44 +22,46 @@ class TextColorAdapter :
 
     override fun onBind(binding: ItemTextColorBinding, item: SelectedAddModel, position: Int) {
         binding.apply {
-            vFocus.isVisible = item.isSelected
-            cardColor.cardElevation = if (item.isSelected) 3f else 0f
-
-            if (position == 0) {
-
-                imvColor.gone()
-                btnAddColor.visible()
-                cardColor.setCardBackgroundColor(
-                    ContextCompat.getColor(cardColor.context, R.color.app_color)
-                )
-                root.onClick { onChooseColorClick.invoke() }
+            if (item.isSelected) {
+                frameShadown.visible()
+                frame.apply {
+                    strokeColor = ContextCompat.getColor(context, R.color.app_color)
+                }
             } else {
-                imvColor.visible()
-                btnAddColor.gone()
-                imvColor.setBackgroundColor(item.color)
+                frameShadown.gone()
+                frame.apply {
+                    strokeColor = ContextCompat.getColor(context, R.color.transparent)
+                }
+                if (position == 0) {
+                    imvColor.gone()
+                    btnAddColor.visible()
+                    root.onClick { onChooseColorClick.invoke() }
+                } else {
+                    imvColor.visible()
+                    btnAddColor.gone()
+                    imvColor.setBackgroundColor(item.color)
+                    root.onClick { onTextColorClick.invoke(item.color, position) }
+                }
+            }
+        }}
 
-                root.onClick { onTextColorClick.invoke(item.color, position) }
+        fun submitItem(position: Int, list: ArrayList<SelectedAddModel>) {
+            if (position != currentSelected) {
+                items.clear()
+                items.addAll(list)
+
+                notifyItemChanged(currentSelected)
+                notifyItemChanged(position)
+
+                currentSelected = position
             }
         }
-    }
 
-    fun submitItem(position: Int, list: ArrayList<SelectedAddModel>) {
-        if (position != currentSelected) {
+        @SuppressLint("NotifyDataSetChanged")
+        fun submitListReset(list: ArrayList<SelectedAddModel>) {
             items.clear()
             items.addAll(list)
-
-            notifyItemChanged(currentSelected)
-            notifyItemChanged(position)
-
-            currentSelected = position
+            currentSelected = 1
+            notifyDataSetChanged()
         }
     }
-
-    @SuppressLint("NotifyDataSetChanged")
-    fun submitListReset(list: ArrayList<SelectedAddModel>) {
-        items.clear()
-        items.addAll(list)
-        currentSelected = 1
-        notifyDataSetChanged()
-    }
-}

@@ -40,13 +40,14 @@
     <string name="image_has_been_saved_successfully">Image has been saved successfully!</string>
     <string name="download">Download</string>
     <string name="avatar">Avatar</string>
-    <string name="design">Design</string>
+    <string name="my_avatar">My Avatar</string>
+    <string name="design">My Design</string>
     <string name="no_item_here">No Item Here</string>
     <string name="add_to_whatsapp">Add To WhatsApp</string>
     <string name="add_to_telegram">Add To Telegram</string>
     <string name="share">Share</string>
     <string name="no_app_found_to_handle_this_action">No app found to handle this action</string>
-    <string name="download_success">Download successful to the PFP OC Maker album</string>
+    <string name="download_success">Download successful to the %s album</string>
     <string name="download_fail">Download failed, please try again later!</string>
     <string name="delete">Delete</string>
     <string name="are_you_sure_want_to_delete_this_item">Are you sure want to delete this item?</string>

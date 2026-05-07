@@ -9,7 +9,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/img_bg_app"
+        android:src="@drawable/img_bg_view"
         android:scaleType="fitXY"
         android:elevation="-1dp"
         android:adjustViewBounds="true"/>
@@ -27,24 +27,79 @@
         android:id="@+id/cvImage"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="16dp"
-        android:layout_marginTop="10dp"
-        app:cardBackgroundColor="@color/transparent"
-        app:cardCornerRadius="16dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginVertical="10dp"
+        app:cardCornerRadius="24dp"
+        app:strokeColor="@color/app_color"
+        app:strokeWidth="2dp"
+        app:cardBackgroundColor="@color/app_color4"
+
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/layoutActionBar"
-        app:strokeColor="#FFF3D2"
-        app:strokeWidth="4dp">
+       >
 
-
-        <!--        imvImage-->
-        <ImageView
-            android:id="@+id/imvImage"
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:scaleType="centerCrop" />
+            android:layout_marginBottom="16dp"
+
+            >
+
+
+
+            <FrameLayout
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent">
+
+                <com.google.android.material.card.MaterialCardView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    app:cardCornerRadius="24dp"
+                    app:strokeWidth="0dp"
+                    app:strokeColor="#FFF5FE"
+                    app:cardBackgroundColor="@color/transparent"
+                    android:outlineAmbientShadowColor="#E8C0F5"
+
+                    >
+
+                    <!--            imvImage-->
+                    <ImageView
+                        android:id="@+id/imvImage"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/img_permission" />
+
+                    <!--        sflShimmer-->
+                    <!--            <com.facebook.shimmer.ShimmerFrameLayout-->
+                    <!--                android:id="@+id/sflShimmer"-->
+                    <!--                android:layout_width="match_parent"-->
+                    <!--                android:layout_height="match_parent"-->
+                    <!--                app:shimmer_auto_start="true"-->
+                    <!--                app:shimmer_base_alpha="0.7"-->
+                    <!--                app:shimmer_direction="left_to_right"-->
+                    <!--                app:shimmer_duration="1800"-->
+                    <!--                app:shimmer_highlight_alpha="0.6"-->
+                    <!--                app:shimmer_shape="linear">-->
+                    <!--                &lt;!&ndash; View nền để shimmer quét qua &ndash;&gt;-->
+                    <!--                <View-->
+                    <!--                    android:layout_width="match_parent"-->
+                    <!--                    android:layout_height="match_parent"-->
+                    <!--                    android:background="#818181" />-->
+                    <!--            </com.facebook.shimmer.ShimmerFrameLayout>-->
+                </com.google.android.material.card.MaterialCardView>
+
+            </FrameLayout>
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
     </com.google.android.material.card.MaterialCardView>
 
     <!--    btnEdit-->
@@ -66,12 +121,12 @@
         android:visibility="gone"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:fontFamily="@font/itim_regular"
+        android:fontFamily="@font/baloo2_bold"
         android:gravity="center"
         android:layout_marginTop="12dp"
         android:text="@string/image_has_been_saved_successfully"
-        android:textColor="@color/app_color3"
-        android:textSize="16sp"
+        android:textColor="@color/app_color"
+        android:textSize="18sp"
         app:layout_constraintTop_toBottomOf="@+id/cvImage" />
 
 
@@ -86,35 +141,45 @@
         app:layout_constraintTop_toBottomOf="@+id/tvSuccess">
 
         <!--        btnBottomLeft-->
-
-        <TextView
-            style="@style/single_marquee"
+        <FrameLayout
             android:id="@+id/btnBottomLeft"
-
+            android:background="@drawable/frame_btn_view"
             android:layout_width="0dp"
             android:layout_height="51dp"
             android:layout_marginEnd="28dp"
-            android:layout_weight="1"
-            android:background="@drawable/frame_btn_view"
-            android:fontFamily="@font/itim_regular"
-            android:gravity="center"
-            android:text="@string/my_work"
-            android:textColor="@color/app_color"
-            android:textSize="16sp" />
+            android:layout_weight="1">
+            <TextView
+                android:id="@+id/txtLeft"
+                style="@style/single_marquee"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_gravity="center"
+                android:fontFamily="@font/baloo2_bold"
+                android:gravity="center"
+                android:text="@string/my_creation"
+                android:textColor="@color/app_color"
+                android:textSize="20sp" />
+        </FrameLayout>
 
-        <!--        btnBottomRight-->
-        <TextView
-            style="@style/single_marquee"
+        <FrameLayout
             android:id="@+id/btnBottomRight"
-
+            android:background="@drawable/frame_btn_view"
             android:layout_width="0dp"
             android:layout_height="51dp"
-            android:layout_weight="1"
-            android:background="@drawable/frame_btn_view"
-            android:fontFamily="@font/itim_regular"
-            android:gravity="center"
-            android:text="@string/download"
-            android:textColor="@color/app_color"
-            android:textSize="16sp" />
+            android:layout_weight="1">
+            <TextView
+                android:id="@+id/txtRight"
+                style="@style/single_marquee"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:background="@drawable/frame_btn_view"
+                android:gravity="center"
+                android:text="@string/download"
+                android:fontFamily="@font/baloo2_bold"
+                android:textColor="@color/app_color"
+                android:textSize="20sp"/>
+        </FrameLayout>
+        <!--        btnBottomRight-->
+
     </LinearLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -34,8 +34,10 @@ import com.example.basefragment.data.model.custom.BodyPartModel
 import com.example.basefragment.data.model.custom.SelectionIndex
 import com.example.basefragment.databinding.FragmentCustomizeBinding
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicInteger
 
 @AndroidEntryPoint
@@ -412,27 +414,44 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     // ── SAVE ──────────────────────────────────────────────────────────────────
 
     private fun performSave() {
-        val bitmap = renderLayersToBitmap() ?: return
-        val savedPath = bitmap.saveToFile(requireContext(), "avatar") ?: return
+        if (!canSave) return
+        setSaveEnabled(false)
+        showLoadingSafe()
 
-        val result = viewModel.onSaveComplete(savedPath)
-        result?.let { (template, selections) ->
-            sharedViewModel.saveCharacterWithSelections(
-                character = template,
-                selections = selections,
-                imageSave = savedPath,
-                isFlipped = viewModel.state.value.isFlipped
+        viewLifecycleOwner.lifecycleScope.launch {
+            val savedPath = withContext(Dispatchers.IO) {
+                val bitmap = renderLayersToBitmap() ?: return@withContext null
+                bitmap.saveToFile(requireContext(), "avatar")
+            }
+
+
+            setSaveEnabled(true)
+
+            if (savedPath == null) return@launch
+
+            val result = viewModel.onSaveComplete(savedPath)
+            result?.let { (template, selections) ->
+                sharedViewModel.saveCharacterWithSelections(
+                    character = template,
+                    selections = selections,
+                    imageSave = savedPath,
+                    isFlipped = viewModel.state.value.isFlipped
+                )
+            }
+            val isEdit = arguments?.getBoolean(ARG_IS_EDIT, false) ?: false
+
+            if (isEdit) {
+                runCatching {
+                    findNavController().getBackStackEntry(R.id.viewFragment)
+                        .savedStateHandle["updated_image_path"] = savedPath  // ← syntax ngắn hơn
+                }
+            }
+            hideLoadingSafe()
+            findNavController().navigate(
+                R.id.action_customizeFragment_to_addFragment,
+                Bundle().apply { putString("imagePath", savedPath) }
             )
         }
-
-        // Thay Directions bằng Bundle trực tiếp
-        val bundle = Bundle().apply {
-            putString("imagePath", savedPath)
-        }
-        findNavController().navigate(
-            R.id.action_customizeFragment_to_addFragment,
-            bundle
-        )
     }
 
     private fun renderLayersToBitmap(): Bitmap? {
