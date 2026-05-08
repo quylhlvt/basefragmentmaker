@@ -23,6 +23,7 @@ import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.NavController
 import androidx.navigation.fragment.findNavController
 import androidx.viewbinding.ViewBinding
+import com.example.basefragment.LoadingController
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.extention.gone
@@ -49,6 +50,9 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     protected val viewModel: VM by lazy {
         ViewModelProvider(this)[viewModelClass]
     }
+    private val loadingController: LoadingController?
+        get() = activity as? LoadingController
+
     open fun setupPreViews() {}
     abstract fun viewListener()
     protected var toast: Toast? = null
@@ -102,11 +106,22 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     private fun observeNetworkRetry() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
+
+                // ✅ Check ngay khi vào màn (không chờ network thay đổi)
+                val isOnlineNow = viewModelActivity.networkOnline.value
+                val hasData = viewModelActivity.templates.value.any { it.id.startsWith("online_") }
+                if (isOnlineNow && !hasData) {
+                    Log.d("BaseFragment", "🌐 ${this@BaseFragment::class.simpleName}: check on enter → fetch")
+                    viewModelActivity.fetchOnlineTemplates()
+                }
+
+                // ✅ Tiếp tục lắng nghe khi network thay đổi (offline → online)
                 viewModelActivity.networkOnline.collect { isOnline ->
                     if (isOnline) {
                         val hasOnlineData = viewModelActivity.templates.value
                             .any { it.id.startsWith("online_") }
                         if (!hasOnlineData) {
+                            Log.d("BaseFragment", "🌐 ${this@BaseFragment::class.simpleName}: network changed → fetch")
                             viewModelActivity.fetchOnlineTemplates()
                         }
                     }
@@ -146,7 +161,6 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     }
 
     override fun onDestroyView() {
-        hideLoading()
         super.onDestroyView()
         Log.v(TAG, "onDestroyView: $this")
         _navController = null
@@ -183,92 +197,36 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         toast = Toast.makeText(requireContext(), contentString, Toast.LENGTH_SHORT)
         toast?.show()
     }
-    fun showLoading(
-        cancelable: Boolean = false,
-        select: Boolean = false,  // true = confirm dialog, false = loading
-        title: String? = null,
-        message: String? = getString(R.string.loading),
-    ) {
-        hideLoading()
 
-        dialog = Dialog(requireContext(),R.style.BaseDialog).apply {
-            val binding = DialogbaseBinding.inflate(layoutInflater)
-            setContentView(binding.root)
-            confirmDialogBinding = binding
-
-            // Cập nhật text
-            title?.let { binding.txtTitle.text = it } // nếu có TextView title
-            binding.txtContent.text = message ?: ""
-
-            if (select) {
-                // Hiện nút Yes/No
-                binding.btnNo.visible()
-                binding.btnYes.visible()
-                binding.btnNo.setOnClickListener {
-                    onNoClick?.invoke()
-                    dismiss()
-                }
-                binding.btnYes.setOnClickListener {
-                    onYesClick?.invoke()
-                    dismiss()
-                }
-            } else {
-                // Ẩn nút Yes/No (chỉ loading)
-                binding.btnNo.gone()
-                binding.btnYes.gone()
-            }
-
-            setCancelable(cancelable)
-            window?.apply {
-                setBackgroundDrawableResource(android.R.color.transparent)
-                // Đặt layout MATCH_PARENT cho cả width và height
-                setLayout(
-                    WindowManager.LayoutParams.MATCH_PARENT,
-                    WindowManager.LayoutParams.MATCH_PARENT
-                )
-                setGravity(Gravity.CENTER)
-            }
-            show()
-        }
-    }
     fun hideLoading() {
         dialog?.dismiss()
-        dialog = null
         dialog = null
         requireActivity().hideNavigation(true)
     }
     fun showLoadingSafe() {
         if (!isAdded || activity == null) return
-        requireActivity().runOnUiThread {
-            showLoading()
-            requireActivity().hideNavigation(true)
-        }
+        loadingController?.showGlobalLoading()
     }
 
     fun hideLoadingSafe() {
         if (!isAdded || activity == null) return
-        requireActivity().runOnUiThread {
-            hideLoading()
-        }
+        loadingController?.hideGlobalLoading()
     }
 
-    // Hàm tiện ích để show confirm (dễ dùng)
+    // ========== Confirm Dialog ==========
+
     fun showConfirmDialog(
         message: String,
         title: String? = null,
-
         onYes: () -> Unit,
         onNo: (() -> Unit)? = null
     ) {
-        onYesClick = onYes
-        onNoClick = onNo
-
-        showLoading(
-            cancelable = true,
-            select = true,
+        if (!isAdded || activity == null) return
+        loadingController?.showGlobalConfirmDialog(
+            message = message,
             title = title,
-            message = message
-
+            onYes = onYes,
+            onNo = onNo
         )
     }
 

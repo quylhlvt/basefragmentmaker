@@ -79,28 +79,31 @@ class OuterStrokeShadownTextView : AppCompatTextView {
     }
     override fun onDraw(canvas: Canvas) {
         if (outerStrokeWidth > 0f) {
-            val textColor = currentTextColor
             val paint = paint
+            val originalColor = paint.color
+            val originalStyle = paint.style
+            val originalStrokeWidth = paint.strokeWidth
+            val originalJoin = paint.strokeJoin
 
-            // Stroke — không shadow
             paint.clearShadowLayer()
-            setTextColor(outerStrokeColor)
+            paint.color = outerStrokeColor
             paint.style = Paint.Style.STROKE
-            paint.strokeWidth = outerStrokeWidth  // ← bỏ * dp(1.5)
+            paint.strokeWidth = outerStrokeWidth
             paint.strokeJoin = outerStrokeJoin
             paint.strokeMiter = strokeMiter
             paint.isAntiAlias = true
-            super.onDraw(canvas)
 
-            // Fill — restore shadow
-            paint.setShadowLayer(
-                shadowRadius,
-                shadowDx,
-                shadowDy,
-                shadowColor
-            )
-            setTextColor(textColor)
-            paint.style = Paint.Style.FILL
+            // Lưu ellipsize để tắt marquee tạm thời
+            val ellipsize = ellipsize
+            setEllipsize(null)
+            super.onDraw(canvas)
+            setEllipsize(ellipsize)
+
+            paint.setShadowLayer(shadowRadius, shadowDx, shadowDy, shadowColor)
+            paint.color = originalColor
+            paint.style = originalStyle
+            paint.strokeWidth = originalStrokeWidth
+            paint.strokeJoin = originalJoin
             super.onDraw(canvas)
         } else {
             super.onDraw(canvas)

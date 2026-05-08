@@ -419,15 +419,24 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
         showLoadingSafe()
 
         viewLifecycleOwner.lifecycleScope.launch {
+            val bitmap = withContext(Dispatchers.Default) {  // ✅ Đổi sang Default thay vì gọi trực tiếp
+                renderLayersToBitmap()
+            }
+            if (bitmap == null) {
+                setSaveEnabled(true)
+                hideLoadingSafe()
+                return@launch
+            }
+
             val savedPath = withContext(Dispatchers.IO) {
-                val bitmap = renderLayersToBitmap() ?: return@withContext null
                 bitmap.saveToFile(requireContext(), "avatar")
             }
 
-
-            setSaveEnabled(true)
-
-            if (savedPath == null) return@launch
+            if (savedPath == null) {
+                setSaveEnabled(true)
+                hideLoadingSafe()
+                return@launch
+            }
 
             val result = viewModel.onSaveComplete(savedPath)
             result?.let { (template, selections) ->
@@ -438,22 +447,25 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
                     isFlipped = viewModel.state.value.isFlipped
                 )
             }
-            val isEdit = arguments?.getBoolean(ARG_IS_EDIT, false) ?: false
 
+            val isEdit = arguments?.getBoolean(ARG_IS_EDIT, false) ?: false
             if (isEdit) {
                 runCatching {
-                    findNavController().getBackStackEntry(R.id.viewFragment)
-                        .savedStateHandle["updated_image_path"] = savedPath  // ← syntax ngắn hơn
+                    findNavController()
+                        .getBackStackEntry(R.id.viewFragment)
+                        .savedStateHandle["updated_image_path"] = savedPath
                 }
             }
-            hideLoadingSafe()
-            findNavController().navigate(
-                R.id.action_customizeFragment_to_addFragment,
-                Bundle().apply { putString("imagePath", savedPath) }
-            )
+
+            // ✅ Navigate trực tiếp trên Main thread, KHÔNG wrap thêm withContext
+            if (isAdded && !isDetached) {
+                findNavController().navigate(
+                    R.id.action_customizeFragment_to_addFragment,
+                    Bundle().apply { putString("imagePath", savedPath) }
+                )
+            }
         }
     }
-
     private fun renderLayersToBitmap(): Bitmap? {
         val root = binding.rlCharacter
         if (root.width == 0 || root.height == 0) return null

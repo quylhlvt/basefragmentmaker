@@ -33,7 +33,9 @@
             app:exitAnim="@anim/slide_out_left"
             app:popEnterAnim="@anim/slide_in_left"
             app:popExitAnim="@anim/slide_out_right"
-            app:popUpTo="@id/homeFragment" />
+            app:popUpTo="@id/homeFragment"
+            app:popUpToInclusive="false"
+            />
         <action
             android:id="@+id/action_home_to_cosplay"
             app:destination="@id/cosplay"
@@ -109,19 +111,30 @@
         <action
             android:id="@+id/action_mypony_to_custom"
             app:destination="@id/custom"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
             app:popUpTo="@id/myPony"
             app:popUpToInclusive="false" />
+
         <action
             android:id="@+id/action_mypony_to_view"
             app:destination="@id/viewFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
             app:popUpTo="@id/myPony"
-            app:popUpToInclusive="false"
-
-            />
+            app:popUpToInclusive="false" />
 
         <action
             android:id="@+id/action_my_pony_to_home"
             app:destination="@id/homeFragment"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left"
             app:popUpTo="@id/homeFragment"
             app:popUpToInclusive="true" />
     </fragment>
@@ -133,8 +146,20 @@
 
         <action
             android:id="@+id/action_customizeFragment_to_addFragment"
-            app:destination="@id/addCharacterFragment" />
-
+            app:destination="@id/addCharacterFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"/>
+        <action
+            android:id="@+id/action_custom_to_myPony"
+            app:destination="@id/myPony"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left"
+            app:popUpTo="@id/myPony"
+            app:popUpToInclusive="false" />
     </fragment>
     <fragment
         android:id="@+id/addCharacterFragment"
@@ -148,7 +173,12 @@
             app:argType="string" />
         <action
             android:id="@+id/action_addCharacterFragment_to_viewImageFragment"
-            app:destination="@id/viewFragment" />
+            app:destination="@id/viewFragment"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            />
     </fragment>
     <fragment
         android:id="@+id/viewFragment"
@@ -171,13 +201,23 @@
             android:id="@+id/action_view_to_myPony"
             app:destination="@id/myPony"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true" />
+            app:popUpToInclusive="true"
+            app:enterAnim="@anim/slide_in_left"
+            app:exitAnim="@anim/slide_out_right"
+            app:popEnterAnim="@anim/slide_in_right"
+            app:popExitAnim="@anim/slide_out_left"
+            />
 
         <!-- ✅ Thêm action này -->
         <action
             android:id="@+id/action_view_to_customize"
             app:destination="@id/custom"
-            app:popUpTo="@id/viewFragment" />
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
+            app:popEnterAnim="@anim/slide_in_left"
+            app:popExitAnim="@anim/slide_out_right"
+            app:popUpTo="@id/viewFragment"
+            />
 
     </fragment>
     <fragment

@@ -265,14 +265,16 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
         initRcv()
         initDrawView()
+        hideLoadingSafe()
 
         if (!viewModel.isInitialized) {
-            showLoadingSafe()
             initData()
             viewModel.isInitialized = true
         } else {
+            hideLoadingSafe()
             restoreUIState()
         }
+
     }
 
     // ── Keyboard ──────────────────────────────────────────────────────────────
@@ -378,10 +380,18 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         submitAllAdapters()
         viewModel.setTypeNavigation(ValueKey.BACKGROUND_NAVIGATION)
         viewModel.setTypeBackground(ValueKey.IMAGE_BACKGROUND)
-        hideLoadingSafe()
 
         viewLifecycleOwner.lifecycleScope.launch {
-            addDrawable(imagepath, isCharacter = true)
+            if (imagepath.isNotEmpty()) {
+                // ✅ hideLoadingSafe chỉ chạy trong callback onDone — sau khi Glide load xong
+                addDrawable(imagepath, isCharacter = true) {
+                    hideLoadingSafe()
+                }
+            } else {
+                // ✅ Không có ảnh → ẩn ngay
+                hideLoadingSafe()
+            }
+
             if (viewModel.pathDefault.isNotEmpty()) {
                 addDrawable(viewModel.pathDefault, isCharacter = true)
             }
@@ -461,10 +471,12 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     private fun addDrawable(
         path: String,
         isCharacter: Boolean = false,
-        bitmapText: Bitmap? = null
+        bitmapText: Bitmap? = null,
+        onDone: (() -> Unit)? = null
     ) {
         if (bitmapText != null) {
             binding.drawView.addDraw(viewModel.loadDrawableEmoji(bitmapText, isCharacter))
+            onDone?.invoke()
             return
         }
         Glide.with(this)

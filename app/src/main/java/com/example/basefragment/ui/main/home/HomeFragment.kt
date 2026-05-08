@@ -90,9 +90,13 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
 
     override fun inflateBinding(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
-    ): FragmentHomeBinding = FragmentHomeBinding.inflate(inflater, container, false)
-
+    ): FragmentHomeBinding {
+        android.util.Log.d("PERF", "2. Home inflateBinding: ${System.currentTimeMillis()}")
+        return FragmentHomeBinding.inflate(inflater, container, false)
+    }
     override fun initView() {
+        android.util.Log.d("PERF", "3. Home initView: ${System.currentTimeMillis()}")
+
         binding.apply {
             tv1.post { tv1.isSelected = true }
             tv2.post { tv2.isSelected = true }

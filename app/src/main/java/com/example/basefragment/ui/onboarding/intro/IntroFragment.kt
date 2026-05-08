@@ -37,7 +37,8 @@ class IntroFragment : BaseFragment<FragmentIntroBinding, IntroViewModel>(
     lateinit var introAdapter: IntroAdapter
 
     override fun viewListener() {
-        binding.btnNextPager.root.setOnClickListener {
+        binding.btnNextPager.root.onClick(200) {
+            android.util.Log.d("PERF", "1. Button clicked: ${System.currentTimeMillis()}")
             viewModel.nextPage(binding.viewPager2.currentItem, introAdapter.itemCount)
         }
 

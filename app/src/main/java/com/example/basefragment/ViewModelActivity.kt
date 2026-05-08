@@ -22,7 +22,6 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.UUID
 import javax.inject.Inject
-
 @HiltViewModel
 class ViewModelActivity @Inject constructor(
     private val getCatalogueUseCase: GetCatalogueUseCase,
@@ -44,44 +43,48 @@ class ViewModelActivity @Inject constructor(
     val isLoading:            StateFlow<Boolean>           = appDataManager.isLoading
     val error:                StateFlow<String?>           = appDataManager.error
 
-    init { loadInitialData() }
     val networkOnline: StateFlow<Boolean> = networkFlow
         .stateIn(
             scope = viewModelScope,
-            started = SharingStarted.WhileSubscribed(5_000),
+            started = SharingStarted.Eagerly, // ← Eagerly để không miss network event
             initialValue = false
         )
 
-    fun forceReloadAll() {
-        viewModelScope.launch {
-            appDataManager.forceReloadAll()
-        }
-    }
+    // Guard chống gọi fetch trùng từ nhiều fragment
+    private var isFetchingOnline = false
+
     // ── INIT ──────────────────────────────────────────────────────────────────
+
+    init {
+        loadInitialData()
+    }
+
     private fun loadInitialData() {
         viewModelScope.launch {
             try {
                 Log.d("ViewModelActivity", "🚀 loadInitialData start")
-
-                // 1. Load local data trước (assets + customized) → UI có data ngay
                 appDataManager.loadInitialData()
                 Log.d("ViewModelActivity", "✅ local data loaded")
-
-                // 2. Fetch API song song với quick data
-                //    Không await — để UI không bị block, templates sẽ update qua Flow khi có
-                launch { fetchOnlineTemplatesInternal() }
-
+                // Fetch online ngay nếu có mạng
+                fetchOnlineTemplatesInternal()
             } catch (e: Exception) {
                 Log.e("ViewModelActivity", "❌ Init error: ${e.message}", e)
             }
         }
     }
 
+    // ── FETCH (duy nhất 1 hàm, có guard) ─────────────────────────────────────
+
     /**
-     * Fetch API nội bộ — có retry 1 lần nếu thất bại.
-     * Gọi từ init, không expose ra fragment.
+     * Gọi từ mọi nơi đều an toàn — guard đảm bảo chỉ 1 request chạy tại 1 thời điểm.
+     * BaseFragment gọi khi vào màn + có mạng + chưa có online data.
      */
     private suspend fun fetchOnlineTemplatesInternal() {
+        if (isFetchingOnline) {
+            Log.d("ViewModelActivity", "⏭️ Already fetching, skip")
+            return
+        }
+        isFetchingOnline = true
         try {
             Log.d("ViewModelActivity", "📡 fetchOnlineTemplates start")
             val result = getCatalogueUseCase()
@@ -89,47 +92,52 @@ class ViewModelActivity @Inject constructor(
                 val newTemplates = result.getOrNull() ?: return
                 appDataManager.saveApiCache(newTemplates)
                 appDataManager.mergeApiTemplates(newTemplates)
-                // ✅ Prefetch ảnh ngay sau khi có templates
                 prefetchTemplateImages(newTemplates)
+                Log.d("ViewModelActivity", "✅ Online templates loaded: ${newTemplates.size}")
             } else {
                 Log.e("ViewModelActivity", "❌ API failed: ${result.exceptionOrNull()?.message}")
-                // Retry sau 3s
-                kotlinx.coroutines.delay(3_000)
-                Log.d("ViewModelActivity", "🔄 Retrying API...")
-                getCatalogueUseCase()
             }
         } catch (e: Exception) {
             Log.e("ViewModelActivity", "❌ fetchOnlineTemplates error: ${e.message}", e)
+        } finally {
+            isFetchingOnline = false
         }
     }
+
+    /** Public — BaseFragment và pull-to-refresh gọi */
+    fun fetchOnlineTemplates() {
+        viewModelScope.launch { fetchOnlineTemplatesInternal() }
+    }
+
+    fun forceReloadAll() {
+        viewModelScope.launch { appDataManager.forceReloadAll() }
+    }
+
+    fun refreshApiData() {
+        viewModelScope.launch { appDataManager.refreshFromApi() }
+    }
+
+    // ── PREFETCH IMAGES ───────────────────────────────────────────────────────
+
     private suspend fun prefetchTemplateImages(templates: List<CustomModel>) {
         withContext(Dispatchers.IO) {
-            templates.take(5).forEach { template -> // prefetch 5 template đầu
+            templates.take(5).forEach { template ->
                 template.listPath.forEach { bp ->
                     val firstColor = bp.listPath.firstOrNull() ?: return@forEach
                     val firstPath  = firstColor.listPath
                         .firstOrNull { it != "none" && it != "dice" }
                         ?: return@forEach
-
                     runCatching {
                         Glide.with(context)
                             .asBitmap()
                             .load(firstPath)
                             .diskCacheStrategy(DiskCacheStrategy.ALL)
                             .override(256, 256)
-                            .preload()  // ✅ download vào disk cache, không cần show
+                            .preload()
                     }
                 }
             }
         }
-    }
-    /** Public — chỉ gọi khi user chủ động refresh (pull-to-refresh, v.v.) */
-    fun refreshApiData() {
-        viewModelScope.launch { appDataManager.refreshFromApi() }
-    }
-
-    fun fetchOnlineTemplates() {
-        viewModelScope.launch { fetchOnlineTemplatesInternal() }
     }
 
     // ── QUERIES ───────────────────────────────────────────────────────────────

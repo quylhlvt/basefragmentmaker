@@ -42,11 +42,15 @@
         <action
             android:id="@+id/action_intro_to_permission"
             app:destination="@id/permission"
+            app:enterAnim="@anim/slide_in_right"
+            app:exitAnim="@anim/slide_out_left"
             app:popUpTo="@id/intro"
             app:popUpToInclusive="true" />
         <action
             android:id="@+id/action_intro_to_home"
             app:destination="@id/nav_main"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
             app:popUpTo="@id/intro"
             app:popUpToInclusive="true" />
     </fragment>
@@ -59,6 +63,8 @@
         <action
             android:id="@+id/action_permission_to_home"
             app:destination="@id/nav_main"
+            app:enterAnim="@anim/fade_in"
+            app:exitAnim="@anim/fade_out"
             app:popUpTo="@id/permission"
             app:popUpToInclusive="true" />
     </fragment>
