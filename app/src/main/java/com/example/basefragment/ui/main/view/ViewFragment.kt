@@ -13,6 +13,7 @@ import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.safeNavigate
 import com.example.basefragment.core.extention.setImageActionBar
+import com.example.basefragment.core.extention.setTextActionBar
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.databinding.FragmentViewBinding
 import com.example.basefragment.ui.main.customize.CustomizeFragment
@@ -47,6 +48,10 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                 // ── Type 0: Từ AddCharacter — success screen ──────────────────
                 0 -> {
                     tvSuccess.visible()
+                    setTextActionBar(
+                        binding.actionBar.tvCenter,
+                        getString(R.string.successful)
+                    )
                     setImageActionBar(actionBar.btnActionBarNextToRight, R.drawable.ic_share)
                     setImageActionBar(actionBar.btnActionBarRight, R.drawable.ic_home)
                     // ✅ Show 2 nút bottom

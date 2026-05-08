@@ -112,7 +112,8 @@ class MainActivity : AppCompatActivity() , LoadingController{
         return Dialog(this, R.style.BaseDialog).apply {
             val binding = DialogbaseBinding.inflate(layoutInflater)
             setContentView(binding.root)
-
+            binding.txtYes.isSelected = true
+            binding.txtNo.isSelected = true
             title?.let { binding.txtTitle.text = it }
             binding.txtContent.text = message
 
@@ -170,7 +171,6 @@ class MainActivity : AppCompatActivity() , LoadingController{
 //        val sharedPrefs = getSharedPreferences("DEFAULT", Context.MODE_PRIVATE)
 //        SharedPreferencesManager.sharedPreferences = sharedPrefs
 //        SharedPreferencesManager.editor = sharedPrefs.edit()
-
         // Lấy NavController từ NavHostFragment
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment

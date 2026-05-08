@@ -226,7 +226,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
             lnlText.btnDoneText.onClick {
                 handleDoneText()
-                clearFocus()
+                clearFocus(true)
             }
 
             // Click ngoài → đóng keyboard
@@ -330,7 +330,8 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         // Reset view ngay lập tức, không đợi layout change
         setFlFunctionTopMargin(0)
     }
-    private fun clearFocus() {
+    private fun clearFocus( check: Boolean =false) {
+        if (!check)
         binding.drawView.hideSelect()
         hideSoftKeyboard()
         setFlFunctionTopMargin(0)

@@ -64,10 +64,7 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
     override fun initView() {
         binding.setupActionBar()
 
-        // ✅ Chỉ randomize lần đầu, nếu chưa có item nào
-        if (viewModel.randomItem.value == null) {
-            viewModel.randomize()
-        }
+
     }
 
     private fun FragmentRandomBinding.setupActionBar() {

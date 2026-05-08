@@ -11,6 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 @HiltViewModel
@@ -22,7 +24,14 @@ class RandomViewModel  @Inject constructor(
     val randomItem: StateFlow<RandomItem?> = _randomItem.asStateFlow()
     private var _cachedBitmap: Bitmap? = null
     val cachedBitmap get() = _cachedBitmap
-
+    init {
+        viewModelScope.launch {
+            appDataManager.templates
+                .filter { it.isNotEmpty() }
+                .take(1)
+                .collect { randomize() }
+        }
+    }
     data class RandomItem(
         val templateIndex: Int,
         val template     : CustomModel,

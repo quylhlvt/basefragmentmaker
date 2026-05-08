@@ -1,87 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- values-de/strings.xml -->
+
 <resources>
     <string name="app_name">baseFragment</string>
     <string name="next">Weiter</string>
     <string name="language">Sprache</string>
-    <string name="title_1">Charakter erstellen</string>
-    <string name="title_2">Charaktervielfalt</string>
-    <string name="title_3">Vielfältige Elemente</string>
-    <string name="not_select_lang">Bitte wählen Sie eine Sprache</string>
+    <string name="title_1">Erstelle verschiedene Stile ganz nach deinem Geschmack</string>
+    <string name="title_2">Erstelle deinen perfekten Avatar</string>
+    <string name="title_3">Sammlung verschiedener Elemente</string>
+    <string name="not_select_lang">Bitte wähle eine Sprache aus</string>
     <string name="pony_maker">Pony-Ersteller</string>
-    <string name="trending_custom">Beliebt</string>
+    <string name="trending_custom">Beliebte Anpassungen</string>
     <string name="my_work">Meine Kreationen</string>
 
     <string name="permission">Berechtigung</string>
     <string name="storage">Speicher</string>
-    <string name="continue_per">Fortfahren</string>
-    <string name="notification">Benachrichtigungen</string>
+    <string name="continue_per">Weiter</string>
+    <string name="notification">Benachrichtigung</string>
     <string name="granted_notification">Benachrichtigungsberechtigung erteilt</string>
     <string name="granted_storage">Speicherberechtigung erteilt</string>
-    <string name="allow">Erlauben</string>
-    <string name="to_access">um auf Fotos auf Ihrem Gerät zuzugreifen</string>
-    <string name="to_access_13">um Ihnen Benachrichtigungen zu senden</string>
-    <string name="go_to_setting_message">Diese Berechtigung ist erforderlich</string>
+    <string name="allow">Zulassen</string>
+    <string name="to_access">um auf Fotos auf deinem Gerät zuzugreifen</string>
+    <string name="to_access_13">um auf Benachrichtigungen auf deinem Gerät zuzugreifen</string>
+    <string name="go_to_setting_message">Die App benötigt diese Berechtigung</string>
     <string name="settings">Einstellungen</string>
     <string name="cancel">Abbrechen</string>
     <string name="add_image">Bild hinzufügen</string>
     <string name="text">Text</string>
-    <string name="type_your_content">Geben Sie Ihren Inhalt ein</string>
-    <string name="loading">Wird geladen…</string>
-    <string name="haven_t_saved_it_yet_do_you_want_to_exit">Sie haben noch nicht gespeichert. Möchten Sie fortfahren?</string>
+    <string name="type_your_content">Gib deinen Inhalt ein</string>
+    <string name="loading">Lädt...</string>
+    <string name="haven_t_saved_it_yet_do_you_want_to_exit">Noch nicht gespeichert. Möchtest du wirklich beenden?</string>
     <string name="no">Nein</string>
     <string name="yes">Ja</string>
-    <string name="null_edt">Bitte Text eingeben</string>
+    <string name="null_edt">Bitte gib einen Text ein</string>
     <string name="done">Fertig</string>
-    <string name="choose_color">Farbe wählen</string>
-    <string name="do_you_want_to_reset_all">Alles zurücksetzen?</string>
+    <string name="choose_color">Farbe auswählen</string>
+    <string name="do_you_want_to_reset_all">Möchtest du alles zurücksetzen?</string>
     <string name="reset">Zurücksetzen</string>
     <string name="exit">Beenden</string>
-    <string name="rate_us">Bewerten</string>
+    <string name="rate_us">Bewerte uns</string>
     <string name="share_app">App teilen</string>
-    <string name="image_has_been_saved_successfully">Bild erfolgreich gespeichert</string>
+    <string name="image_has_been_saved_successfully">Bild erfolgreich gespeichert!</string>
     <string name="download">Herunterladen</string>
     <string name="avatar">Avatar</string>
-    <string name="design">Design</string>
+    <string name="my_avatar">Mein Avatar</string>
+    <string name="design">Mein Design</string>
     <string name="no_item_here">Keine Elemente vorhanden</string>
     <string name="add_to_whatsapp">Zu WhatsApp hinzufügen</string>
     <string name="add_to_telegram">Zu Telegram hinzufügen</string>
     <string name="share">Teilen</string>
-    <string name="no_app_found_to_handle_this_action">Keine App gefunden</string>
-    <string name="download_success">In Galerie gespeichert</string>
-    <string name="download_fail">Download fehlgeschlagen. Bitte später erneut versuchen.</string>
+    <string name="no_app_found_to_handle_this_action">Keine App gefunden, die diese Aktion unterstützt</string>
+    <string name="download_success">Erfolgreich im Album %s gespeichert</string>
+    <string name="download_fail">Download fehlgeschlagen. Bitte versuche es später erneut!</string>
     <string name="delete">Löschen</string>
-    <string name="are_you_sure_want_to_delete_this_item">Möchten Sie dieses Element wirklich löschen?</string>
-    <string name="please_select_an_image">Bitte wählen Sie ein Bild</string>
-    <string name="limit_3_items">Mindestens 3 Elemente erforderlich</string>
-    <string name="limit_30_items">Maximal 30 Elemente</string>
-    <string name="invalid_action_msg">App nicht installiert</string>
+    <string name="are_you_sure_want_to_delete_this_item">Möchtest du dieses Element wirklich löschen?</string>
+    <string name="please_select_an_image">Bitte wähle ein Bild aus</string>
+    <string name="limit_3_items">Mindestens 3 Elemente sind erforderlich, um einen Sticker zu erstellen</string>
+    <string name="limit_30_items">Es können maximal 30 Elemente hinzugefügt werden</string>
+    <string name="invalid_action_msg">Anwendung nicht installiert</string>
     <string name="invalid_action">Fehler</string>
-    <string name="download_failed_please_try_again_later">Download fehlgeschlagen. Bitte später erneut versuchen.</string>
+    <string name="download_failed_please_try_again_later">Download fehlgeschlagen. Bitte versuche es später erneut!</string>
     <string name="edit">Bearbeiten</string>
     <string name="rate">Bewerten</string>
+    <string name="privacy_policy"><![CDATA[Datenschutz & Richtlinien]]></string>
 
-    <string name="zero_star_title">Gefällt Ihnen die App?</string>
-    <string name="zero_star">Teilen Sie uns Ihre Erfahrung mit</string>
+    <string name="zero_star_title">Gefällt dir die App?</string>
+    <string name="zero_star">Teile uns deine Erfahrung mit</string>
 
     <string name="one_star_title">Oh nein!</string>
-    <string name="one_star">Bitte geben Sie Feedback</string>
+    <string name="one_star">Bitte gib uns dein Feedback</string>
 
     <string name="two_star_title">Oh nein!</string>
-    <string name="two_star">Bitte geben Sie Feedback</string>
+    <string name="two_star">Bitte gib uns dein Feedback</string>
 
     <string name="three_star_title">Oh nein!</string>
-    <string name="three_star">Bitte geben Sie Feedback</string>
+    <string name="three_star">Bitte gib uns dein Feedback</string>
 
-    <string name="four_star_title">Wir lieben Sie auch!</string>
-    <string name="four_star">Danke für Ihre Unterstützung</string>
+    <string name="four_star_title">Wir lieben dich auch!</string>
+    <string name="four_star">Danke für dein Feedback</string>
 
-    <string name="five_star_title">Wir lieben Sie auch!</string>
-    <string name="five_star">Danke für Ihre Unterstützung</string>
+    <string name="five_star_title">Wir lieben dich auch!</string>
+    <string name="five_star">Danke für dein Feedback</string>
 
-    <string name="rate_us_0">Noch nicht bewertet</string>
-    <string name="have_rated">Danke für Ihre Bewertung</string>
+    <string name="rate_us_0">Du hast noch keine Bewertung abgegeben!</string>
+    <string name="have_rated">Danke für deine Bewertung</string>
     <string name="refresh">Aktualisieren</string>
-    <string name="hello_blank_fragment">Hallo</string>
+    <string name="hello_blank_fragment">Hallo leeres Fragment</string>
     <string name="cosplay">Cosplay</string>
-    <string name="permission_camera_denied">Kameraberechtigung ist erforderlich</string>
+    <string name="permission_camera_denied">Kameraberechtigung erforderlich, um diese Funktion zu verwenden</string>
+    <string name="cat_random">Zufällige Katze</string>
+    <string name="my_creation">Meine Kreationen</string>
+    <string name="category">Kategorie</string>
+    <string name="image">Bild</string>
+    <string name="color">Farbe</string>
+    <string name="successful">Erfolgreich</string>
 </resources>

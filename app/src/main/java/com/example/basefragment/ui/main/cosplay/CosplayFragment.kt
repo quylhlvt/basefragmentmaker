@@ -110,7 +110,9 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
 
     override fun onResume() {
         super.onResume()
-        // Khi back về: dùng lại bitmap đã cache
+        // ✅ Guard: chỉ access viewModel khi fragment đã attach xong
+        if (!isAdded || view == null) return
+
         val cached = viewModel.cachedBitmap
         if (cached != null && !cached.isRecycled) {
             showBitmap(cached)

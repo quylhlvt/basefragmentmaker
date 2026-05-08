@@ -43,7 +43,7 @@ fun setImageActionBar(imageView: ImageView, res: Int) {
 fun setTextActionBar(textView: TextView, text: String) {
     textView.text = text
     textView.visible()
-    textView.visible()
+    textView.isSelected = true
 }
 
 fun View.visible() {

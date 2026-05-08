@@ -27,7 +27,19 @@ object SharedPreferencesManager {
     private const val COUNT_BACK_KEY = "COUNT_BACK_KEY"
     private const val RATE_KEY = "RATE_KEY"
     private const val VERSION_CODE_KEY = "version_code_key"
+    fun clearAll() {
+        // Chỉ giữ lại language CODE
+        val savedLanguage = isLanguageKey()
 
+        // Xóa toàn bộ
+        sharedPreferences.edit(commit = true) { clear() }
+
+        // Restore language code thôi, KHÔNG restore LANGUAGE_SCREEN
+        if (savedLanguage.isNotEmpty()) {
+            setLanguageKey(savedLanguage)
+        }
+        // ❌ Bỏ: if (savedLanguageScreen) { setLanuageScreen(true) }
+    }
     fun getVersionCode(): Int = getIntDataByKey(VERSION_CODE_KEY)
 
     fun setVersionCode(versionCode: Int) {

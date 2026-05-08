@@ -5,10 +5,13 @@ import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
@@ -30,7 +33,9 @@ import com.example.basefragment.utils.DataLocal
 import com.example.basefragment.utils.LanguageManager.updateLanguage
 import com.example.basefragment.utils.key.IntentKey
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @AndroidEntryPoint
 class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel>(
@@ -54,7 +59,33 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         }
         return true
     }
+    override fun setupPreViews() {
+        // ✅ Load bg
+        val isFirst = !SharedPreferencesManager.isLanuageScreen()
+        val bgRes = if (isFirst) R.drawable.img_bg_lang else R.drawable.img_bg_home
+        Glide.with(this)
+            .load(bgRes)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+            .into(binding.imageBgLang)
 
+        // ✅ Setup RecyclerView sớm nhất có thể
+        binding.recycleLanguage.apply {
+            adapter = languageAdapter
+            itemAnimator = null
+            background = ContextCompat.getDrawable(requireContext(), R.drawable.img_bg_rcy_lang)
+        }
+
+        // ✅ Load list
+        val currentLang = SharedPreferencesManager.isLanguageKey()
+        viewModel.setFirstLanguage(isFirst = isFirst)
+        viewModel.loadLanguages(currentLang)
+
+        // ✅ Submit list ngay nếu có sẵn
+        val list = viewModel.languageList.value
+        if (list.isNotEmpty()) {
+            languageAdapter.submitList(list)
+        }
+    }
     override fun viewListener() {
         binding.apply {
             actionBar.btnActionBarRight.onClick {
@@ -73,60 +104,32 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     ): FragmentLanguageBinding = FragmentLanguageBinding.inflate(inflater, container, false)
 
     override fun initView() {
-        // Set isFromSetting trước khi dùng
         isFromSetting = findNavController().previousBackStackEntry?.destination?.id == R.id.setting
 
-        binding.apply {
-            actionBar.apply {
-                btnActionBarRight.gone()
-                btnActionBarLeft.setImageResource(R.drawable.back_app)
-            }
-            layoutTitle.apply {
-                txtLang.isSelected =true
-            }
-
-
+        binding.actionBar.apply {
+            btnActionBarRight.gone()
+            btnActionBarLeft.setImageResource(R.drawable.back_app)
         }
-        initRcv()
+        binding.layoutTitle.txtLang.isSelected = true
 
-        val checkFirst =
-            SharedPreferencesManager.isLanuageScreen()
-        val keyLanguage =
-            SharedPreferencesManager.isLanguageKey()
-        val currentLang = keyLanguage
-
-        viewModel.setFirstLanguage(isFirst = !checkFirst)
-        viewModel.loadLanguages(currentLang)
+        // ✅ Bỏ initRcv() — đã làm trong setupPreViews
+        updateActionBar(viewModel.isFirstLanguage.value)
     }
+
 
     override fun observeData() {
         lifecycleScope.launch {
             repeatOnLifecycle(Lifecycle.State.STARTED) {
                 launch {
                     viewModel.isFirstLanguage.collect { isFirst ->
-                        if (isFirst) {
-                            binding.actionBar.apply {
-//                                tvStart.visible()
-
-                                btnActionBarRight.invisible()
-                                btnActionBarRight.setImageResource(R.drawable.select_language)
-                            }
-                        } else {
-                            binding.apply {
-                                actionBar.apply {
-                                    btnActionBarLeft.visible()
-//                                tvCenter.visible()
-                                    btnActionBarRight.setImageResource(R.drawable.select_language)
-                                }
-                                imageBgLang.setImageResource(R.drawable.img_bg_home)
-                            }
-                        }
+                        updateActionBar(isFirst)
                     }
                 }
                 launch {
                     viewModel.languageList.collect { list ->
-                        Log.d("LANG", "Updating adapter with list size=${list.size}")
-                        languageAdapter.submitList(list)
+                        if (list.isNotEmpty()) {
+                            languageAdapter.submitList(list)
+                        }
                     }
                 }
                 launch {
@@ -140,6 +143,22 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         }
     }
 
+    private fun updateActionBar(isFirst: Boolean) {
+        binding.apply {
+            if (isFirst) {
+                actionBar.btnActionBarRight.invisible()
+                actionBar.btnActionBarRight.setImageResource(R.drawable.select_language)
+            } else {
+                actionBar.btnActionBarLeft.visible()
+                actionBar.btnActionBarRight.setImageResource(R.drawable.select_language)
+                Glide.with(this@LanguageFragment)
+                    .load(R.drawable.img_bg_home)
+                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                    .into(imageBgLang)
+            }
+        }
+    }
+
     override fun bindViewModel() {
     }
 
@@ -147,6 +166,9 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         binding.recycleLanguage.apply {
             adapter = languageAdapter
             itemAnimator = null
+            post {
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.img_bg_rcy_lang)
+            }
         }
     }
     private fun handleRcv() {

@@ -47,6 +47,7 @@
                 android:textColor="@color/white"
                 android:textSize="18dp"
                 style="@style/single_marquee"
+                android:text="languae"
                 app:outerStrokeColor="@color/app_color"
                 app:outerStrokeWidth="1.3dp"
                 android:fontFamily="@font/baloo2_extrabold"

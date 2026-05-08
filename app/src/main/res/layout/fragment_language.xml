@@ -17,7 +17,6 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
 
-            android:background="@drawable/img_bg_rcy_lang"
             android:elevation="1dp"
             android:overScrollMode="never"
             android:paddingHorizontal="20dp"
@@ -34,8 +33,8 @@
         android:layout_height="match_parent"
         android:adjustViewBounds="true"
         android:elevation="-1dp"
-        android:scaleType="fitXY"
-        android:src="@drawable/img_bg_lang" />
+        android:src="@drawable/img_bg_lang"
+        android:scaleType="fitXY"/>
 
     <FrameLayout
         android:id="@+id/layoutActionBar"

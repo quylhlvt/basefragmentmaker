@@ -95,33 +95,28 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     }
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.v(TAG, "onViewCreated: $this")
         initView()
         initText()
         viewListener()
         bindViewModel()
-        observeData()
-        observeNetworkRetry()
+
+        // Delay observeData + network sau frame đầu render
+        view.post {
+            if (isAdded) {
+                observeData()
+                observeNetworkRetry()
+            }
+        }
     }
     private fun observeNetworkRetry() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-
-                // ✅ Check ngay khi vào màn (không chờ network thay đổi)
-                val isOnlineNow = viewModelActivity.networkOnline.value
-                val hasData = viewModelActivity.templates.value.any { it.id.startsWith("online_") }
-                if (isOnlineNow && !hasData) {
-                    Log.d("BaseFragment", "🌐 ${this@BaseFragment::class.simpleName}: check on enter → fetch")
-                    viewModelActivity.fetchOnlineTemplates()
-                }
-
-                // ✅ Tiếp tục lắng nghe khi network thay đổi (offline → online)
+                // Chỉ lắng nghe network thay đổi, KHÔNG check ngay khi vào màn
                 viewModelActivity.networkOnline.collect { isOnline ->
                     if (isOnline) {
                         val hasOnlineData = viewModelActivity.templates.value
                             .any { it.id.startsWith("online_") }
                         if (!hasOnlineData) {
-                            Log.d("BaseFragment", "🌐 ${this@BaseFragment::class.simpleName}: network changed → fetch")
                             viewModelActivity.fetchOnlineTemplates()
                         }
                     }

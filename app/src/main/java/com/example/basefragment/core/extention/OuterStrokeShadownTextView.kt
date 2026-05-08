@@ -1,9 +1,7 @@
 package com.example.basefragment.core.extention
 
 import android.content.Context
-import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
+import android.graphics.*
 import android.graphics.Paint.Join
 import android.util.AttributeSet
 import androidx.appcompat.widget.AppCompatTextView
@@ -17,44 +15,21 @@ class OuterStrokeShadownTextView : AppCompatTextView {
     private var outerStrokeJoin: Join = Join.ROUND
     private var strokeMiter = 5f
     private var extraPadding = 0
+    private var isDrawingStroke = false
 
-    constructor(context: Context) : super(context) {
-        init(null)
-    }
-
-    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) {
-        init(attrs)
-    }
-
-    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int)
-            : super(context, attrs, defStyleAttr) {
-        init(attrs)
-    }
+    constructor(context: Context) : super(context) { init(null) }
+    constructor(context: Context, attrs: AttributeSet?) : super(context, attrs) { init(attrs) }
+    constructor(context: Context, attrs: AttributeSet?, defStyleAttr: Int) : super(context, attrs, defStyleAttr) { init(attrs) }
 
     private fun init(attrs: AttributeSet?) {
         if (attrs == null) return
-
-        val a = context.obtainStyledAttributes(
-            attrs,
-            R.styleable.OuterStrokeTextView
-        )
-
+        val a = context.obtainStyledAttributes(attrs, R.styleable.OuterStrokeTextView)
         try {
-            outerStrokeWidth = a.getDimension(
-                R.styleable.OuterStrokeTextView_outerStrokeWidth,
-                0f
-            )
-
-            outerStrokeColor = a.getColor(
-                R.styleable.OuterStrokeTextView_outerStrokeColor,
-                Color.WHITE
-            )
-
-            outerStrokeJoin = when (a.getInt(
-                R.styleable.OuterStrokeTextView_outerStrokeJoinStyle, 2)) {
+            outerStrokeWidth = a.getDimension(R.styleable.OuterStrokeTextView_outerStrokeWidth, 0f)
+            outerStrokeColor = a.getColor(R.styleable.OuterStrokeTextView_outerStrokeColor, Color.WHITE)
+            outerStrokeJoin = when (a.getInt(R.styleable.OuterStrokeTextView_outerStrokeJoinStyle, 2)) {
                 0 -> Join.MITER
                 1 -> Join.BEVEL
-                2 -> Join.ROUND
                 else -> Join.ROUND
             }
         } finally {
@@ -64,49 +39,58 @@ class OuterStrokeShadownTextView : AppCompatTextView {
             extraPadding = (outerStrokeWidth * dp(2)).toInt()
         }
     }
+
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        // ✅ Apply sau khi XML padding đã được set xong
         if (extraPadding > 0) {
-            setPadding(
-                paddingLeft + extraPadding,
-                paddingTop ,
-                paddingRight + extraPadding,
-                paddingBottom
-            )
-            extraPadding = 0  // reset tránh apply 2 lần
+            setPadding(paddingLeft + extraPadding, paddingTop, paddingRight + extraPadding, paddingBottom)
+            extraPadding = 0
+        }
+        if (outerStrokeWidth > 0f) {
+            post { setLayerType(LAYER_TYPE_SOFTWARE, null) }
         }
     }
+
     override fun onDraw(canvas: Canvas) {
-        if (outerStrokeWidth > 0f) {
-            val paint = paint
-            val originalColor = paint.color
-            val originalStyle = paint.style
-            val originalStrokeWidth = paint.strokeWidth
-            val originalJoin = paint.strokeJoin
-
-            paint.clearShadowLayer()
-            paint.color = outerStrokeColor
-            paint.style = Paint.Style.STROKE
-            paint.strokeWidth = outerStrokeWidth
-            paint.strokeJoin = outerStrokeJoin
-            paint.strokeMiter = strokeMiter
-            paint.isAntiAlias = true
-
-            // Lưu ellipsize để tắt marquee tạm thời
-            val ellipsize = ellipsize
-            setEllipsize(null)
+        if (outerStrokeWidth <= 0f) {
             super.onDraw(canvas)
-            setEllipsize(ellipsize)
-
-            paint.setShadowLayer(shadowRadius, shadowDx, shadowDy, shadowColor)
-            paint.color = originalColor
-            paint.style = originalStyle
-            paint.strokeWidth = originalStrokeWidth
-            paint.strokeJoin = originalJoin
-            super.onDraw(canvas)
-        } else {
-            super.onDraw(canvas)
+            return
         }
+
+        val p = paint
+        val originalColors = textColors
+        val originalStyle = p.style
+        val originalStrokeWidth = p.strokeWidth
+        val originalJoin = p.strokeJoin
+
+        // ── Vẽ stroke ──────────────────────────────────────
+        isDrawingStroke = true
+        super.setTextColor(outerStrokeColor)
+        p.clearShadowLayer()
+        p.style = Paint.Style.STROKE
+        p.strokeWidth = outerStrokeWidth
+        p.strokeJoin = outerStrokeJoin
+        p.strokeMiter = strokeMiter
+        p.isAntiAlias = true
+        super.onDraw(canvas)
+
+        // ── Vẽ fill + shadow ────────────────────────────────
+        isDrawingStroke = false
+        super.setTextColor(originalColors)
+        p.setShadowLayer(shadowRadius, shadowDx, shadowDy, shadowColor)
+        p.style = originalStyle
+        p.strokeWidth = originalStrokeWidth
+        p.strokeJoin = originalJoin
+        super.onDraw(canvas)
+    }
+
+    override fun invalidate() {
+        if (isDrawingStroke) return          // ✅ chặn loop
+        super.invalidate()
+    }
+
+    override fun postInvalidate() {
+        if (isDrawingStroke) return          // ✅ chặn thêm postInvalidate
+        super.postInvalidate()
     }
 }

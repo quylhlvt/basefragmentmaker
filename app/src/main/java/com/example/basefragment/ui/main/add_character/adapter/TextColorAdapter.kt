@@ -21,29 +21,30 @@ class TextColorAdapter :
 
 
     override fun onBind(binding: ItemTextColorBinding, item: SelectedAddModel, position: Int) {
+        val context = binding.root.context
         binding.apply {
+            // ── Luôn setup đúng content trước ──────────────────
+            if (position == 0) {
+                imvColor.gone()
+                btnAddColor.visible()
+                root.onClick { onChooseColorClick.invoke() }
+            } else {
+                imvColor.visible()
+                btnAddColor.gone()
+                imvColor.setBackgroundColor(item.color)
+                root.onClick { onTextColorClick.invoke(item.color, position) }
+            }
+
+            // ── Sau đó mới apply selected state ────────────────
             if (item.isSelected) {
                 frameShadown.visible()
-                frame.apply {
-                    strokeColor = ContextCompat.getColor(context, R.color.app_color)
-                }
+                frame.strokeColor = ContextCompat.getColor(context, R.color.app_color)
             } else {
                 frameShadown.gone()
-                frame.apply {
-                    strokeColor = ContextCompat.getColor(context, R.color.transparent)
-                }
-                if (position == 0) {
-                    imvColor.gone()
-                    btnAddColor.visible()
-                    root.onClick { onChooseColorClick.invoke() }
-                } else {
-                    imvColor.visible()
-                    btnAddColor.gone()
-                    imvColor.setBackgroundColor(item.color)
-                    root.onClick { onTextColorClick.invoke(item.color, position) }
-                }
+                frame.strokeColor = ContextCompat.getColor(context, R.color.transparent)
             }
-        }}
+        }
+    }
 
         fun submitItem(position: Int, list: ArrayList<SelectedAddModel>) {
             if (position != currentSelected) {

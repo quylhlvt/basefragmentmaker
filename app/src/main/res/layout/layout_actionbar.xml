@@ -8,8 +8,8 @@
     <!--    btnActionBarLeft-->
     <ImageView
         android:id="@+id/btnActionBarLeft"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="10dp"
         android:src="@drawable/back_app"
@@ -21,8 +21,8 @@
     <!--    cvLogo-->
     <androidx.cardview.widget.CardView
         android:id="@+id/cvLogo"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:layout_marginStart="16dp"
         android:layout_marginBottom="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
@@ -71,7 +71,7 @@
         style="@style/single_marquee"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
-        android:layout_marginHorizontal="16dp"
+        android:layout_marginHorizontal="25dp"
         android:gravity="center"
         android:text="@string/language"
         android:textSize="28dp"
@@ -92,8 +92,8 @@
     <!--    btnActionBarCenter-->
     <ImageView
         android:id="@+id/btnActionBarCenter"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
@@ -102,8 +102,8 @@
         app:layout_constraintTop_toTopOf="@+id/btnActionBarLeft" />
     <ImageView
         android:id="@+id/btnActionBarCenter1"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="gone"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
@@ -113,8 +113,8 @@
     <!--    btnActionBarCenter-->
     <ImageView
         android:id="@+id/btnActionBarCenter2"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="invisible"
         app:layout_constraintBottom_toBottomOf="@+id/btnActionBarLeft"
@@ -125,9 +125,9 @@
     <!--    btnActionBarNextToRight-->
     <ImageView
         android:id="@+id/btnActionBarNextToRight"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_marginEnd="8dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="5dp"
         android:layout_marginBottom="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="invisible"
@@ -137,9 +137,9 @@
     <!--    btnActionBarRight-->
     <ImageView
         android:id="@+id/btnActionBarRight"
-        android:layout_width="45dp"
-        android:layout_height="45dp"
-        android:layout_marginEnd="16dp"
+        android:layout_width="40dp"
+        android:layout_height="40dp"
+        android:layout_marginEnd="13dp"
         android:layout_marginBottom="10dp"
         android:background="?attr/selectableItemBackgroundBorderless"
         android:visibility="invisible"

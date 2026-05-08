@@ -20,6 +20,13 @@ import javax.inject.Inject
 class CosplayViewModel @Inject constructor(
     private val appDataManager: AppDataManager
 ) : ViewModel() {
+
+    // ✅ Khai báo HẾT property TRƯỚC init
+    private val _randomItem = MutableStateFlow<RandomItem?>(null)
+    val randomItem: StateFlow<RandomItem?> = _randomItem.asStateFlow()
+
+    private var _cachedBitmap: Bitmap? = null
+    val cachedBitmap get() = _cachedBitmap
     init {
         viewModelScope.launch {
             appDataManager.templates
@@ -28,10 +35,7 @@ class CosplayViewModel @Inject constructor(
                 .collect { randomize() }
         }
     }
-    private val _randomItem = MutableStateFlow<RandomItem?>(null)
-    val randomItem: StateFlow<RandomItem?> = _randomItem.asStateFlow()
-    private var _cachedBitmap: Bitmap? = null
-    val cachedBitmap get() = _cachedBitmap
+
 
     data class RandomItem(
         val templateIndex: Int,

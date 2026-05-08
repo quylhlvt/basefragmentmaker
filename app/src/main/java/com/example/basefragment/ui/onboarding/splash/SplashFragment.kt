@@ -14,12 +14,16 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.widget.FrameLayout
+import androidx.asynclayoutinflater.view.AsyncLayoutInflater
+import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.OuterStrokeShadownTextView
 import com.example.basefragment.core.extention.dpToPx
 import com.example.basefragment.core.extention.toIntro
 import com.example.basefragment.core.extention.toLanguage
@@ -51,10 +55,24 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     // ── INIT ──────────────────────────────────────────────────────────────────
 
     override fun initView() {
+        // ✅ Warm up font — giữ nguyên, nhẹ
+        ResourcesCompat.getFont(requireContext(), R.font.baloo2_extrabold)
+
+        // ✅ Bỏ OuterStrokeShadownTextView warm up — không cần thiết
+        // val dummyView = OuterStrokeShadownTextView(requireContext())
+
+        // ✅ Bỏ AsyncLayoutInflater ở đây — inflate fragment_home quá nặng
+        // AsyncLayoutInflater(requireContext()).inflate(R.layout.fragment_home, null) { _, _, _ -> }
+
         checkAndClearDataIfNewVersion()
-        // Đợi layout đo xong mới animate
+
         binding.progressWrapper.post {
             startFakeProgress()
+
+            // ✅ Preload fragment_home SAU khi splash đã hiển thị xong
+            AsyncLayoutInflater(requireContext()).inflate(
+                R.layout.fragment_home, null
+            ) { _, _, _ -> }
         }
     }
     private fun checkAndClearDataIfNewVersion() {
@@ -62,18 +80,22 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
         val currentVersion = context.packageManager
             .getPackageInfo(context.packageName, 0).versionCode
         val savedVersion = sharedPreferences.getVersionCode()
-        Log.d("listAssets", "currentVersion: $currentVersion")
-        Log.d("listAssets", "savedVersion: $savedVersion")
-        if (savedVersion < currentVersion) {
-            // Xóa MMKV cache
-            MMKV.defaultMMKV().apply {
-                removeValueForKey("templates")
-                removeValueForKey("customized")
-                removeValueForKey("api_cache")
-            }
+
+        if (savedVersion != currentVersion) {
+            // ✅ Xóa MMKV
+            MMKV.defaultMMKV().clearAll()
+
+            // ✅ Xóa SharedPreferences (giữ lại language)
+            sharedPreferences.clearAll()
+
+            // ✅ Xóa file cache
+            context.filesDir.deleteRecursively()
+            context.cacheDir.deleteRecursively()
+            context.externalCacheDir?.deleteRecursively()
+
+            // ✅ Set lại version SAU khi clear
             sharedPreferences.setVersionCode(currentVersion)
 
-            // Force reload lại từ assets
             viewLifecycleOwner.lifecycleScope.launch {
                 mainViewModel.forceReloadAll()
             }
@@ -82,14 +104,17 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     override fun viewListener() {}
 
     override fun observeData() {
-        viewModel.startSplashTimer(
-            hasOnlineTemplates = mainViewModel.templates.value.any { it.id.startsWith("online_") },
-            waitForOnline = {
-                mainViewModel.templates.first { list ->
-                    list.any { it.id.startsWith("online_") }
+        // Launch trên background, không block main thread
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.startSplashTimer(
+                hasOnlineTemplates = mainViewModel.templates.value.any { it.id.startsWith("online_") },
+                waitForOnline = {
+                    mainViewModel.templates.first { list ->
+                        list.any { it.id.startsWith("online_") }
+                    }
                 }
-            }
-        )
+            )
+        }
 
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {

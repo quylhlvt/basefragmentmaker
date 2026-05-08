@@ -4,6 +4,7 @@ import android.Manifest
 import android.content.pm.PackageManager
 import androidx.fragment.app.viewModels
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.activity.result.contract.ActivityResultContracts
@@ -11,6 +12,8 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BackPressHandler
@@ -43,6 +46,32 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
         } else {
             showToast(R.string.permission_camera_denied)
         }
+    }
+    override fun setupPreViews() {
+        binding.root.post {
+            binding.tv1.isSelected = true
+            binding.tv2.isSelected = true
+            binding.tv3.isSelected = true
+            binding.tv4.isSelected = true
+        }
+        // ✅ Preload tất cả ảnh dùng trong màn home
+        Glide.with(this).load(R.drawable.img_bg_home)
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE).preload()
+        binding.apply {
+            actionBar.apply {
+                setImageActionBar(btnActionBarRight, R.drawable.ic_settings)
+            }
+
+
+            // ✅ Setup actionbar sớm
+
+
+            // ✅ Fetch online data sớm nhất có thể
+            if (mainViewModel.networkOnline.value) {
+                mainViewModel.fetchOnlineTemplates()
+            }
+        }
+
     }
     override fun viewListener() {
         binding.apply {
@@ -91,102 +120,46 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     override fun inflateBinding(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): FragmentHomeBinding {
-        android.util.Log.d("PERF", "2. Home inflateBinding: ${System.currentTimeMillis()}")
+        android.util.Log.d("PERF1", "1. inflateBinding: ${System.currentTimeMillis()}")
         return FragmentHomeBinding.inflate(inflater, container, false)
     }
     override fun initView() {
-        android.util.Log.d("PERF", "3. Home initView: ${System.currentTimeMillis()}")
 
-        binding.apply {
-            tv1.post { tv1.isSelected = true }
-            tv2.post { tv2.isSelected = true }
-            tv3.post { tv3.isSelected = true }
-            tv4.post { tv4.isSelected = true }
-
-            actionBar.apply {
-                setImageActionBar(btnActionBarRight, R.drawable.ic_settings)
-//            setImageActionBar(btnActionBarLeft, R.drawable.logo_app)
-            }
-        }
-        deleteTempFolder()
-//        binding.textView.text = "Home Fragment"
-//        binding.btnTest.setOnClickListener {
-//            showSnackbar("Xin chào từ Home!")
-//        }
     }
 
     override fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
-            mainViewModel.isLoading.collect { isLoading ->
-                // Hiển thị/ẩn loading indicator
-                if (isLoading) {
-                    // binding.progressBar.visibility = View.VISIBLE
-                } else {
-                    // binding.progressBar.visibility = View.GONE
-                }
-            }
-        }
-
-        // Observe characters data
-        viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.characters.collect { characters ->
-                // Data đã được load, có thể dùng ở đây
                 if (characters.isNotEmpty()) {
-                    // Ví dụ: hiển thị số lượng characters
-                    // binding.tvCharacterCount.text = "Available: ${characters.size} characters"
-                    android.util.Log.d("HomeFragment", "✅ Có ${characters.size} characters")
+                    Log.d("HomeFragment", "✅ ${characters.size} characters")
                 }
             }
         }
-
-        // Observe backgrounds data
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.backgrounds.collect { backgrounds ->
                 if (backgrounds.isNotEmpty()) {
-                    android.util.Log.d("HomeFragment", "✅ Có ${backgrounds.size} backgrounds")
+                    Log.d("HomeFragment", "✅ ${backgrounds.size} backgrounds")
                 }
             }
         }
-
-        // Observe stickers data
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.stickers.collect { stickers ->
                 if (stickers.isNotEmpty()) {
-                    android.util.Log.d("HomeFragment", "✅ Có ${stickers.size} stickers")
+                    Log.d("HomeFragment", "✅ ${stickers.size} stickers")
                 }
             }
         }
-
-        // Observe errors
         viewLifecycleOwner.lifecycleScope.launch {
             mainViewModel.error.collect { error ->
-                error?.let {
-                    // Hiển thị error message
-                    // showSnackbar("Error: $it")
-                    android.util.Log.e("HomeFragment", "❌ Error: $it")
-                }
+                error?.let { Log.e("HomeFragment", "❌ $it") }
             }
         }
-//        viewModel.data.observe(viewLifecycleOwner) { text ->
-//            binding.textView.text = text
-//        }
     }
 
     override fun bindViewModel() {
     }
 
-    private fun deleteTempFolder() {
-        lifecycleScope.launch(Dispatchers.IO) {
-//            val dataTemp =
-//                MediaHelper.getImageInternal(requireContext(), ValueKey.RANDOM_TEMP_ALBUM)
-//            if (dataTemp.isNotEmpty()) {
-//                dataTemp.forEach {
-//                    val file = File(it)
-//                    file.delete()
-//                }
-//            }
-        }
-    }
+
     override fun onBackPressed(): Boolean {
         countRate = sharedPreferences.isBackRequest() + 1
         sharedPreferences.setBackRequest(countRate)
