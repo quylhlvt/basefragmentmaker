@@ -4,13 +4,13 @@
     <string name="app_name">baseFragment</string>
     <string name="next">Lanjut</string>
     <string name="language">Bahasa</string>
-    <string name="title_1">Buat berbagai gaya sesukamu</string>
+    <string name="title_1">Buat berbagai gaya sesuai keinginanmu</string>
     <string name="title_2">Buat avatar sempurnamu</string>
     <string name="title_3">Koleksi berbagai item</string>
     <string name="not_select_lang">Silakan pilih bahasa</string>
-    <string name="pony_maker">Pembuat Pony</string>
+    <string name="pony_maker">Pony Maker</string>
     <string name="trending_custom">Kustom Populer</string>
-    <string name="my_work">Kreasiku</string>
+    <string name="my_work">Karya Saya</string>
 
     <string name="permission">Izin</string>
     <string name="storage">Penyimpanan</string>
@@ -27,14 +27,14 @@
     <string name="add_image">Tambah Gambar</string>
     <string name="text">Teks</string>
     <string name="type_your_content">Ketik konten Anda</string>
-    <string name="loading">Memuat...</string>
-    <string name="haven_t_saved_it_yet_do_you_want_to_exit">Belum disimpan. Apakah Anda ingin keluar?</string>
+    <string name="loading">Memuat</string>
+    <string name="haven_t_saved_it_yet_do_you_want_to_exit">Belum disimpan, apakah Anda ingin keluar?</string>
     <string name="no">Tidak</string>
     <string name="yes">Ya</string>
     <string name="null_edt">Silakan masukkan teks</string>
     <string name="done">Selesai</string>
     <string name="choose_color">Pilih Warna</string>
-    <string name="do_you_want_to_reset_all">Apakah Anda ingin mengatur ulang semuanya?</string>
+    <string name="do_you_want_to_reset_all">Apakah Anda ingin mengatur ulang semua?</string>
     <string name="reset">Atur Ulang</string>
     <string name="exit">Keluar</string>
     <string name="rate_us">Beri Nilai</string>
@@ -48,50 +48,52 @@
     <string name="add_to_whatsapp">Tambahkan ke WhatsApp</string>
     <string name="add_to_telegram">Tambahkan ke Telegram</string>
     <string name="share">Bagikan</string>
-    <string name="no_app_found_to_handle_this_action">Tidak ada aplikasi yang dapat menjalankan tindakan ini</string>
-    <string name="download_success">Berhasil disimpan ke album %s</string>
-    <string name="download_fail">Unduhan gagal. Silakan coba lagi nanti!</string>
+    <string name="no_app_found_to_handle_this_action">Tidak ada aplikasi yang ditemukan untuk tindakan ini</string>
+    <string name="download_success">Berhasil diunduh ke album %s</string>
+    <string name="download_fail">Gagal mengunduh, silakan coba lagi nanti!</string>
     <string name="delete">Hapus</string>
     <string name="are_you_sure_want_to_delete_this_item">Apakah Anda yakin ingin menghapus item ini?</string>
     <string name="please_select_an_image">Silakan pilih gambar</string>
     <string name="limit_3_items">Minimal 3 item diperlukan untuk membuat stiker</string>
     <string name="limit_30_items">Maksimal hanya 30 item yang dapat ditambahkan</string>
-    <string name="invalid_action_msg">Aplikasi belum terpasang</string>
+    <string name="invalid_action_msg">Aplikasi tidak terpasang</string>
     <string name="invalid_action">Kesalahan</string>
-    <string name="download_failed_please_try_again_later">Unduhan gagal. Silakan coba lagi nanti!</string>
+    <string name="download_failed_please_try_again_later">Gagal mengunduh, silakan coba lagi nanti!</string>
     <string name="edit">Edit</string>
     <string name="rate">Nilai</string>
-    <string name="privacy_policy"><![CDATA[Kebijakan & Privasi]]></string>
+    <string name="privacy_policy"><![CDATA[Kebijakan Privasi]]></string>
 
     <string name="zero_star_title">Apakah Anda menyukai aplikasi ini?</string>
-    <string name="zero_star">Ceritakan pengalaman Anda</string>
+    <string name="zero_star">Beri tahu kami pengalaman Anda</string>
 
-    <string name="one_star_title">Oh tidak!</string>
-    <string name="one_star">Silakan berikan masukan Anda</string>
+    <string name="one_star_title">Oh tidak =(</string>
+    <string name="one_star">Silakan beri kami masukan</string>
 
-    <string name="two_star_title">Oh tidak!</string>
-    <string name="two_star">Silakan berikan masukan Anda</string>
+    <string name="two_star_title">Oh tidak =(</string>
+    <string name="two_star">Silakan beri kami masukan</string>
 
-    <string name="three_star_title">Oh tidak!</string>
-    <string name="three_star">Silakan berikan masukan Anda</string>
+    <string name="three_star_title">Oh tidak =(</string>
+    <string name="three_star">Silakan beri kami masukan</string>
 
-    <string name="four_star_title">Kami juga menyukai Anda!</string>
-    <string name="four_star">Terima kasih atas masukan Anda</string>
+    <string name="four_star_title">Kami juga menyukaimu =3</string>
+    <string name="four_star">Terima kasih atas masukan Anda =3</string>
 
-    <string name="five_star_title">Kami juga menyukai Anda!</string>
-    <string name="five_star">Terima kasih atas masukan Anda</string>
+    <string name="five_star_title">Kami juga menyukaimu =3</string>
+    <string name="five_star">Terima kasih atas masukan Anda =3</string>
 
-    <string name="rate_us_0">Anda belum memberi penilaian!</string>
-    <string name="have_rated">Terima kasih telah menilai aplikasi kami</string>
-    <string name="refresh">Segarkan</string>
-    <string name="hello_blank_fragment">Halo fragment kosong</string>
+    <string name="rate_us_0">Anda belum memberi nilai!</string>
+    <string name="have_rated">Terima kasih telah memberi nilai aplikasi kami</string>
+    <string name="refresh">Muat Ulang</string>
+    <string name="hello_blank_fragment">Halo fragmen kosong</string>
     <string name="cosplay">Cosplay</string>
     <string name="permission_camera_denied">Izin kamera diperlukan untuk menggunakan fitur ini</string>
     <string name="cat_random">Kucing Acak</string>
-    <string name="my_creation">Kreasiku</string>
+    <string name="random">Acak</string>
+    <string name="my_creation">Kreasi Saya</string>
     <string name="category">Kategori</string>
     <string name="image">Gambar</string>
     <string name="color">Warna</string>
     <string name="successful">Berhasil</string>
-    <string name="context_guide_body">Dalam mode Cosplay, pemain secara acak diberikan satu gambar referensi untuk diikuti. Tugasmu adalah menciptakan kembali karakter tersebut seakurat mungkin dengan memilih gaya rambut, pakaian, warna, dan aksesori yang tepat. Setiap kecocokan yang benar meningkatkan skor persentasemu (%). Semakin mirip karaktermu dengan gambar acak, semakin tinggi skor akhirmu. Perhatikan detail kecil untuk mencapai hasil cosplay terbaik.</string>
+    <string name="context_guide_body">Dalam mode Cosplay, pemain akan diberikan satu gambar referensi secara acak. Tugas Anda adalah membuat ulang karakter tersebut seakurat mungkin dengan memilih gaya rambut, pakaian, warna, dan aksesori yang tepat. Setiap kecocokan yang benar akan meningkatkan persentase Anda (%). Semakin mirip karakter Anda dengan gambar acak, semakin tinggi skor akhir Anda. Perhatikan detail kecil untuk mendapatkan hasil cosplay terbaik.</string>
+    <string name="try_again">Coba Lagi</string>
 </resources>

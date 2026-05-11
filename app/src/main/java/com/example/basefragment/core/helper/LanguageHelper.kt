@@ -40,15 +40,20 @@ object LanguageHelper {
     /**
      * Cập nhật ngôn ngữ KHÔNG restart
      */
+//    fun setLocale(context: Context, languageCode: String) {
+//        val locale = Locale(languageCode)
+//        Locale.setDefault(locale)
+//
+//        val resources: Resources = context.resources
+//        val config: Configuration = resources.configuration
+//        config.setLocale(locale)
+//
+//        resources.updateConfiguration(config, resources.displayMetrics)
+//    }
+// LanguageHelper — chỉ giữ lại hàm này, xóa các hàm còn lại
     fun setLocale(context: Context, languageCode: String) {
         val locale = Locale(languageCode)
         Locale.setDefault(locale)
-
-        val resources: Resources = context.resources
-        val config: Configuration = resources.configuration
-        config.setLocale(locale)
-
-        resources.updateConfiguration(config, resources.displayMetrics)
+        SharedPreferencesManager.setLanguageKey(languageCode)
     }
-
 }

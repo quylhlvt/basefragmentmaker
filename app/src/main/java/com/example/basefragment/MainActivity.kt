@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity() , LoadingController{
 
         hideNavigation(true)        // ← sau setContentView, window đã sẵn sàng
         initSharedPreferences()
-        applyLanguage()
+//        applyLanguage()
 
         val navHostFragment = supportFragmentManager
             .findFragmentById(R.id.nav_host_fragment) as NavHostFragment
@@ -198,25 +198,35 @@ class MainActivity : AppCompatActivity() , LoadingController{
         SharedPreferencesManager.sharedPreferences = sharedPrefs
         SharedPreferencesManager.editor = sharedPrefs.edit()
     }
-    private fun applyLanguage() {
-        val savedLanguage = SharedPreferencesManager.isLanguageKey()
-        if (savedLanguage.isNotEmpty()) {
-            val locale = Locale(savedLanguage)
-            Locale.setDefault(locale)
+    override fun attachBaseContext(newBase: Context) {
+        val sharedPrefs = newBase.getSharedPreferences("DEFAULT", Context.MODE_PRIVATE)
+        val lang = sharedPrefs.getString("language_key", "") ?: ""
 
-            val config = Configuration(resources.configuration)
-            config.setLocale(locale)
-
-            // ✅ QUAN TRỌNG: Update configuration
-            resources.updateConfiguration(config, resources.displayMetrics)
-        }
+        val locale = Locale(lang.ifEmpty { "en" })
+        val config = Configuration(newBase.resources.configuration)
+        config.setLocale(locale)
+        val context = newBase.createConfigurationContext(config)
+        super.attachBaseContext(context)
     }
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-
-        // ✅ Re-apply language khi xoay màn hình
-        applyLanguage()
-    }
+//    private fun applyLanguage() {
+//        val savedLanguage = SharedPreferencesManager.isLanguageKey()
+//        if (savedLanguage.isNotEmpty()) {
+//            val locale = Locale(savedLanguage)
+//            Locale.setDefault(locale)
+//
+//            val config = Configuration(resources.configuration)
+//            config.setLocale(locale)
+//
+//            // ✅ QUAN TRỌNG: Update configuration
+//            resources.updateConfiguration(config, resources.displayMetrics)
+//        }
+//    }
+//    override fun onConfigurationChanged(newConfig: Configuration) {
+//        super.onConfigurationChanged(newConfig)
+//
+//        // ✅ Re-apply language khi xoay màn hình
+//        applyLanguage()
+//    }
 
 //    // QUAN TRỌNG: xử lý nút Back đúng cách
 //    override fun onBackPressed() {

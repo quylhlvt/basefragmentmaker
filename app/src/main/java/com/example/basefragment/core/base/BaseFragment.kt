@@ -82,24 +82,24 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(
         return binding.root
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-
-        // ✅ Re-apply language
-        val savedLanguage = sharedPreferences.isLanguageKey()
-        if (savedLanguage.isNotEmpty()) {
-            val locale = Locale(savedLanguage)
-            Locale.setDefault(locale)
-
-            val config = Configuration(requireContext().resources.configuration)
-            config.setLocale(locale)
-
-            requireContext().resources.updateConfiguration(
-                config,
-                requireContext().resources.displayMetrics
-            )
-        }
-    }
+//    override fun onConfigurationChanged(newConfig: Configuration) {
+//        super.onConfigurationChanged(newConfig)
+//
+//        // ✅ Re-apply language
+//        val savedLanguage = sharedPreferences.isLanguageKey()
+//        if (savedLanguage.isNotEmpty()) {
+//            val locale = Locale(savedLanguage)
+//            Locale.setDefault(locale)
+//
+//            val config = Configuration(requireContext().resources.configuration)
+//            config.setLocale(locale)
+//
+//            requireContext().resources.updateConfiguration(
+//                config,
+//                requireContext().resources.displayMetrics
+//            )
+//        }
+//    }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)

@@ -128,14 +128,14 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             }
         }
 
-    private fun launchImagePicker() {
-        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
-            addCategory(Intent.CATEGORY_OPENABLE)
-            type = "image/*"
-            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
-        }
-        imagePickerLauncher.launch(intent)
-    }
+//    private fun launchImagePicker() {
+//        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+//            addCategory(Intent.CATEGORY_OPENABLE)
+//            type = "image/*"
+//            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+//        }
+//        imagePickerLauncher.launch(intent)
+//    }
 
     // ── Inflate ───────────────────────────────────────────────────────────────
     override fun inflateBinding(
@@ -233,7 +233,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             main.onClick { clearFocus() }
 
             // Adapters
-            backgroundImageAdapter.onAddImageClick = { checkStoragePermission() }
+            backgroundImageAdapter.onAddImageClick = { launchImagePicker() }
             backgroundImageAdapter.onBackgroundImageClick = { path, position ->
                 handleSetBackgroundImage(path, position)
             }
@@ -621,6 +621,14 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             permissionViewModel.needGoToSettings(sharedPreferences, true) -> requireActivity().goToSettings()
             else -> permissionLauncher.launch(perms)
         }
+    }
+    private fun launchImagePicker() {
+        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
+            addCategory(Intent.CATEGORY_OPENABLE)
+            type = "image/*"
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_PERSISTABLE_URI_PERMISSION)
+        }
+        imagePickerLauncher.launch(intent)
     }
 
     private fun handleChooseColor(isTextColor: Boolean = false) {

@@ -193,6 +193,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
             toIntroFromLanguage()
         } else {
             Log.d("LANG", "Navigating to Home")
+            requireActivity().recreate()
             toHomeFromLanguage()
         }
     }

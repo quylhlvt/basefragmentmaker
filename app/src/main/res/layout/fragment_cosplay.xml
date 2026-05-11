@@ -117,7 +117,7 @@
             android:fontFamily="@font/baloo2_bold"
             android:gravity="center"
             android:layout_marginBottom="4dp"
-            android:text="Random"
+            android:text="@string/random"
             android:textColor="@color/app_color"
             android:textSize="20sp"
             app:strokeWidth="1dp" />
