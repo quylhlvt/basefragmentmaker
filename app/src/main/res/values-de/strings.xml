@@ -94,4 +94,5 @@
     <string name="image">Bild</string>
     <string name="color">Farbe</string>
     <string name="successful">Erfolgreich</string>
+    <string name="context_guide_body">Im Cosplay-Modus erhalten die Spieler zufällig ein Referenzbild, dem sie folgen sollen. Deine Aufgabe ist es, den Charakter so genau wie möglich nachzubilden, indem du die richtigen Frisuren, Outfits, Farben und Accessoires auswählst. Jede korrekte Übereinstimmung erhöht deinen Prozentsatz (%). Je ähnlicher dein Charakter dem zufälligen Bild aussieht, desto höher wird dein Endergebnis sein. Achte auf kleine Details, um das beste Cosplay-Ergebnis zu erzielen.</string>
 </resources>

@@ -199,4 +199,8 @@ class ShowViewModel @Inject constructor(
         }
         checkComplete(_state.value.matchPercent)
     }
+    // ShowViewModel.kt
+    fun reset() {
+        _state.value = ShowState()
+    }
 }

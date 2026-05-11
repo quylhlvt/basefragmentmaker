@@ -71,8 +71,8 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
         binding.apply {
             btnCreate.onClick { findNavController().navigate(R.id.action_home_to_createPony) }
             btnMyAlbum.onClick { findNavController().navigate(R.id.action_home_to_myPony) }
-            btnRandom.onClick { findNavController().navigate(R.id.action_home_to_random) }
-            btnCosPlay.onClick { findNavController().navigate(R.id.action_home_to_cosplay) }
+            btnRandom.onClick(800) { findNavController().navigate(R.id.action_home_to_random) }
+            btnCosPlay.onClick(800) { findNavController().navigate(R.id.action_home_to_cosplay) }
             actionBar.btnActionBarRight.onClick { toSettingFromHome() }
         }
     }
@@ -81,7 +81,6 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
         binding.root.post {
             Log.d("PERF2", "HomeFragment first frame: ${System.currentTimeMillis()}")
             if (!isAdded || isDetached) return@post
-
             binding.tv1.isSelected = true
             binding.tv2.isSelected = true
             binding.tv3.isSelected = true

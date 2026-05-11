@@ -87,9 +87,12 @@
     <string name="cosplay">Cosplay</string>
     <string name="permission_camera_denied">Cần quyền camera để sử dụng tính năng này</string>
     <string name="cat_random">Cat Random</string>
+    <string name="random">Random</string>
     <string name="my_creation">My Creation</string>
     <string name="category">Category</string>
     <string name="image">Image</string>
     <string name="color">Color</string>
     <string name="successful">Successful</string>
+    <string name="context_guide_body">Cosplay Mode, players are randomly given one reference image to follow. Your task is to recreate that character as accurately as possible by choosing the right hairstyles, outfits, colors, and accessories. Every correct match increases your percentage score (%). The closer your character looks to the random image, the higher your final score will be. Pay attention to small details to achieve the best cosplay result.</string>
+    <string name="try_again">Try Again</string>
 </resources>

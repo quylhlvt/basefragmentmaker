@@ -93,4 +93,5 @@
     <string name="image">Gambar</string>
     <string name="color">Warna</string>
     <string name="successful">Berhasil</string>
+    <string name="context_guide_body">Dalam mode Cosplay, pemain secara acak diberikan satu gambar referensi untuk diikuti. Tugasmu adalah menciptakan kembali karakter tersebut seakurat mungkin dengan memilih gaya rambut, pakaian, warna, dan aksesori yang tepat. Setiap kecocokan yang benar meningkatkan skor persentasemu (%). Semakin mirip karaktermu dengan gambar acak, semakin tinggi skor akhirmu. Perhatikan detail kecil untuk mencapai hasil cosplay terbaik.</string>
 </resources>

@@ -46,14 +46,20 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     private val isAvatarTab = MutableStateFlow(true)
 
     companion object {
-        private const val ADD_PACK_REQUEST              = 200
-        private const val MIN_STICKERS_WHATSAPP         = 3
-        private const val MAX_STICKERS_WHATSAPP         = 30
+        private const val ADD_PACK_REQUEST = 200
+        private const val MIN_STICKERS_WHATSAPP = 3
+        private const val MAX_STICKERS_WHATSAPP = 30
     }
 
     // ── INIT ──────────────────────────────────────────────────────────────────
 
     override fun initView() {
+        binding.apply {
+            tvWhatApp.isSelected = true
+            tvTelegram.isSelected = true
+            tvShare.isSelected = true
+            tvDownload.isSelected = true
+        }
         setupActionBar()
         setupTabs()
         setupRecyclerViews()
@@ -65,7 +71,7 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     private fun setupActionBar() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
-            setTextActionBar(tvCenter, getString(R.string.my_work))
+            setTextActionBar(tvCenter, getString(R.string.my_creation))
             setImageActionBar(btnActionBarNextToRight, R.drawable.ic_delete_all)
             setImageActionBar(btnActionBarRight, R.drawable.ic_select_all)
             btnActionBarNextToRight.invisible()
@@ -104,28 +110,28 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     private fun setupRecyclerViews() {
         myAvatarAdapter = MyAvatarAdapter(requireContext()).apply {
-            onItemClick   = { item -> handleItemClick(item.path, true, 1, item.idEdit) }
-            onLongClick   = { position -> handleLongClick(position, true) }
-            onItemTick    = { position -> toggleSelection(position, true) }
-            onEditClick   = { idEdit -> navigateToEdit(idEdit) }
+            onItemClick = { item -> handleItemClick(item.path, true, 1, item.idEdit) }
+            onLongClick = { position -> handleLongClick(position, true) }
+            onItemTick = { position -> toggleSelection(position, true) }
+            onEditClick = { idEdit -> navigateToEdit(idEdit) }
             onDeleteClick = { path -> confirmDelete(arrayListOf(path), true) }
         }
         binding.recycleAvatar.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
-            adapter       = myAvatarAdapter
-            itemAnimator  = null
+            adapter = myAvatarAdapter
+            itemAnimator = null
         }
 
         myDesignAdapter = MyDesignAdapter().apply {
-            onItemClick   = { path -> handleItemClick(path, false, 2, "0") }
-            onLongClick   = { position -> handleLongClick(position, false) }
-            onItemTick    = { position -> toggleSelection(position, false) }
+            onItemClick = { path -> handleItemClick(path, false, 2, "0") }
+            onLongClick = { position -> handleLongClick(position, false) }
+            onItemTick = { position -> toggleSelection(position, false) }
             onDeleteClick = { path -> confirmDelete(arrayListOf(path), false) }
         }
         binding.recycleDesign.apply {
             layoutManager = GridLayoutManager(requireContext(), 2)
-            adapter       = myDesignAdapter
-            itemAnimator  = null
+            adapter = myDesignAdapter
+            itemAnimator = null
         }
     }
 
@@ -134,17 +140,22 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             btnWhatsapp.onClick { handleWhatsAppShare() }
             btnTelegram.onClick { handleTelegramShare() }
             btnDownload.onClick { handleDownload() }
-            btnShare.onClick   { handleShare() }
+            btnShare.onClick { handleShare() }
             actionBar.btnActionBarRight.onClick { handleSelectAll() }
             actionBar.btnActionBarNextToRight.onClick { handleDeleteSelected() }  // ✅ thêm
 
         }
     }
+
     private fun handleShare() {
         val selected = getSelectedItems()
-        if (selected.isEmpty()) { showToast(R.string.please_select_an_image); return }
+        if (selected.isEmpty()) {
+            showToast(R.string.please_select_an_image); return
+        }
         val paths = selected.map { it.path }.filter { it.isNotEmpty() }
-        if (paths.isEmpty()) { showToast(R.string.please_select_an_image); return }
+        if (paths.isEmpty()) {
+            showToast(R.string.please_select_an_image); return
+        }
 
         val uris = ArrayList(paths.map { path ->
             androidx.core.content.FileProvider.getUriForFile(
@@ -156,13 +167,13 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
         val intent = if (uris.size == 1) {
             Intent(Intent.ACTION_SEND).apply {
-                type  = "image/*"
+                type = "image/*"
                 putExtra(Intent.EXTRA_STREAM, uris[0])
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
         } else {
             Intent(Intent.ACTION_SEND_MULTIPLE).apply {
-                type  = "image/*"
+                type = "image/*"
                 putParcelableArrayListExtra(Intent.EXTRA_STREAM, uris)
                 addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             }
@@ -171,6 +182,7 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         startActivity(Intent.createChooser(intent, getString(R.string.share)))
         resetSelection()
     }
+
     private fun setupTouchListenerForResetSelection() {
         val touchListener = object : RecyclerView.OnItemTouchListener {
             override fun onInterceptTouchEvent(rv: RecyclerView, e: MotionEvent): Boolean {
@@ -180,12 +192,14 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
                 }
                 return false
             }
+
             override fun onTouchEvent(rv: RecyclerView, e: MotionEvent) {}
             override fun onRequestDisallowInterceptTouchEvent(disallow: Boolean) {}
         }
         binding.recycleAvatar.addOnItemTouchListener(touchListener)
         binding.recycleDesign.addOnItemTouchListener(touchListener)
     }
+
     // ── OBSERVE ───────────────────────────────────────────────────────────────
 // MyPonyFragment.kt — observeData()
     override fun observeData() {
@@ -215,8 +229,14 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.downloadState.collect { state ->
                 when (state) {
-                    MyPonyViewModel.DownloadState.SUCCESS -> showToast(getString(R.string.download_success, getString(R.string.app_name)))
-                    MyPonyViewModel.DownloadState.ERROR   -> showToast(R.string.download_failed_please_try_again_later)
+                    MyPonyViewModel.DownloadState.SUCCESS -> showToast(
+                        getString(
+                            R.string.download_success,
+                            getString(R.string.app_name)
+                        )
+                    )
+
+                    MyPonyViewModel.DownloadState.ERROR -> showToast(R.string.download_failed_please_try_again_later)
                     else -> {}
                 }
             }
@@ -230,23 +250,23 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     }
 
     private fun updateSelectionUI() {
-        val currentList   = if (isAvatarTab.value) myAvatarAdapter.items else myDesignAdapter.items
-        val hasSelection  = currentList.any { it.isShowSelection }
-        val allSelected   = currentList.isNotEmpty() && currentList.all { it.isSelected }
+        val currentList = if (isAvatarTab.value) myAvatarAdapter.items else myDesignAdapter.items
+        val hasSelection = currentList.any { it.isShowSelection }
+        val allSelected = currentList.isNotEmpty() && currentList.all { it.isSelected }
         val selectedCount = currentList.count { it.isSelected }
 
         binding.actionBar.apply {
             if (hasSelection) {
-              btnActionBarNextToRight.visible()
+                btnActionBarNextToRight.visible()
                 btnActionBarRight.visible()
-                tvCenter.text = "Selected $selectedCount/${currentList.size}"
+
                 btnActionBarRight.setImageResource(
                     if (allSelected) R.drawable.ic_select_all else R.drawable.ic_not_select_all
                 )
             } else {
                 btnActionBarNextToRight.invisible()
                 btnActionBarRight.invisible()
-                tvCenter.text = getString(R.string.my_work)
+
             }
         }
 
@@ -254,12 +274,11 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             binding.lnlBottom.visible()
             if (isAvatarTab.value) {
                 binding.lnlBottomTop.visible()   // WhatsApp + Telegram
-                binding.btnDownload.gone()
-                binding.btnShare.visible()        // ← THÊM
+                binding.llBottom.gone()
             } else {
                 binding.lnlBottomTop.gone()       // Ẩn WhatsApp + Telegram cho Design tab
-                binding.btnDownload.visible()
-                binding.btnShare.visible()        // ← THÊM
+                binding.llBottom.visible()
+
             }
         } else {
             binding.lnlBottom.gone()
@@ -274,13 +293,14 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     // ── SELECTION ─────────────────────────────────────────────────────────────
 
     private fun handleItemClick(path: String, isAvatar: Boolean, type: Int, idEdit: String) {
-        val currentList = if (isAvatar) myAvatarAdapter.items else myDesignAdapter.items
-        if (currentList.any { it.isShowSelection }) {
-            val position = currentList.indexOfFirst { it.path == path }
-            if (position >= 0) toggleSelection(position, isAvatar)
-        } else {
-            navigateToView(path, type, idEdit)
-        }
+//        val currentList = if (isAvatar) myAvatarAdapter.items else myDesignAdapter.items
+//        if (currentList.any { it.isShowSelection }) {
+//            val position = currentList.indexOfFirst { it.path == path }
+//            if (position >= 0) toggleSelection(position, isAvatar)
+//        } else {
+//            navigateToView(path, type, idEdit)
+//        }
+        navigateToView(path, type, idEdit)
     }
 // MyAvatarAdapter — long click gọi về Fragment
 
@@ -298,12 +318,20 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         }
         if (isAvatar) {
             myAvatarAdapter.submitList(updatedList)
+            setRecyclerBottomMargin(binding.recycleAvatar, 50) // ← thêm margin
         } else {
             myDesignAdapter.submitList(updatedList)
+            setRecyclerBottomMargin(binding.recycleDesign, 50) // ← thêm margin
         }
         updateSelectionUI()
     }
-
+    private fun setRecyclerBottomMargin(view: RecyclerView, dpValue: Int) {
+        val px = (dpValue * resources.displayMetrics.density).toInt()
+        (view.layoutParams as? ViewGroup.MarginLayoutParams)?.apply {
+            bottomMargin = px
+            view.layoutParams = this
+        }
+    }
     private fun toggleSelection(position: Int, isAvatar: Boolean) {
         val currentList = if (isAvatar) myAvatarAdapter.items else myDesignAdapter.items
         val updatedList = currentList.mapIndexed { index, item ->
@@ -315,16 +343,21 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         updateSelectionUI()
         if (updatedList.none { it.isSelected }) resetSelection()
     }
+
     private fun handleDeleteSelected() {
         val selected = getSelectedItems()
-        if (selected.isEmpty()) { showToast(R.string.please_select_an_image); return }
+        if (selected.isEmpty()) {
+            showToast(R.string.please_select_an_image); return
+        }
         val paths = ArrayList(selected.map { it.path })
         confirmDelete(paths, isAvatarTab.value)
     }
+
     private fun handleSelectAll() {
-        val currentList     = if (isAvatarTab.value) myAvatarAdapter.items else myDesignAdapter.items
+        val currentList = if (isAvatarTab.value) myAvatarAdapter.items else myDesignAdapter.items
         val shouldSelectAll = !currentList.all { it.isSelected }
-        val updatedList     = currentList.map { it.copy(isSelected = shouldSelectAll, isShowSelection = true) }
+        val updatedList =
+            currentList.map { it.copy(isSelected = shouldSelectAll, isShowSelection = true) }
         if (isAvatarTab.value) myAvatarAdapter.submitList(updatedList)
         else myDesignAdapter.submitList(updatedList)
         updateSelectionUI()
@@ -335,6 +368,11 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         val designReset = myDesignAdapter.items.map { it.copy(isSelected = false, isShowSelection = false) }
         myAvatarAdapter.submitList(avatarReset)
         myDesignAdapter.submitList(designReset)
+
+        // Reset margin về 0
+        setRecyclerBottomMargin(binding.recycleAvatar, 0)
+        setRecyclerBottomMargin(binding.recycleDesign, 0)
+
         updateSelectionUI()
     }
 
@@ -370,11 +408,11 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             ?: run { showToast("Template not found"); return }
 
         val args = CustomizeFragment.newArgs(
-            templateIndex   = templateIndex,
-            isEdit          = true,
-            customizedId    = idEdit,            // ← THÊM
+            templateIndex = templateIndex,
+            isEdit = true,
+            customizedId = idEdit,            // ← THÊM
             savedSelections = customized.selections,
-            isFlipped       = customized.isFlipped
+            isFlipped = customized.isFlipped
         )
         findNavController().navigate(R.id.action_mypony_to_custom, args)
     }
@@ -382,21 +420,23 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     // ── ACTIONS ───────────────────────────────────────────────────────────────
 
     private fun confirmDelete(paths: ArrayList<String>, isAvatar: Boolean) {
-        AlertDialog.Builder(requireContext())
-            .setTitle(R.string.delete)
-            .setMessage(R.string.are_you_sure_want_to_delete_this_item)
-            .setPositiveButton("Delete") { _, _ ->
+        showConfirmDialog(
+            title = getString(R.string.delete),
+            message = getString(R.string.are_you_sure_want_to_delete_this_item),
+            onYes = {
                 if (isAvatar) viewModel.deleteItem(requireContext(), paths)
-                else          viewModel.deleteItemDesign(paths, requireContext())
+                else viewModel.deleteItemDesign(paths, requireContext())
                 resetSelection()
-            }
-            .setNegativeButton("Cancel", null)
-            .show()
+            },
+            onNo = null
+        )
     }
 
     private fun handleDownload() {
         val selected = getSelectedItems()
-        if (selected.isEmpty()) { showToast(R.string.please_select_an_image); return }
+        if (selected.isEmpty()) {
+            showToast(R.string.please_select_an_image); return
+        }
         viewModel.downloadFiles(requireContext(), ArrayList(selected.map { it.path }))
         resetSelection()
     }
@@ -417,14 +457,23 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     private fun handleWhatsAppShare() {
         val paths = getSharePaths()
         when {
-            paths.isEmpty()                    -> { showToast(R.string.please_select_an_image); return }
-            paths.size < MIN_STICKERS_WHATSAPP -> { showToast(R.string.limit_3_items); return }
-            paths.size > MAX_STICKERS_WHATSAPP -> { showToast(R.string.limit_30_items); return }
+            paths.isEmpty() -> {
+                showToast(R.string.please_select_an_image); return
+            }
+
+            paths.size < MIN_STICKERS_WHATSAPP -> {
+                showToast(R.string.limit_3_items); return
+            }
+
+            paths.size > MAX_STICKERS_WHATSAPP -> {
+                showToast(R.string.limit_30_items); return
+            }
         }
         showPackNameDialog { packName ->
             viewModel.addToWhatsapp(requireContext(), packName, ArrayList(paths)) { pack ->
-                if (pack != null) { addToWhatsapp(pack); resetSelection() }
-                else showToast("Failed to create sticker pack")
+                if (pack != null) {
+                    addToWhatsapp(pack); resetSelection()
+                } else showToast("Failed to create sticker pack")
             }
         }
     }
@@ -446,18 +495,17 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     }
 
 
-
-
     @Deprecated("Deprecated in Java")
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (requestCode != ADD_PACK_REQUEST) return
         when (resultCode) {
-            android.app.Activity.RESULT_OK       -> showToast("Sticker pack added successfully")
+            android.app.Activity.RESULT_OK -> showToast("Sticker pack added successfully")
             android.app.Activity.RESULT_CANCELED -> {
                 val err = data?.getStringExtra("validation_error")
-                if (err != null) { Log.e("MyPonyFragment", "Validation: $err"); showToast("Failed: $err") }
-                else showToast("Cancelled")
+                if (err != null) {
+                    Log.e("MyPonyFragment", "Validation: $err"); showToast("Failed: $err")
+                } else showToast("Cancelled")
             }
         }
     }
@@ -466,15 +514,22 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     private fun handleTelegramShare() {
         val paths = getSharePaths()
-        if (paths.isEmpty()) { showToast(R.string.please_select_an_image); return }
+        if (paths.isEmpty()) {
+            showToast(R.string.please_select_an_image); return
+        }
         viewModel.addToTelegram(requireContext(), ArrayList(paths))
         resetSelection()
     }
 
     // ── UTILITY ───────────────────────────────────────────────────────────────
 
-    private fun showToast(resId: Int)  = android.widget.Toast.makeText(requireContext(), resId, android.widget.Toast.LENGTH_SHORT).show()
-    private fun showToast(msg: String) = android.widget.Toast.makeText(requireContext(), msg,   android.widget.Toast.LENGTH_SHORT).show()
+    private fun showToast(resId: Int) =
+        android.widget.Toast.makeText(requireContext(), resId, android.widget.Toast.LENGTH_SHORT)
+            .show()
+
+    private fun showToast(msg: String) =
+        android.widget.Toast.makeText(requireContext(), msg, android.widget.Toast.LENGTH_SHORT)
+            .show()
 
     // ── BASE OVERRIDES ────────────────────────────────────────────────────────
 

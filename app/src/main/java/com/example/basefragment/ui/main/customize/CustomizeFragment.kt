@@ -427,7 +427,7 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
                 hideLoadingSafe()
                 return@launch
             }
-
+            viewModelActivity.customizeBitmap = bitmap
             val savedPath = withContext(Dispatchers.IO) {
                 bitmap.saveToFile(requireActivity(), "avatar")
             }

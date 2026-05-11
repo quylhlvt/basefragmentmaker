@@ -15,11 +15,13 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.select
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.setTextActionBar
+import com.example.basefragment.core.extention.visible
 import com.example.basefragment.databinding.FragmentCosplayBinding
 import com.example.basefragment.ui.main.customize.CustomizeFragment
 import dagger.hilt.android.AndroidEntryPoint
@@ -45,7 +47,9 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
         requireActivity().onBackPressedDispatcher.addCallback(
             viewLifecycleOwner,
             object : OnBackPressedCallback(true) {
-                override fun handleOnBackPressed() { popBack() }
+                override fun handleOnBackPressed() {
+                    popBack()
+                }
             }
         )
     }
@@ -69,20 +73,33 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
     }
 
     override fun viewListener() {
-        binding.actionBar.btnActionBarLeft.onClick { popBack() }
+        binding.apply {
 
-        binding.random.onClick {
-            viewModel.randomize()
-        }
+            actionBar.btnActionBarLeft.onClick { popBack() }
 
-        binding.show.onClick {
-            val item = viewModel.randomItem.value ?: return@onClick
-            val args = CustomizeFragment.newArgs(
-                templateIndex   = item.templateIndex,
-                isEdit          = false,
-                savedSelections = item.selections
-            )
-            findNavController().navigate(R.id.action_cosplay_to_show, args)
+            random.onClick {
+                viewModel.randomize()
+            }
+            actionBar.btnActionBarRight.onClick {
+                showGuide.visible()
+            }
+            closeGuide.onClick {
+                showGuide.gone()
+            }
+            show.onClick {
+                val item = viewModel.randomItem.value ?: return@onClick
+                val cached = viewModel.cachedBitmap
+                if (cached != null && !cached.isRecycled) {
+                    viewModelActivity.cosplayBitmap = cached
+                }
+
+                val args = CustomizeFragment.newArgs(
+                    templateIndex = item.templateIndex,
+                    isEdit = false,
+                    savedSelections = item.selections
+                )
+                findNavController().navigate(R.id.action_cosplay_to_show, args)
+            }
         }
     }
 
@@ -158,21 +175,21 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
     }
 
     private fun showBitmap(bitmap: Bitmap) {
-        binding.imgPreview.apply {
+        binding.material2.apply {
             removeAllViews()
             addView(AppCompatImageView(requireContext()).apply {
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
-                scaleType = ImageView.ScaleType.FIT_CENTER
+                scaleType = ImageView.ScaleType.CENTER_CROP
                 setImageBitmap(bitmap)
             })
         }
     }
 
     private fun mergeBitmaps(bitmaps: List<Bitmap>): Bitmap {
-        val size   = 512
+        val size = 512
         val merged = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(merged)
         bitmaps.forEach { bmp ->

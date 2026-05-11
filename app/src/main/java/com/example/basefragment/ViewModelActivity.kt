@@ -1,6 +1,7 @@
 package com.example.basefragment
 
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -42,7 +43,11 @@ class ViewModelActivity @Inject constructor(
     val myDesignPaths:        StateFlow<List<String>>      = appDataManager.myDesignPaths
     val isLoading:            StateFlow<Boolean>           = appDataManager.isLoading
     val error:                StateFlow<String?>           = appDataManager.error
-
+    var cosplayBitmap: Bitmap? = null
+    var userResultBitmap: Bitmap? = null
+    var customizeBitmap: Bitmap? = null
+    var cosplayPercent: Int = 0
+    var shouldRestartShow = false
     val networkOnline: StateFlow<Boolean> = networkFlow
         .stateIn(
             scope = viewModelScope,

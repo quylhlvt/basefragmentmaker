@@ -149,10 +149,10 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
     }
 
     private fun confirmDelete() {
-        android.app.AlertDialog.Builder(requireContext())
-            .setTitle(R.string.delete)
-            .setMessage(R.string.are_you_sure_want_to_delete_this_item)
-            .setPositiveButton(getString(R.string.delete)) { _, _ ->
+        showConfirmDialog(
+            title = getString(R.string.delete),
+            message = getString(R.string.are_you_sure_want_to_delete_this_item),
+            onYes = {
                 viewModel.deleteFile(
                     path     = imagePath,
                     isAvatar = imageType == 1,
@@ -161,9 +161,9 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                         findNavController().safeNavigate(R.id.action_view_to_myPony)
                     }
                 )
-            }
-            .setNegativeButton(getString(R.string.cancel), null)
-            .show()
+            },
+            onNo = null
+        )
     }
 
     private fun navigateToEdit() {

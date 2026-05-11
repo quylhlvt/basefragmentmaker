@@ -20,7 +20,6 @@ import javax.inject.Inject
 class CosplayViewModel @Inject constructor(
     private val appDataManager: AppDataManager
 ) : ViewModel() {
-
     // ✅ Khai báo HẾT property TRƯỚC init
     private val _randomItem = MutableStateFlow<RandomItem?>(null)
     val randomItem: StateFlow<RandomItem?> = _randomItem.asStateFlow()

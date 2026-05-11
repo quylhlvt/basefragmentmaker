@@ -70,15 +70,26 @@ fun View.select() {
     isSelected = true
 }
 
-fun View.onClick(interval: Long = 500, action: (View) -> Unit) {
+//fun View.onClick(interval: Long = 500, action: (View) -> Unit) {
+//    setOnClickListener {
+//        val lastClickTime = (this.getTag(KEY_LAST_CLICK_TIME) as? Long) ?: 0L
+//        val currentTime = System.currentTimeMillis()
+//
+//        if (currentTime - lastClickTime >= interval) {
+//            action(it)
+//
+//            this.setTag(KEY_LAST_CLICK_TIME, currentTime)
+//        }
+//    }
+//}
+private var lastClickTime = 0L
+
+fun View.onClick(interval: Long = 200, action: (View) -> Unit) {
     setOnClickListener {
-        val lastClickTime = (this.getTag(KEY_LAST_CLICK_TIME) as? Long) ?: 0L
         val currentTime = System.currentTimeMillis()
-
         if (currentTime - lastClickTime >= interval) {
+            lastClickTime = currentTime
             action(it)
-
-            this.setTag(KEY_LAST_CLICK_TIME, currentTime)
         }
     }
 }

@@ -22,7 +22,6 @@ class MyAvatarAdapter(val context: Context) :
 
     override fun onBind(binding: ItemMyAlbumBinding, item: MyAlbumModel, position: Int) {
         binding.apply {
-
             loadImage(root, item.path, imvImage)
 
             if (item.isShowSelection) {
@@ -35,26 +34,22 @@ class MyAvatarAdapter(val context: Context) :
                 btnDelete.visible()
             }
 
-            if (item.isSelected) {
-                btnSelect.setImageResource(R.drawable.ic_selected)
-            } else {
-                btnSelect.setImageResource(R.drawable.ic_not_select)
-            }
+            btnSelect.setImageResource(
+                if (item.isSelected) R.drawable.ic_selected else R.drawable.ic_not_select
+            )
 
+            // Click luôn navigate, không check selection mode
             root.onClick { onItemClick.invoke(item) }
 
             root.setOnLongClickListener {
-                if (items.any { album -> album.isShowSelection }) {
-                    return@setOnLongClickListener false
-                } else {
-                    onLongClick.invoke(position)
-                    return@setOnLongClickListener true
-
-                }
+                if (items.any { it.isShowSelection }) return@setOnLongClickListener false
+                onLongClick.invoke(position)
+                true
             }
+
             btnEdit.onClick { onEditClick.invoke(item.idEdit) }
             btnDelete.onClick { onDeleteClick.invoke(item.path) }
-            btnSelect.onClick { onItemTick.invoke(position) }
+            btnSelect.onClick { onItemTick.invoke(position) } // chỉ tick button mới toggle
         }
     }
 }

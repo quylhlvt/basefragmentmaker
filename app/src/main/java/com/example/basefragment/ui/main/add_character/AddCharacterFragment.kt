@@ -383,18 +383,20 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         viewModel.setTypeBackground(ValueKey.IMAGE_BACKGROUND)
 
         viewLifecycleOwner.lifecycleScope.launch {
-            if (imagepath.isNotEmpty()) {
-                // ✅ hideLoadingSafe chỉ chạy trong callback onDone — sau khi Glide load xong
+            // ✅ Ưu tiên dùng bitmap từ CustomizeFragment nếu có
+            val customizeBitmap = viewModelActivity.customizeBitmap
+            if (customizeBitmap != null && !customizeBitmap.isRecycled) {
+                binding.drawView.addDraw(
+                    viewModel.loadDrawableEmoji(customizeBitmap, isCharacter = true)
+                )
+                viewModelActivity.customizeBitmap = null // clear sau khi dùng
+                hideLoadingSafe()
+            } else if (imagepath.isNotEmpty()) {
                 addDrawable(imagepath, isCharacter = true) {
                     hideLoadingSafe()
                 }
             } else {
-                // ✅ Không có ảnh → ẩn ngay
                 hideLoadingSafe()
-            }
-
-            if (viewModel.pathDefault.isNotEmpty()) {
-                addDrawable(viewModel.pathDefault, isCharacter = true)
             }
         }
     }
@@ -568,7 +570,17 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                 backgroundImageAdapter.clearSelection()
                 backgroundColorAdapter.clearSelection()
                 hideLoadingSafe()
-                addDrawable(imagepath, isCharacter = true)
+
+                // ✅ Ưu tiên bitmap đã cache, fallback về imagepath
+                val cachedBitmap = viewModelActivity.customizeBitmap
+                if (cachedBitmap != null && !cachedBitmap.isRecycled) {
+                    binding.drawView.addDraw(
+                        viewModel.loadDrawableEmoji(cachedBitmap, isCharacter = true)
+                    )
+                    hideLoadingSafe()
+                } else if (imagepath.isNotEmpty()) {
+                    addDrawable(imagepath, isCharacter = true)
+                }
             },
             onNo = { hideLoadingSafe() }
         )

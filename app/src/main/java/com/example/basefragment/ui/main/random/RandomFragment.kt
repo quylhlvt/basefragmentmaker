@@ -71,28 +71,33 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
         actionBar.apply {
             tvCenter.select()
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
-            setTextActionBar(tvCenter, getString(R.string.settings))
+            setImageActionBar(btnActionBarRight, R.drawable.next_app)
+            setTextActionBar(tvCenter, getString(R.string.random))
         }
     }
 
     override fun viewListener() {
         // ✅ Chỉ 1 listener duy nhất cho back
-        binding.actionBar.btnActionBarLeft.onClick {
-            popBack()
-        }
+        binding.apply {
 
-        binding.random.onClick {
-            viewModel.randomize()
-        }
 
-        binding.show.onClick {
-            val item = viewModel.randomItem.value ?: return@onClick
-            val args = CustomizeFragment.newArgs(
-                templateIndex   = item.templateIndex,
-                isEdit          = false,
-                savedSelections = item.selections
-            )
-            findNavController().navigate(R.id.action_random_to_custom, args)
+            actionBar.btnActionBarLeft.onClick {
+                popBack()
+            }
+
+            random.onClick {
+                viewModel.randomize()
+            }
+
+            actionBar.btnActionBarRight.onClick {
+                val item = viewModel.randomItem.value ?: return@onClick
+                val args = CustomizeFragment.newArgs(
+                    templateIndex = item.templateIndex,
+                    isEdit = false,
+                    savedSelections = item.selections
+                )
+                findNavController().navigate(R.id.action_random_to_custom, args)
+            }
         }
     }
 
@@ -160,21 +165,21 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
     }
 
     private fun showBitmap(bitmap: Bitmap) {
-        binding.imgRandom.apply {
+        binding.material2.apply {
             removeAllViews()
             addView(AppCompatImageView(requireContext()).apply {
                 layoutParams = ViewGroup.LayoutParams(
                     ViewGroup.LayoutParams.MATCH_PARENT,
                     ViewGroup.LayoutParams.MATCH_PARENT
                 )
-                scaleType = ImageView.ScaleType.FIT_CENTER
+                scaleType = ImageView.ScaleType.CENTER_CROP
                 setImageBitmap(bitmap)
             })
         }
     }
 
     private fun mergeBitmaps(bitmaps: List<Bitmap>): Bitmap {
-        val size   = 512
+        val size = 512
         val merged = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(merged)
         bitmaps.forEach { bmp ->

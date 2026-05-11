@@ -93,4 +93,5 @@
     <string name="image">Imagen</string>
     <string name="color">Color</string>
     <string name="successful">Exitoso</string>
+    <string name="context_guide_body">En el modo Cosplay, los jugadores reciben aleatoriamente una imagen de referencia a seguir. Tu tarea es recrear ese personaje con la mayor precisión posible eligiendo los peinados, atuendos, colores y accesorios correctos. Cada coincidencia correcta aumenta tu puntuación porcentual (%). Cuanto más se parezca tu personaje a la imagen aleatoria, mayor será tu puntuación final. Presta atención a los pequeños detalles para lograr el mejor resultado de cosplay.</string>
 </resources>
