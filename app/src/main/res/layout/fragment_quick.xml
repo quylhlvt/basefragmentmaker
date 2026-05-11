@@ -9,7 +9,7 @@
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:src="@drawable/img_bg_app"
+        android:src="@drawable/img_bg_view"
         android:scaleType="fitXY"
         android:elevation="-1dp"
         android:adjustViewBounds="true" />

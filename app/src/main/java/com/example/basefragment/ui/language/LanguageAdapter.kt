@@ -38,11 +38,13 @@ class LanguageAdapter (val context: Context) : BaseAdapter<LanguageModel, ItemLa
             }
         }
     }
-
     @SuppressLint("NotifyDataSetChanged")
     fun submitItem(position: Int) {
+        val oldSelected = items.indexOfFirst { it.activate }
         items.forEach { it.activate = false }
         items[position].activate = true
-        notifyDataSetChanged()
+        // Chỉ update 2 item thay đổi, không redraw toàn bộ list
+        if (oldSelected >= 0) notifyItemChanged(oldSelected)
+        notifyItemChanged(position)
     }
 }

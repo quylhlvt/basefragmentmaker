@@ -56,23 +56,24 @@ class ViewModelActivity @Inject constructor(
     // ── INIT ──────────────────────────────────────────────────────────────────
 
     init {
+        Log.d("PERF2", "ViewModelActivity created: ${System.currentTimeMillis()}")
         loadInitialData()
     }
 
     private fun loadInitialData() {
         viewModelScope.launch {
             try {
-                Log.d("ViewModelActivity", "🚀 loadInitialData start")
-                appDataManager.loadInitialData()
-                Log.d("ViewModelActivity", "✅ local data loaded")
-                // Fetch online ngay nếu có mạng
+                appDataManager.loadQuickData()
+                val hasCache = appDataManager.templates.value.isNotEmpty()
+                if (!hasCache) {
+                    appDataManager.loadInitialData()
+                }
                 fetchOnlineTemplatesInternal()
             } catch (e: Exception) {
                 Log.e("ViewModelActivity", "❌ Init error: ${e.message}", e)
             }
         }
     }
-
     // ── FETCH (duy nhất 1 hàm, có guard) ─────────────────────────────────────
 
     /**
@@ -106,7 +107,7 @@ class ViewModelActivity @Inject constructor(
 
     /** Public — BaseFragment và pull-to-refresh gọi */
     fun fetchOnlineTemplates() {
-        viewModelScope.launch { fetchOnlineTemplatesInternal() }
+        viewModelScope.launch(Dispatchers.IO){ fetchOnlineTemplatesInternal() }
     }
 
     fun forceReloadAll() {

@@ -13,7 +13,7 @@
         android:adjustViewBounds="true"
         android:elevation="-1dp"
         android:scaleType="fitXY"
-        android:src="@drawable/img_bg_app" />
+        android:src="@drawable/img_bg_view" />
     <FrameLayout
         android:id="@+id/layoutActionBar"
         android:layout_width="match_parent"

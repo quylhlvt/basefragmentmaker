@@ -63,6 +63,7 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
         actionBar.apply {
             tvCenter.select()
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
+            setImageActionBar(btnActionBarRight, R.drawable.guid)
             setTextActionBar(tvCenter, getString(R.string.cosplay))
         }
     }

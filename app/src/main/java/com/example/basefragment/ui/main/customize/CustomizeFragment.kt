@@ -429,7 +429,7 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
             }
 
             val savedPath = withContext(Dispatchers.IO) {
-                bitmap.saveToFile(requireContext(), "avatar")
+                bitmap.saveToFile(requireActivity(), "avatar")
             }
 
             if (savedPath == null) {

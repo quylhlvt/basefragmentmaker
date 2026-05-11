@@ -31,6 +31,7 @@ fun Activity.hideNavigation(isBlack: Boolean = false) {
                 View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
     }
 }
+
 fun Fragment.hideSoftKeyboard() {
     val inputMethodManager = requireContext()
         .getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager

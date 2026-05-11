@@ -77,6 +77,7 @@ class AppDataManager @Inject constructor(
     // ── INIT ─────────────────────────────────────────────────────────────────
 
     suspend fun loadInitialData() {
+        Log.d("PERF2", "loadInitialData START: ${System.currentTimeMillis()}")
         if (isDataLoaded) { Log.d(TAG, "⚠️ Already loaded, skip"); return }
         _isLoading.value = true
         _error.value = null
@@ -103,6 +104,33 @@ class AppDataManager @Inject constructor(
                 _isLoading.value = false
             }
         }
+
+        Log.d("PERF2", "loadInitialData END: ${System.currentTimeMillis()}")
+
+    }
+
+    // In AppDataManager:
+    suspend fun loadQuickData(): Boolean = withContext(Dispatchers.IO) {
+        Log.d("PERF2", "loadQuickData START: ${System.currentTimeMillis()}")
+
+        val cached = loadTemplatesFromJson()
+        Log.d("PERF2", "loadQuickData fromJson done: ${System.currentTimeMillis()}")
+
+        if (cached.isNotEmpty()) {
+            _templates.value = cached
+            loadCustomizedCharacters()
+            combineCharacterLists()
+        }
+        coroutineScope {
+            launch { loadBackgrounds() }
+            launch { loadBackgroundTexts() }
+            launch { loadStickers() }
+            launch { loadSpeechs() }
+            launch { loadMyDesigns() }
+        }
+        Log.d("PERF2", "loadQuickData END: ${System.currentTimeMillis()}")
+
+        cached.isNotEmpty() // ← return Boolean
     }
 
 

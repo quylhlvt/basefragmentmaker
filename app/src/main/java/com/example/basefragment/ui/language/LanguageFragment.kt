@@ -60,30 +60,40 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         return true
     }
     override fun setupPreViews() {
-        // ✅ Load bg
+        // ❌ Xóa Glide load background — đã set android:src trong XML rồi
+        // Chỉ update nếu cần đổi bg runtime
         val isFirst = !SharedPreferencesManager.isLanuageScreen()
-        val bgRes = if (isFirst) R.drawable.img_bg_lang else R.drawable.img_bg_home
-        Glide.with(this)
-            .load(bgRes)
-            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-            .into(binding.imageBgLang)
+        if (!isFirst) {
+            // Chỉ đổi khi không phải lần đầu
+            binding.imageBgLang.setImageResource(R.drawable.img_bg_home)
+        }
 
-        // ✅ Setup RecyclerView sớm nhất có thể
         binding.recycleLanguage.apply {
             adapter = languageAdapter
             itemAnimator = null
             background = ContextCompat.getDrawable(requireContext(), R.drawable.img_bg_rcy_lang)
         }
 
-        // ✅ Load list
         val currentLang = SharedPreferencesManager.isLanguageKey()
         viewModel.setFirstLanguage(isFirst = isFirst)
         viewModel.loadLanguages(currentLang)
 
-        // ✅ Submit list ngay nếu có sẵn
         val list = viewModel.languageList.value
         if (list.isNotEmpty()) {
             languageAdapter.submitList(list)
+        }
+    }
+    private fun updateActionBar(isFirst: Boolean) {
+        binding.apply {
+            if (isFirst) {
+                actionBar.btnActionBarRight.invisible()
+                actionBar.btnActionBarRight.setImageResource(R.drawable.select_language)
+            } else {
+                actionBar.btnActionBarLeft.visible()
+                actionBar.btnActionBarRight.setImageResource(R.drawable.select_language)
+                // ❌ Xóa Glide — dùng setImageResource trực tiếp
+                imageBgLang.setImageResource(R.drawable.img_bg_home)
+            }
         }
     }
     override fun viewListener() {
@@ -143,21 +153,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         }
     }
 
-    private fun updateActionBar(isFirst: Boolean) {
-        binding.apply {
-            if (isFirst) {
-                actionBar.btnActionBarRight.invisible()
-                actionBar.btnActionBarRight.setImageResource(R.drawable.select_language)
-            } else {
-                actionBar.btnActionBarLeft.visible()
-                actionBar.btnActionBarRight.setImageResource(R.drawable.select_language)
-                Glide.with(this@LanguageFragment)
-                    .load(R.drawable.img_bg_home)
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .into(imageBgLang)
-            }
-        }
-    }
+
 
     override fun bindViewModel() {
     }

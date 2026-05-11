@@ -32,13 +32,16 @@ import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.databinding.DialogbaseBinding
 import com.google.android.material.snackbar.Snackbar
+import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.launch
 import java.util.Locale
 import javax.inject.Inject
 import kotlin.getValue
 
-abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> VB,
-                                                                private val viewModelClass: Class<VM>) : Fragment() {
+abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(
+    private val bindingInflater: (LayoutInflater, ViewGroup?, Boolean) -> VB,
+    private val viewModelClass: Class<VM>
+) : Fragment() {
 
     private lateinit var _binding: VB
     protected val binding: VB get() = _binding
@@ -56,6 +59,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     open fun setupPreViews() {}
     abstract fun viewListener()
     protected var toast: Toast? = null
+
     @Inject
     internal lateinit var sharedPreferences: SharedPreferencesManager
     abstract fun inflateBinding(
@@ -69,12 +73,15 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
+        Log.d("PERF2", "onCreateView ${this::class.simpleName}: ${System.currentTimeMillis()}")
+
         Log.v(TAG, "onCreateView: $this")
         _navController = findNavController()
         _binding = inflateBinding(inflater, container, savedInstanceState)
         setupPreViews()
         return binding.root
     }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
 
@@ -93,37 +100,38 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
             )
         }
     }
+
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("PERF2", "onViewCreated ${this::class.simpleName}: ${System.currentTimeMillis()}")
+
         initView()
         initText()
-        viewListener()
-        bindViewModel()
-
-        // Delay observeData + network sau frame đầu render
-        view.post {
-            if (isAdded) {
-                observeData()
-                observeNetworkRetry()
-            }
+        binding.root.post {
+            if (!isAdded) return@post
+            viewListener()
+            bindViewModel()
+            observeData()
+            observeNetworkRetry()
         }
     }
+
     private fun observeNetworkRetry() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Chỉ lắng nghe network thay đổi, KHÔNG check ngay khi vào màn
-                viewModelActivity.networkOnline.collect { isOnline ->
-                    if (isOnline) {
+                viewModelActivity.networkOnline
+                    .filter { it } // chỉ quan tâm khi online = true
+                    .collect {
                         val hasOnlineData = viewModelActivity.templates.value
                             .any { it.id.startsWith("online_") }
                         if (!hasOnlineData) {
                             viewModelActivity.fetchOnlineTemplates()
                         }
                     }
-                }
             }
         }
     }
+
     override fun onAttach(context: Context) {
         super.onAttach(context)
 
@@ -134,6 +142,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         super.onCreate(savedInstanceState)
         Log.v(TAG, "onCreate: $this")
     }
+
     override fun onStart() {
         super.onStart()
 
@@ -170,6 +179,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         super.onDetach()
         Log.v(TAG, "onDetach: $this")
     }
+
     private var _navController: NavController? = null
 
     protected val navController: NavController? get() = _navController
@@ -180,14 +190,17 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
     fun showSnackbar(message: String) {
         Snackbar.make(binding.root, message, Snackbar.LENGTH_SHORT).show()
     }
+
     fun showToast(content: Any) {
-        if (toast != null){
+        if (toast != null) {
             toast?.cancel()
         }
         val contentString = when (content) {
             is String -> content
             is Int -> getString(content)
-            else -> {""}
+            else -> {
+                ""
+            }
         }
         toast = Toast.makeText(requireContext(), contentString, Toast.LENGTH_SHORT)
         toast?.show()
@@ -198,6 +211,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         dialog = null
         requireActivity().hideNavigation(true)
     }
+
     fun showLoadingSafe() {
         if (!isAdded || activity == null) return
         loadingController?.showGlobalLoading()
@@ -208,7 +222,7 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(  private val bind
         loadingController?.hideGlobalLoading()
     }
 
-    // ========== Confirm Dialog ==========
+// ========== Confirm Dialog ==========
 
     fun showConfirmDialog(
         message: String,
