@@ -33,7 +33,7 @@
             app:layout_constraintTop_toTopOf="parent"
             tools:layout_editor_absoluteX="16dp">
 
-            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/tvTitle"
                 style="@style/single_marquee"
                 android:layout_width="match_parent"

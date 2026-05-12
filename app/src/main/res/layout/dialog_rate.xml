@@ -46,7 +46,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/tv1"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -1,0 +1,142 @@
+package com.oc.catemoji.catoc.ui.onboarding.permission
+
+import android.content.pm.PackageManager
+import android.os.Build
+import android.os.Bundle
+import android.text.TextUtils
+import android.view.LayoutInflater
+import android.view.ViewGroup
+import androidx.fragment.app.Fragment
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
+import androidx.lifecycle.repeatOnLifecycle
+import com.oc.catemoji.catoc.R
+import com.oc.catemoji.catoc.core.base.BackPressHandler
+import com.oc.catemoji.catoc.core.base.BaseFragment
+import com.oc.catemoji.catoc.core.extention.gone
+import com.oc.catemoji.catoc.core.extention.onClick
+import com.oc.catemoji.catoc.core.extention.select
+import com.oc.catemoji.catoc.core.extention.toHomeFromPermission
+import com.oc.catemoji.catoc.core.extention.visible
+import com.oc.catemoji.catoc.core.helper.StringHelper
+import com.oc.catemoji.catoc.databinding.FragmentPermissionBinding
+import com.oc.catemoji.catoc.utils.key.RequestKey
+import com.oc.catemoji.catoc.core.extention.checkPermissions
+import com.oc.catemoji.catoc.core.extention.goToSettings
+import com.oc.catemoji.catoc.core.extention.requestPermission
+import com.oc.catemoji.catoc.core.extention.setImageActionBar
+import com.oc.catemoji.catoc.core.extention.setTextActionBar
+import com.oc.catemoji.catoc.core.helper.PermissionHelper
+import com.oc.catemoji.catoc.core.helper.PermissionRequestHelper
+import com.oc.catemoji.catoc.databinding.FragmentSettingBinding
+import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.launch
+
+@AndroidEntryPoint
+class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionViewModel>(
+    FragmentPermissionBinding::inflate, PermissionViewModel::class.java
+), BackPressHandler {
+
+    private var storageDenyCount = 0
+    private var notificationDenyCount = 0
+
+    override fun viewListener() {
+        binding.swPermission.onClick(1500) { handlePermissionRequest(isStorage = true) }
+        binding.swNotification.onClick(1500) { handlePermissionRequest(isStorage = false) }
+        binding.tvContinue.onClick(1000) { handleContinue() }
+    }
+    override fun inflateBinding(
+        inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
+    ): FragmentPermissionBinding = FragmentPermissionBinding.inflate(inflater, container, false)
+
+    override fun initView() {
+        binding.setupActionBar()
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
+            binding.btnStorage.visible()
+            binding.btnNotification.gone()
+        } else {
+            binding.btnNotification.visible()
+            binding.btnStorage.gone()
+        }
+        // cập nhật UI switch khi vào màn
+        updatePermissionUI(requireContext().checkPermissions(PermissionHelper.storagePermission), true)
+        updatePermissionUI(requireContext().checkPermissions(PermissionHelper.notificationPermission), false)
+    }
+
+    private fun FragmentPermissionBinding.setupActionBar() {
+        actionBar.apply {
+            tvStart.select()
+            setTextActionBar(tvStart, getString(R.string.permission))
+        }
+    }
+
+    private fun handlePermissionRequest(isStorage: Boolean) {
+        val perms = if (isStorage) PermissionHelper.storagePermission
+        else PermissionHelper.notificationPermission
+        val count = if (isStorage) storageDenyCount else notificationDenyCount
+
+        when {
+            requireContext().checkPermissions(perms) ->
+                showToast(if (isStorage) R.string.granted_storage else R.string.granted_notification)
+            count >= 2 -> activity?.goToSettings()
+            else -> requestPermission(perms,
+                if (isStorage) RequestKey.STORAGE_PERMISSION_CODE
+                else RequestKey.NOTIFICATION_PERMISSION_CODE)
+        }
+    }
+
+    private fun updatePermissionUI(granted: Boolean, isStorage: Boolean) {
+        val imageView = if (isStorage) binding.swPermission else binding.swNotification
+        imageView.setImageResource(if (granted) R.drawable.switch_on else R.drawable.switch_off)
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        val granted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+        when (requestCode) {
+            RequestKey.STORAGE_PERMISSION_CODE -> {
+                if (granted) { storageDenyCount = 0; updatePermissionUI(true, true) }
+                else storageDenyCount++
+            }
+            RequestKey.NOTIFICATION_PERMISSION_CODE -> {
+                if (granted) { notificationDenyCount = 0; updatePermissionUI(true, false) }
+                else notificationDenyCount++
+            }
+        }
+    }
+
+    override fun observeData() {}
+
+    override fun initText() {
+        binding.actionBar.tvCenter.select()
+        val textRes = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            R.string.to_access_13 else R.string.to_access
+        binding.txtPermission.text = TextUtils.concat(
+            createColoredText(R.string.allow, R.color.app_color),
+            " ",
+            createColoredText(R.string.app_name, R.color.app_color),
+            " ",
+            createColoredText(textRes, R.color.app_color)
+        )
+    }
+
+    private fun handleContinue() {
+        sharedPreferences.setPermissionScreen(true)
+        toHomeFromPermission()
+    }
+
+    override fun bindViewModel() {}
+
+    private fun createColoredText(
+        @androidx.annotation.StringRes textRes: Int,
+        @androidx.annotation.ColorRes colorRes: Int,
+        font: Int = R.font.baloo2_bold
+    ) = StringHelper.changeColor(requireContext(), getString(textRes), colorRes, font)
+
+    override fun onBackPressed(): Boolean {
+        requireActivity().finish()
+        return true
+    }
+}

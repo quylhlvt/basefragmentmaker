@@ -36,6 +36,7 @@
                 android:layout_marginBottom="4dp">
                 <ImageView
                     android:id="@+id/imvImage"
+                    android:layout_margin="3dp"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:scaleType="centerInside"

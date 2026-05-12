@@ -10,13 +10,13 @@ plugins {
 }
 
 android {
-    namespace 'com.example.basefragment'
+    namespace 'com.oc.catemoji.catoc'
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId "com.example.basefragment"
+        applicationId "com.oc.catemoji.catoc"
         minSdk 24
         targetSdk 36
         versionCode 1
@@ -24,7 +24,7 @@ android {
 
         testInstrumentationRunner= "androidx.test.runner.AndroidJUnitRunner"
         def formattedDate = new Date().format('MM.dd.yyyy')
-        archivesBaseName = "Cat_Avatar_Cat_Maker_v${versionName}_${formattedDate}"
+        archivesBaseName = "ST229_Cat_Avatar_Cat_Maker_v${versionName}_${formattedDate}"
     }
 
     buildTypes {

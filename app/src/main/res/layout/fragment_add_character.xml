@@ -80,7 +80,7 @@
             android:scaleType="centerCrop" />
 
         <!--        drawView-->
-        <com.example.basefragment.core.custom.DrawView
+        <com.oc.catemoji.catoc.core.custom.DrawView
             android:id="@+id/drawView"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

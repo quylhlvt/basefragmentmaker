@@ -14,7 +14,7 @@
         app:layout_constraintEnd_toEndOf="@+id/buttomTilte"
         app:layout_constraintStart_toStartOf="@+id/buttomTilte"
         app:layout_constraintTop_toTopOf="parent">
-        <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+        <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
             android:id="@+id/txtLang"
             android:layout_width="match_parent"
             android:layout_height="match_parent"

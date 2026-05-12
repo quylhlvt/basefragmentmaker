@@ -78,7 +78,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/txt1"
                 style="@style/single_marquee"
                 android:layout_width="0dp"
@@ -126,7 +126,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/txt2"
                 style="@style/single_marquee"
                 android:layout_width="0dp"
@@ -173,7 +173,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/txt3"
 
                 style="@style/single_marquee"
@@ -221,7 +221,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/txt4"
                 style="@style/single_marquee"
                 android:layout_width="0dp"
