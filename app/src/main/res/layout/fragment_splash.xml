@@ -76,7 +76,7 @@
                 android:layout_width="12dp"
                 android:layout_height="match_parent"
                 android:layout_gravity="start|center_vertical"
-                android:layout_marginStart="7dp"
+                android:layout_marginStart="6dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/ic_progress_cap_right" />
         </FrameLayout>

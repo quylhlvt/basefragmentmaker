@@ -8,7 +8,7 @@
     <string name="title_2">Buat avatar sempurnamu</string>
     <string name="title_3">Koleksi berbagai item</string>
     <string name="not_select_lang">Silakan pilih bahasa</string>
-    <string name="pony_maker">Pony Maker</string>
+    <string name="pony_maker">Pembuat Poni</string>
     <string name="trending_custom">Kustom Populer</string>
     <string name="my_work">Karya Saya</string>
 
@@ -85,7 +85,7 @@
     <string name="have_rated">Terima kasih telah memberi nilai aplikasi kami</string>
     <string name="refresh">Muat Ulang</string>
     <string name="hello_blank_fragment">Halo fragmen kosong</string>
-    <string name="cosplay">Cosplay</string>
+    <string name="cosplay">Bermain Peran</string>
     <string name="permission_camera_denied">Izin kamera diperlukan untuk menggunakan fitur ini</string>
     <string name="cat_random">Kucing Acak</string>
     <string name="random">Acak</string>
@@ -94,6 +94,12 @@
     <string name="image">Gambar</string>
     <string name="color">Warna</string>
     <string name="successful">Berhasil</string>
-    <string name="context_guide_body">Dalam mode Cosplay, pemain akan diberikan satu gambar referensi secara acak. Tugas Anda adalah membuat ulang karakter tersebut seakurat mungkin dengan memilih gaya rambut, pakaian, warna, dan aksesori yang tepat. Setiap kecocokan yang benar akan meningkatkan persentase Anda (%). Semakin mirip karakter Anda dengan gambar acak, semakin tinggi skor akhir Anda. Perhatikan detail kecil untuk mendapatkan hasil cosplay terbaik.</string>
+    <string name="context_guide_body">Dalam mode Bermain Peran, pemain akan diberikan satu gambar referensi secara acak. Tugas Anda adalah membuat ulang karakter tersebut seakurat mungkin dengan memilih gaya rambut, pakaian, warna, dan aksesori yang tepat. Setiap kecocokan yang benar akan meningkatkan persentase Anda (%). Semakin mirip karakter Anda dengan gambar acak, semakin tinggi skor akhir Anda. Perhatikan detail kecil untuk mendapatkan hasil cosplay terbaik.</string>
     <string name="try_again">Coba Lagi</string>
+    <string name="no_internet">Tidak ada internet</string>
+    <string name="internet">Internet</string>
+    <string name="please_connect_to_the_internet_to_download_more_data">Sambungkan ke internet untuk mengunduh lebih banyak data</string>
+    <string name="unstable_connection_please_check_your_network_connection">Koneksi tidak stabil, periksa koneksi jaringan kamu</string>
+    <string name="ok">Oke</string>
+    <string name="please_wait_a_few_seconds_for_data_to_load">Harap tunggu beberapa detik untuk memuat data.</string>
 </resources>

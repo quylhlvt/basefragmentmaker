@@ -82,6 +82,7 @@ fun loadImage(
         Glide.with(viewGroup)
             .load(path)
             .apply(softwareOptions)  // ✅
+            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
             .into(imageView)
     }
 }

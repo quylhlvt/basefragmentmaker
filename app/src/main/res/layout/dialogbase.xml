@@ -95,6 +95,7 @@
                     app:layout_constraintTop_toTopOf="parent">
 
                     <FrameLayout
+
                         android:id="@+id/btnNo"
                         android:layout_width="0dp"
                         android:layout_height="0dp"
@@ -119,6 +120,7 @@
                     </FrameLayout>
 
                     <FrameLayout
+
                         android:id="@+id/btnYes"
                         android:layout_width="0dp"
                         android:layout_height="0dp"

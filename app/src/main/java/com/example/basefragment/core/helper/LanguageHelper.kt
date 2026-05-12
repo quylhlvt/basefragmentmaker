@@ -55,5 +55,10 @@ object LanguageHelper {
         val locale = Locale(languageCode)
         Locale.setDefault(locale)
         SharedPreferencesManager.setLanguageKey(languageCode)
+
+        // ✅ Update configuration ngay lập tức
+        val config = Configuration(context.resources.configuration)
+        config.setLocale(locale)
+        context.resources.updateConfiguration(config, context.resources.displayMetrics)
     }
 }

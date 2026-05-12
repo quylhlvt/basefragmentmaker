@@ -1,5 +1,6 @@
 package com.example.basefragment.ui.language
 
+import android.content.res.Configuration
 import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.util.Log
@@ -36,6 +37,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import java.util.Locale
 
 @AndroidEntryPoint
 class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel>(
@@ -191,10 +193,15 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
             sharedPreferences.setLanuageScreen(true)
             Log.d("LANG", "Navigating to Intro")
             toIntroFromLanguage()
-        } else {
-            Log.d("LANG", "Navigating to Home")
-            requireActivity().recreate()
-            toHomeFromLanguage()
-        }
+        }  else {
+        // Update locale cho Activity context ngay lập tức
+        val locale = Locale(code)
+        val config = Configuration(requireActivity().resources.configuration)
+        config.setLocale(locale)
+        requireActivity().resources.updateConfiguration(config, requireActivity().resources.displayMetrics)
+
+        // Rồi mới navigate
+        toHomeFromLanguage()
+    }
     }
 }

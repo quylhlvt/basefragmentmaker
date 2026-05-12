@@ -19,7 +19,8 @@ import javax.inject.Inject
 class RandomViewModel  @Inject constructor(
     private val appDataManager: AppDataManager
 ) : ViewModel() {
-
+    private val _isDataReady = MutableStateFlow(false)
+    val isDataReady: StateFlow<Boolean> = _isDataReady.asStateFlow()
     private val _randomItem = MutableStateFlow<RandomItem?>(null)
     val randomItem: StateFlow<RandomItem?> = _randomItem.asStateFlow()
     private var _cachedBitmap: Bitmap? = null
@@ -29,7 +30,8 @@ class RandomViewModel  @Inject constructor(
             appDataManager.templates
                 .filter { it.isNotEmpty() }
                 .take(1)
-                .collect { randomize() }
+                .collect { _isDataReady.value = true
+                }
         }
     }
     data class RandomItem(
@@ -44,11 +46,17 @@ class RandomViewModel  @Inject constructor(
         _cachedBitmap?.recycle()
         _cachedBitmap = null
     }
-    fun randomize() {
+    fun randomize(isOnline: Boolean = true) {
         _cachedBitmap?.recycle()
         _cachedBitmap = null
         viewModelScope.launch(Dispatchers.IO) {
-            val templates = appDataManager.templates.value
+            val allTemplates = appDataManager.templates.value
+            if (allTemplates.isEmpty()) return@launch
+
+            // ✅ Nếu offline → chỉ dùng offline templates
+            val templates = if (isOnline) allTemplates
+            else allTemplates.filter { !it.id.startsWith("online_") }
+
             if (templates.isEmpty()) return@launch
 
             val idx      = templates.indices.random()

@@ -8,7 +8,7 @@
     <string name="title_2">अपना परफेक्ट अवतार बनाएं</string>
     <string name="title_3">विभिन्न आइटम्स का संग्रह</string>
     <string name="not_select_lang">कृपया एक भाषा चुनें</string>
-    <string name="pony_maker">पोनी मेकर</string>
+    <string name="pony_maker">पोनी निर्माता</string>
     <string name="trending_custom">ट्रेंडिंग कस्टम</string>
     <string name="my_work">मेरा काम</string>
 
@@ -85,7 +85,7 @@
     <string name="have_rated">हमारे ऐप को रेट करने के लिए धन्यवाद</string>
     <string name="refresh">रीफ़्रेश</string>
     <string name="hello_blank_fragment">नमस्ते खाली फ्रैगमेंट</string>
-    <string name="cosplay">कॉसप्ले</string>
+    <string name="cosplay">वेशभूषा</string>
     <string name="permission_camera_denied">इस सुविधा के लिए कैमरा अनुमति आवश्यक है</string>
     <string name="cat_random">रैंडम बिल्ली</string>
     <string name="random">रैंडम</string>
@@ -96,4 +96,10 @@
     <string name="successful">सफल</string>
     <string name="context_guide_body">कॉसप्ले मोड में, खिलाड़ियों को एक संदर्भ छवि यादृच्छिक रूप से दी जाती है। आपका कार्य सही हेयरस्टाइल, कपड़े, रंग और एक्सेसरी चुनकर उस चरित्र को जितना हो सके उतना सटीक रूप से बनाना है। हर सही मिलान आपके प्रतिशत (%) को बढ़ाता है। आपका चरित्र जितना अधिक उस छवि जैसा दिखेगा, आपका अंतिम स्कोर उतना ही अधिक होगा। सर्वोत्तम परिणाम पाने के लिए छोटे-छोटे विवरणों पर ध्यान दें।</string>
     <string name="try_again">फिर से प्रयास करें</string>
+    <string name="no_internet">इंटरनेट नहीं है</string>
+    <string name="internet">इंटरनेट</string>
+    <string name="please_connect_to_the_internet_to_download_more_data">अधिक डेटा डाउनलोड करने के लिए इंटरनेट से जुड़ें</string>
+    <string name="unstable_connection_please_check_your_network_connection">अस्थिर कनेक्शन, कृपया अपना नेटवर्क कनेक्शन जांचें</string>
+    <string name="ok">ठीक है</string>
+    <string name="please_wait_a_few_seconds_for_data_to_load">डेटा लोड होने के लिए कुछ सेकंड प्रतीक्षा करें।</string>
 </resources>

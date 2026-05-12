@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.invisible
 import com.example.basefragment.core.extention.onClick
@@ -407,10 +408,17 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             .takeIf { it >= 0 }
             ?: run { showToast("Template not found"); return }
 
+        // ✅ Chỉ check internet nếu template là online
+        val template = viewModelActivity.templates.value.getOrNull(templateIndex)
+        if (template?.id?.startsWith("online_") == true && !isInternetAvailable(requireContext())) {
+            showNoInternetDialog()
+            return
+        }
+
         val args = CustomizeFragment.newArgs(
             templateIndex = templateIndex,
             isEdit = true,
-            customizedId = idEdit,            // ← THÊM
+            customizedId = idEdit,
             savedSelections = customized.selections,
             isFlipped = customized.isFlipped
         )

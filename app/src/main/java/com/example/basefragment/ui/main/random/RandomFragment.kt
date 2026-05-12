@@ -16,6 +16,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
+import com.example.basefragment.core.extention.InternetExtension.isNetworkConnected
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.popBack
 import com.example.basefragment.core.extention.select
@@ -63,8 +65,6 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
 
     override fun initView() {
         binding.setupActionBar()
-
-
     }
 
     private fun FragmentRandomBinding.setupActionBar() {
@@ -77,18 +77,14 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
     }
 
     override fun viewListener() {
-        // ✅ Chỉ 1 listener duy nhất cho back
         binding.apply {
-
-
             actionBar.btnActionBarLeft.onClick {
                 popBack()
             }
-
             random.onClick {
-                viewModel.randomize()
+                val isOnline = isNetworkConnected(requireContext()) && isInternetAvailable(requireContext())
+                viewModel.randomize(isOnline = isOnline)
             }
-
             actionBar.btnActionBarRight.onClick {
                 val item = viewModel.randomItem.value ?: return@onClick
                 val args = CustomizeFragment.newArgs(
@@ -102,6 +98,14 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
     }
 
     override fun observeData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isDataReady.collect { ready ->
+                if (ready && viewModel.randomItem.value == null) {
+                    val isOnline = isNetworkConnected(requireContext()) && isInternetAvailable(requireContext())
+                    viewModel.randomize(isOnline = isOnline)
+                }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.randomItem.collectLatest { item ->
                 item ?: return@collectLatest

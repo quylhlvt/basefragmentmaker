@@ -8,7 +8,7 @@
     <string name="title_2">Créez votre avatar parfait</string>
     <string name="title_3">Collection d’éléments variés</string>
     <string name="not_select_lang">Veuillez sélectionner une langue</string>
-    <string name="pony_maker">Pony Maker</string>
+    <string name="pony_maker">Créateur de Poney</string>
     <string name="trending_custom">Tendances</string>
     <string name="my_work">Mes créations</string>
 
@@ -85,7 +85,7 @@
     <string name="have_rated">Merci d’avoir noté notre application</string>
     <string name="refresh">Actualiser</string>
     <string name="hello_blank_fragment">Bonjour fragment vide</string>
-    <string name="cosplay">Cosplay</string>
+    <string name="cosplay">Déguisement</string>
     <string name="permission_camera_denied">L’accès à la caméra est requis pour cette fonction</string>
     <string name="cat_random">Chat aléatoire</string>
     <string name="random">Aléatoire</string>
@@ -94,6 +94,12 @@
     <string name="image">Image</string>
     <string name="color">Couleur</string>
     <string name="successful">Succès</string>
-    <string name="context_guide_body">En mode Cosplay, les joueurs reçoivent aléatoirement une image de référence. Votre mission est de recréer ce personnage le plus fidèlement possible en choisissant les bonnes coiffures, tenues, couleurs et accessoires. Chaque correspondance correcte augmente votre pourcentage (%). Plus votre personnage ressemble à l’image, plus votre score final sera élevé. Faites attention aux détails pour obtenir le meilleur résultat.</string>
+    <string name="context_guide_body">En mode Déguisement, les joueurs reçoivent aléatoirement une image de référence. Votre mission est de recréer ce personnage le plus fidèlement possible en choisissant les bonnes coiffures, tenues, couleurs et accessoires. Chaque correspondance correcte augmente votre pourcentage (%). Plus votre personnage ressemble à l’image, plus votre score final sera élevé. Faites attention aux détails pour obtenir le meilleur résultat.</string>
     <string name="try_again">Réessayer</string>
+    <string name="no_internet">Pas d\'internet</string>
+    <string name="internet">Internet</string>
+    <string name="please_connect_to_the_internet_to_download_more_data">Veuillez vous connecter à internet pour télécharger plus de données</string>
+    <string name="unstable_connection_please_check_your_network_connection">Connexion instable, veuillez vérifier votre connexion réseau</string>
+    <string name="ok">OK</string>
+    <string name="please_wait_a_few_seconds_for_data_to_load">Veuillez patienter quelques secondes pour le chargement des données.</string>
 </resources>

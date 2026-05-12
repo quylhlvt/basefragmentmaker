@@ -3,5 +3,5 @@
     <translate
         android:fromXDelta="100%p"
         android:toXDelta="0"
-        android:duration="300" />  <!-- 300ms là mượt, có thể chỉnh 200-400 -->
+        android:duration="200" />  <!-- 300ms là mượt, có thể chỉnh 200-400 -->
 </set>

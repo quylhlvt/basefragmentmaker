@@ -7,7 +7,9 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
 import android.view.Gravity
+import android.view.View
 import android.view.WindowManager
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
@@ -20,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.hideNavigation
@@ -40,6 +43,11 @@ interface LoadingController {
         onYes: () -> Unit,
         onNo: (() -> Unit)? = null
     )
+    fun showGlobalOkDialog(
+        message: String,
+        title: String? = null,
+        onOk: (() -> Unit)? = null
+    )
 }
 
 @AndroidEntryPoint
@@ -59,7 +67,27 @@ class MainActivity : AppCompatActivity() , LoadingController{
             hideNavigation(true)
         }
     }
-
+    override fun showGlobalOkDialog(message: String, title: String?, onOk: (() -> Unit)?) {
+        runOnUiThread {
+            globalConfirmDialog?.dismiss()
+            globalConfirmDialog = buildDialog(
+                message = message,
+                title = title,
+                showButtons = true,
+                cancelable = true,
+                onYes = {
+                    globalConfirmDialog?.dismiss()
+                    globalConfirmDialog = null
+                    onOk?.invoke()
+                }
+            ).also { dialog ->
+                dialog.findViewById<TextView>(R.id.txtYes)?.text = getString(R.string.ok)
+                dialog.findViewById<View>(R.id.btnNo)?.gone()
+            }
+            globalConfirmDialog?.show()
+            hideNavigation(true)
+        }
+    }
     override fun hideGlobalLoading() {
         val stack = Thread.currentThread().stackTrace
             .take(8).joinToString("\n") { it.toString() }
@@ -150,12 +178,25 @@ class MainActivity : AppCompatActivity() , LoadingController{
             R.drawable.img_avatar2,
             R.drawable.img_avatar3,
             R.drawable.img_avatar4,
+            R.drawable.ic_flag_hindi,
+            R.drawable.ic_flag_spanish,
+            R.drawable.ic_flag_french,
+            R.drawable.ic_flag_english,
+            R.drawable.ic_flag_portugeese,
+            R.drawable.ic_flag_indo,
+            R.drawable.ic_flag_germani,
+            R.drawable.ic_select_lang,
+            R.drawable.ic_un_select_lang,
+            R.drawable.img_bg_rcy_lang,
+            R.drawable.select_language,
+            R.drawable.back_app
         )
         // Glide preload thực sự decode và cache bitmap
         // chạy background tự động, không cần Dispatchers.IO
         resIds.forEach { resId ->
             Glide.with(this)
                 .load(resId)
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
                 .preload()
         }
     }

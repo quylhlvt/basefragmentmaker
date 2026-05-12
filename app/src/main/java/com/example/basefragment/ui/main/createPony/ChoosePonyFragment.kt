@@ -14,6 +14,8 @@ import androidx.recyclerview.widget.GridLayoutManager
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
+import com.example.basefragment.core.extention.InternetExtension.isNetworkConnected
 import com.example.basefragment.core.extention.safeNavigate
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.setTextActionBar
@@ -29,6 +31,7 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
 ) {
     private val mainViewModel: ViewModelActivity by activityViewModels()
     private lateinit var adapter: ChoosePonyAdapter
+    private var isFirstLoad = true
 
     override fun inflateBinding(
         inflater: LayoutInflater,
@@ -43,7 +46,12 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
             getString(R.string.category)
         )
 
-        adapter = ChoosePonyAdapter { _, position ->
+        adapter = ChoosePonyAdapter { character, position ->
+            // ✅ Chỉ check network với online item
+            if (character.id.startsWith("online_") && !isInternetAvailable(requireContext())) {
+                showNoInternetDialog()
+                return@ChoosePonyAdapter
+            }
             findNavController().safeNavigate(
                 R.id.action_createPony_to_custom,
                 bundleOf(ARG_TEMPLATE_INDEX to position)
@@ -67,10 +75,19 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
                 // Avatar đã được preload trong GetCatalogueUseCase trước khi vào đây
                 // → submitList xong là hiện ngay, không cần preload thêm
                 launch {
-                    mainViewModel.templates.collect { templates ->
-                        adapter.submitList(templates)
-                    }
-                }
+                    kotlinx.coroutines.flow.combine(
+                        mainViewModel.templates,
+                        mainViewModel.isFetchingOnlineFlow
+                    ) { templates, isFetching -> Pair(templates, isFetching) }
+                        .collect { (templates, isFetching) ->
+                            adapter.submitList(templates)
+                            if (isFirstLoad && !isFetching) {
+                                isFirstLoad = false
+                                if (templates.size <= 1) showLoadingDataDialog()
+                            }
+                            }
+                        }
+
                 launch {
                     mainViewModel.error.collect { error ->
                         error?.let { showSnackbar(it) }

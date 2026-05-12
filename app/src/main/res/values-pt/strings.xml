@@ -8,7 +8,7 @@
     <string name="title_2">Crie o seu avatar perfeito</string>
     <string name="title_3">Coleção de vários itens</string>
     <string name="not_select_lang">Por favor, selecione um idioma</string>
-    <string name="pony_maker">Pony Maker</string>
+    <string name="pony_maker">Criador de Pônei</string>
     <string name="trending_custom">Personalizações em alta</string>
     <string name="my_work">Meus trabalhos</string>
 
@@ -85,7 +85,7 @@
     <string name="have_rated">Obrigado por avaliar nosso app</string>
     <string name="refresh">Atualizar</string>
     <string name="hello_blank_fragment">Olá fragmento vazio</string>
-    <string name="cosplay">Cosplay</string>
+    <string name="cosplay">Fantasia</string>
     <string name="permission_camera_denied">Permissão de câmera necessária para usar este recurso</string>
     <string name="cat_random">Gato aleatório</string>
     <string name="random">Aleatório</string>
@@ -94,6 +94,12 @@
     <string name="image">Imagem</string>
     <string name="color">Cor</string>
     <string name="successful">Sucesso</string>
-    <string name="context_guide_body">No modo Cosplay, os jogadores recebem aleatoriamente uma imagem de referência. Sua tarefa é recriar o personagem com a maior precisão possível, escolhendo os penteados, roupas, cores e acessórios corretos. Cada acerto aumenta sua porcentagem (%). Quanto mais parecido seu personagem for com a imagem, maior será sua pontuação final. Preste atenção aos detalhes para obter o melhor resultado.</string>
+    <string name="context_guide_body">No modo Fantasia, os jogadores recebem aleatoriamente uma imagem de referência. Sua tarefa é recriar o personagem com a maior precisão possível, escolhendo os penteados, roupas, cores e acessórios corretos. Cada acerto aumenta sua porcentagem (%). Quanto mais parecido seu personagem for com a imagem, maior será sua pontuação final. Preste atenção aos detalhes para obter o melhor resultado.</string>
     <string name="try_again">Tentar novamente</string>
+    <string name="no_internet">Sem internet</string>
+    <string name="internet">Internet</string>
+    <string name="please_connect_to_the_internet_to_download_more_data">Conecte-se à internet para baixar mais dados</string>
+    <string name="unstable_connection_please_check_your_network_connection">Conexão instável, verifique sua conexão de rede</string>
+    <string name="ok">OK</string>
+    <string name="please_wait_a_few_seconds_for_data_to_load">Aguarde alguns segundos para carregar os dados.</string>
 </resources>

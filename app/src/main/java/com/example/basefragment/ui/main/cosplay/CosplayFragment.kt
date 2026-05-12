@@ -15,6 +15,8 @@ import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
+import com.example.basefragment.core.extention.InternetExtension.isNetworkConnected
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.popBack
@@ -78,7 +80,8 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
             actionBar.btnActionBarLeft.onClick { popBack() }
 
             random.onClick {
-                viewModel.randomize()
+                val isOnline = isNetworkConnected(requireContext()) && isInternetAvailable(requireContext())
+                viewModel.randomize(isOnline = isOnline)
             }
             actionBar.btnActionBarRight.onClick {
                 showGuide.visible()
@@ -110,6 +113,14 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
     ): FragmentCosplayBinding = FragmentCosplayBinding.inflate(inflater, container, false)
 
     override fun observeData() {
+        viewLifecycleOwner.lifecycleScope.launch {
+            viewModel.isDataReady.collect { ready ->
+                if (ready && viewModel.randomItem.value == null) {
+                    val isOnline = isNetworkConnected(requireContext()) && isInternetAvailable(requireContext())
+                    viewModel.randomize(isOnline = isOnline)
+                }
+            }
+        }
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.randomItem.collectLatest { item ->
                 item ?: return@collectLatest

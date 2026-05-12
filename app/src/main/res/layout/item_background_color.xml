@@ -3,6 +3,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
+    android:layout_marginBottom="12dp"
     android:layout_height="wrap_content">
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/shadown"
@@ -17,13 +18,11 @@
         android:layout_marginStart="5dp"
         android:layout_marginEnd="4dp"
         app:cardBackgroundColor="#664A2711"
-        android:layout_marginBottom="3dp"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"/>
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/materialParent"
         android:layout_marginHorizontal="5dp"
-        android:layout_marginBottom="5dp"
         android:layout_width="0dp"
         android:layout_height="0dp"
         app:layout_constraintCircleRadius="16dp"

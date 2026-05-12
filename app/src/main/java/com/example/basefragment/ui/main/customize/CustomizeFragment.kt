@@ -473,20 +473,16 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
         val bitmap = Bitmap.createBitmap(root.width, root.height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
 
-        // ✅ Chỉ vẽ drawable từ các layerView đang visible, bỏ qua View overhead
         layerViews.forEach { iv ->
             if (iv.visibility != View.VISIBLE) return@forEach
-            val drawable = iv.drawable ?: return@forEach
 
             canvas.save()
-
-            // ✅ Handle flip
             if (iv.scaleX < 0) {
                 canvas.scale(-1f, 1f, root.width / 2f, 0f)
             }
 
-            drawable.setBounds(0, 0, root.width, root.height)
-            drawable.draw(canvas)
+            // ✅ Vẽ trực tiếp từ ImageView — giữ đúng transform matrix của FIT_CENTER
+            iv.draw(canvas)
 
             canvas.restore()
         }

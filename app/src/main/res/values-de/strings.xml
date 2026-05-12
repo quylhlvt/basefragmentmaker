@@ -8,7 +8,7 @@
     <string name="title_2">Erstelle deinen perfekten Avatar</string>
     <string name="title_3">Sammlung vielfältiger Elemente</string>
     <string name="not_select_lang">Bitte wählen Sie eine Sprache</string>
-    <string name="pony_maker">Pony Maker</string>
+    <string name="pony_maker">Pony-Ersteller</string>
     <string name="trending_custom">Beliebte Anpassungen</string>
     <string name="my_work">Meine Arbeiten</string>
 
@@ -85,7 +85,7 @@
     <string name="have_rated">Vielen Dank für Ihre Bewertung</string>
     <string name="refresh">Aktualisieren</string>
     <string name="hello_blank_fragment">Hallo leeres Fragment</string>
-    <string name="cosplay">Cosplay</string>
+    <string name="cosplay">Kostümspiel</string>
     <string name="permission_camera_denied">Kameraberechtigung ist erforderlich, um diese Funktion zu nutzen</string>
     <string name="cat_random">Zufällige Katze</string>
     <string name="random">Zufällig</string>
@@ -94,6 +94,12 @@
     <string name="image">Bild</string>
     <string name="color">Farbe</string>
     <string name="successful">Erfolgreich</string>
-    <string name="context_guide_body">Im Cosplay-Modus erhalten die Spieler zufällig ein Referenzbild. Ihre Aufgabe ist es, diese Figur so genau wie möglich nachzubilden, indem Sie passende Frisuren, Outfits, Farben und Accessoires auswählen. Jede richtige Übereinstimmung erhöht Ihren Prozentsatz (%). Je ähnlicher Ihre Figur dem Zufallsbild ist, desto höher ist Ihre Punktzahl. Achten Sie auf kleine Details, um das beste Cosplay-Ergebnis zu erzielen.</string>
+    <string name="context_guide_body">Im Kostümspiel-Modus erhalten die Spieler zufällig ein Referenzbild. Ihre Aufgabe ist es, diese Figur so genau wie möglich nachzubilden, indem Sie passende Frisuren, Outfits, Farben und Accessoires auswählen. Jede richtige Übereinstimmung erhöht Ihren Prozentsatz (%). Je ähnlicher Ihre Figur dem Zufallsbild ist, desto höher ist Ihre Punktzahl. Achten Sie auf kleine Details, um das beste Cosplay-Ergebnis zu erzielen.</string>
     <string name="try_again">Erneut versuchen</string>
+    <string name="no_internet">Kein Internet</string>
+    <string name="internet">Internet</string>
+    <string name="please_connect_to_the_internet_to_download_more_data">Bitte mit dem Internet verbinden, um mehr Daten herunterzuladen</string>
+    <string name="unstable_connection_please_check_your_network_connection">Instabile Verbindung, bitte überprüfe deine Netzwerkverbindung</string>
+    <string name="ok">OK</string>
+    <string name="please_wait_a_few_seconds_for_data_to_load">Bitte warte einen Moment, bis die Daten geladen sind.</string>
 </resources>

@@ -48,7 +48,18 @@
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
-
+            <androidx.cardview.widget.CardView
+                android:layout_width="0dp"
+                android:layout_height="0dp"
+                app:cardCornerRadius="20dp"
+                app:cardElevation="0dp"
+                app:cardBackgroundColor="#334A2711"
+                android:layout_marginEnd="-2dp"
+                android:layout_marginBottom="-2dp"
+                app:layout_constraintBottom_toBottomOf="@+id/progressTrack"
+                app:layout_constraintEnd_toEndOf="@+id/progressTrack"
+                app:layout_constraintStart_toStartOf="@+id/progressTrack"
+                app:layout_constraintTop_toTopOf="@+id/progressTrack" />
             <!-- 1. Track nền cam - elevation thấp nhất -->
             <ImageView
                 android:id="@+id/progressTrack"

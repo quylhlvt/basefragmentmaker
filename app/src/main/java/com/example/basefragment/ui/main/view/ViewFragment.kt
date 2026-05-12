@@ -8,6 +8,7 @@ import androidx.core.content.FileProvider
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.onClick
@@ -165,7 +166,6 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
             onNo = null
         )
     }
-
     private fun navigateToEdit() {
         if (idEdit.isEmpty() || imageType != 1) return
 
@@ -176,6 +176,13 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
         val templateIndex = viewModelActivity.getTemplateIndexForCustomized(idEdit)
             .takeIf { it >= 0 }
             ?: run { showToast("Template not found"); return }
+
+        // ✅ Chỉ check internet nếu template là online
+        val template = viewModelActivity.templates.value.getOrNull(templateIndex)
+        if (template?.id?.startsWith("online_") == true && !isInternetAvailable(requireContext())) {
+            showNoInternetDialog()
+            return
+        }
 
         val args = CustomizeFragment.newArgs(
             templateIndex   = templateIndex,

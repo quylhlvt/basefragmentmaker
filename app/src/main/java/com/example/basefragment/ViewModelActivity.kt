@@ -16,8 +16,10 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -56,7 +58,8 @@ class ViewModelActivity @Inject constructor(
         )
 
     // Guard chống gọi fetch trùng từ nhiều fragment
-    private var isFetchingOnline = false
+    private val _isFetchingOnline = MutableStateFlow(false)
+    val isFetchingOnlineFlow: StateFlow<Boolean> = _isFetchingOnline.asStateFlow()
 
     // ── INIT ──────────────────────────────────────────────────────────────────
 
@@ -86,11 +89,11 @@ class ViewModelActivity @Inject constructor(
      * BaseFragment gọi khi vào màn + có mạng + chưa có online data.
      */
     private suspend fun fetchOnlineTemplatesInternal() {
-        if (isFetchingOnline) {
+        if (_isFetchingOnline.value) {
             Log.d("ViewModelActivity", "⏭️ Already fetching, skip")
             return
         }
-        isFetchingOnline = true
+        _isFetchingOnline.value = true
         try {
             Log.d("ViewModelActivity", "📡 fetchOnlineTemplates start")
             val result = getCatalogueUseCase()
@@ -106,7 +109,7 @@ class ViewModelActivity @Inject constructor(
         } catch (e: Exception) {
             Log.e("ViewModelActivity", "❌ fetchOnlineTemplates error: ${e.message}", e)
         } finally {
-            isFetchingOnline = false
+            _isFetchingOnline.value = false
         }
     }
 

@@ -201,7 +201,7 @@
             android:id="@+id/action_view_to_myPony"
             app:destination="@id/myPony"
             app:popUpTo="@id/homeFragment"
-            app:popUpToInclusive="true"
+            app:popUpToInclusive="false"
             app:enterAnim="@anim/slide_in_left"
             app:exitAnim="@anim/slide_out_right"
             app:popEnterAnim="@anim/slide_in_right"

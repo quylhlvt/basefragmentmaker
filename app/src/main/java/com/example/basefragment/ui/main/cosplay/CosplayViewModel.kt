@@ -23,7 +23,8 @@ class CosplayViewModel @Inject constructor(
     // ✅ Khai báo HẾT property TRƯỚC init
     private val _randomItem = MutableStateFlow<RandomItem?>(null)
     val randomItem: StateFlow<RandomItem?> = _randomItem.asStateFlow()
-
+    private val _isDataReady = MutableStateFlow(false)
+    val isDataReady: StateFlow<Boolean> = _isDataReady.asStateFlow()
     private var _cachedBitmap: Bitmap? = null
     val cachedBitmap get() = _cachedBitmap
     init {
@@ -31,7 +32,7 @@ class CosplayViewModel @Inject constructor(
             appDataManager.templates
                 .filter { it.isNotEmpty() }
                 .take(1) // Chỉ trigger lần đầu
-                .collect { randomize() }
+                .collect {   _isDataReady.value = true }
         }
     }
 
@@ -48,13 +49,19 @@ class CosplayViewModel @Inject constructor(
         _cachedBitmap?.recycle()
         _cachedBitmap = null
     }
-    fun randomize() {
+    fun randomize(isOnline: Boolean = true) {
         if (_randomItem.value != null) {
             _cachedBitmap?.recycle()
             _cachedBitmap = null
         }
         viewModelScope.launch(Dispatchers.IO) {
-            val templates = appDataManager.templates.value
+            val allTemplates = appDataManager.templates.value
+            if (allTemplates.isEmpty()) return@launch
+
+            // ✅ Nếu offline → chỉ dùng offline templates
+            val templates = if (isOnline) allTemplates
+            else allTemplates.filter { !it.id.startsWith("online_") }
+
             if (templates.isEmpty()) return@launch
 
             val idx      = templates.indices.random()

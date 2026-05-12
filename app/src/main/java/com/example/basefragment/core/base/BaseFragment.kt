@@ -26,6 +26,8 @@ import androidx.viewbinding.ViewBinding
 import com.example.basefragment.LoadingController
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
+import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
+import com.example.basefragment.core.extention.InternetExtension.isNetworkConnected
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.hideNavigation
 import com.example.basefragment.core.extention.visible
@@ -238,6 +240,47 @@ abstract class BaseFragment<VB : ViewBinding, VM : ViewModel>(
             onNo = onNo
         )
     }
+    fun showNoInternetDialog(onOk: (() -> Unit)? = null) {
+        showOkDialog(
+            title = getString(R.string.no_internet),
+            message = getString(R.string.please_connect_to_the_internet_to_download_more_data),
+            onOk = onOk
+        )
+    }
+    fun showLoadingDataDialog(onOk: (() -> Unit)? = null) {
+        showOkDialog(
+            title = getString(R.string.internet),
+            message = getString(R.string.please_wait_a_few_seconds_for_data_to_load),
+            onOk = onOk
+        )
+    }
+    fun showUnstableNetworkDialog(onOk: (() -> Unit)? = null) {
+        showOkDialog(
+            title = getString(R.string.internet),
+            message = getString(R.string.unstable_connection_please_check_your_network_connection),
+            onOk = onOk
+        )
+    }
 
+    fun checkNetworkAndShowDialog() {
+        val context = requireContext()
+        when {
+            !isInternetAvailable(context) -> showNoInternetDialog()
+            !isNetworkConnected(context) -> showUnstableNetworkDialog()
+            else -> {}
+        }
+    }
+    fun showOkDialog(
+        message: String,
+        title: String? = null,
+        onOk: (() -> Unit)? = null
+    ) {
+        if (!isAdded || activity == null) return
+        (activity as? LoadingController)?.showGlobalOkDialog(
+            message = message,
+            title = title,
+            onOk = onOk
+        )
+    }
     abstract fun bindViewModel()
 }

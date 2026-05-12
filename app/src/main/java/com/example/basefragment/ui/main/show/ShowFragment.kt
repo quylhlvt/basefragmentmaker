@@ -59,7 +59,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
 
     private val pendingLoads = AtomicInteger(0)
     private var timerJob: Job? = null
-    private val totalSeconds = 1 * 60
+    private val totalSeconds = 5 * 60
     // ── INFLATE ───────────────────────────────────────────────────────────────
 
     override fun inflateBinding(

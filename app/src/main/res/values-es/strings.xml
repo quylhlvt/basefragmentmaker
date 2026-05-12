@@ -8,7 +8,7 @@
     <string name="title_2">Crea tu avatar perfecto</string>
     <string name="title_3">Colección de diversos elementos</string>
     <string name="not_select_lang">Por favor selecciona un idioma</string>
-    <string name="pony_maker">Pony Maker</string>
+    <string name="pony_maker">Creador de Pony</string>
     <string name="trending_custom">Personalizaciones populares</string>
     <string name="my_work">Mi trabajo</string>
 
@@ -85,7 +85,7 @@
     <string name="have_rated">Gracias por calificar nuestra app</string>
     <string name="refresh">Actualizar</string>
     <string name="hello_blank_fragment">Hola fragmento vacío</string>
-    <string name="cosplay">Cosplay</string>
+    <string name="cosplay">Disfraz</string>
     <string name="permission_camera_denied">Se necesita permiso de cámara para usar esta función</string>
     <string name="cat_random">Gato aleatorio</string>
     <string name="random">Aleatorio</string>
@@ -94,6 +94,12 @@
     <string name="image">Imagen</string>
     <string name="color">Color</string>
     <string name="successful">Exitoso</string>
-    <string name="context_guide_body">En el modo Cosplay, los jugadores reciben aleatoriamente una imagen de referencia. Tu tarea es recrear ese personaje con la mayor precisión posible eligiendo los peinados, atuendos, colores y accesorios correctos. Cada coincidencia correcta aumenta tu porcentaje (%). Cuanto más se parezca tu personaje a la imagen, mayor será tu puntuación final. Presta atención a los pequeños detalles para lograr el mejor resultado de cosplay.</string>
+    <string name="context_guide_body">En el modo Disfraz, los jugadores reciben aleatoriamente una imagen de referencia. Tu tarea es recrear ese personaje con la mayor precisión posible eligiendo los peinados, atuendos, colores y accesorios correctos. Cada coincidencia correcta aumenta tu porcentaje (%). Cuanto más se parezca tu personaje a la imagen, mayor será tu puntuación final. Presta atención a los pequeños detalles para lograr el mejor resultado de cosplay.</string>
     <string name="try_again">Intentar de nuevo</string>
+    <string name="no_internet">Sin internet</string>
+    <string name="internet">Internet</string>
+    <string name="please_connect_to_the_internet_to_download_more_data">Conéctate a internet para descargar más datos</string>
+    <string name="unstable_connection_please_check_your_network_connection">Conexión inestable, comprueba tu conexión de red</string>
+    <string name="ok">Aceptar</string>
+    <string name="please_wait_a_few_seconds_for_data_to_load">Espera unos segundos para que se carguen los datos.</string>
 </resources>

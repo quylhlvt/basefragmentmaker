@@ -25,6 +25,7 @@ import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
 import com.example.basefragment.core.extention.OuterStrokeShadownTextView
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.onClick
@@ -69,10 +70,34 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
 
     override fun viewListener() {
         binding.apply {
-            btnCreate.onClick { findNavController().navigate(R.id.action_home_to_createPony) }
-            btnMyAlbum.onClick { findNavController().navigate(R.id.action_home_to_myPony) }
-            btnRandom.onClick(800) { findNavController().navigate(R.id.action_home_to_random) }
-            btnCosPlay.onClick(800) { findNavController().navigate(R.id.action_home_to_cosplay) }
+            btnCreate.onClick {
+                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
+                    showLoadingDataDialog()
+                } else {
+                    findNavController().navigate(R.id.action_home_to_createPony)
+                }
+            }
+            btnMyAlbum.onClick {
+                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
+                    showLoadingDataDialog()
+                } else {
+                    findNavController().navigate(R.id.action_home_to_myPony)
+                }
+            }
+            btnRandom.onClick(800) {
+                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
+                    showLoadingDataDialog()
+                } else {
+                    findNavController().navigate(R.id.action_home_to_random)
+                }
+            }
+            btnCosPlay.onClick(800) {
+                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
+                    showLoadingDataDialog()
+                } else {
+                    findNavController().navigate(R.id.action_home_to_cosplay)
+                }
+            }
             actionBar.btnActionBarRight.onClick { toSettingFromHome() }
         }
     }
