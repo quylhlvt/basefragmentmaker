@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- values-fr/strings.xml -->
 <resources>
-    <string name="app_name">baseFragment</string>
+    <string name="app_name">Cat Avatar: Cat Maker</string>
     <string name="next">Suivant</string>
     <string name="language">Langue</string>
     <string name="title_1">Créez différents styles comme vous le souhaitez</string>

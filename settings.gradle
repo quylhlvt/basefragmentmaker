@@ -40,5 +40,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "baseFragment"
+rootProject.name = "Cat Avatar Cat Maker"
 include ':app'

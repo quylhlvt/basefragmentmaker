@@ -26,7 +26,6 @@ import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.RateHelper
 import com.example.basefragment.databinding.FragmentQuickBinding
 import com.example.basefragment.databinding.FragmentSettingBinding
-import com.example.basefragment.ui.main.quick.QuickViewModel
 import com.example.basefragment.utils.state.RateState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlin.getValue
