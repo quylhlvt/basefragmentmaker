@@ -37,8 +37,6 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
     FragmentPermissionBinding::inflate, PermissionViewModel::class.java
 ), BackPressHandler {
 
-    private var storageDenyCount = 0
-    private var notificationDenyCount = 0
 
     override fun viewListener() {
         binding.swPermission.onClick(1500) { handlePermissionRequest(isStorage = true) }
@@ -70,18 +68,42 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
         }
     }
 
+// ❌ Xóa 2 dòng này
+// private var storageDenyCount = 0
+// private var notificationDenyCount = 0
+
     private fun handlePermissionRequest(isStorage: Boolean) {
         val perms = if (isStorage) PermissionHelper.storagePermission
         else PermissionHelper.notificationPermission
-        val count = if (isStorage) storageDenyCount else notificationDenyCount
 
         when {
             requireContext().checkPermissions(perms) ->
                 showToast(if (isStorage) R.string.granted_storage else R.string.granted_notification)
-            count >= 2 -> activity?.goToSettings()
-            else -> requestPermission(perms,
+
+            // ✅ Dùng ViewModel thay vì local count
+            viewModel.shouldGoToSettings(isStorage) -> activity?.goToSettings()
+
+            else -> requestPermission(
+                perms,
                 if (isStorage) RequestKey.STORAGE_PERMISSION_CODE
-                else RequestKey.NOTIFICATION_PERMISSION_CODE)
+                else RequestKey.NOTIFICATION_PERMISSION_CODE
+            )
+        }
+    }
+
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        val granted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+        when (requestCode) {
+            RequestKey.STORAGE_PERMISSION_CODE -> {
+                if (granted) { viewModel.onStorageGranted(); updatePermissionUI(true, true) }
+                else viewModel.onStorageDenied()  // ✅ ViewModel đếm
+            }
+            RequestKey.NOTIFICATION_PERMISSION_CODE -> {
+                if (granted) { viewModel.onNotificationGranted(); updatePermissionUI(true, false) }
+                else viewModel.onNotificationDenied()
+            }
         }
     }
 
@@ -90,22 +112,6 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
         imageView.setImageResource(if (granted) R.drawable.switch_on else R.drawable.switch_off)
     }
 
-    @Deprecated("Deprecated in Java")
-    override fun onRequestPermissionsResult(
-        requestCode: Int, permissions: Array<String>, grantResults: IntArray
-    ) {
-        val granted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
-        when (requestCode) {
-            RequestKey.STORAGE_PERMISSION_CODE -> {
-                if (granted) { storageDenyCount = 0; updatePermissionUI(true, true) }
-                else storageDenyCount++
-            }
-            RequestKey.NOTIFICATION_PERMISSION_CODE -> {
-                if (granted) { notificationDenyCount = 0; updatePermissionUI(true, false) }
-                else notificationDenyCount++
-            }
-        }
-    }
 
     override fun observeData() {}
 

@@ -182,6 +182,7 @@ class ViewModelActivity @Inject constructor(
                     selections = ArrayList(selections),
                     imageSave  = imageSave,
                     isFlipped  = isFlipped,
+                    createdAt  = System.currentTimeMillis(),
                     updatedAt  = System.currentTimeMillis()
                 )
             } else {

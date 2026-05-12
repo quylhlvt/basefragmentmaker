@@ -104,6 +104,9 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                                 .build()
                         )
                     }
+                    actionBar.btnActionBarNextToRight.onClick {
+                        shareImage()
+                    }
                     // ✅ MyPony button
                     btnBottomLeft.onClick {
                         findNavController().navigate(
@@ -152,13 +155,12 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
 // ViewFragment.kt
 
     // Thêm vào ViewFragment
-
     private fun downloadImage() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { performDownload(); return }
         val permission = android.Manifest.permission.WRITE_EXTERNAL_STORAGE
         when {
             requireContext().checkPermissions(arrayOf(permission)) -> performDownload()
-            storageHelper.shouldGoToSettings() -> activity?.goToSettings()
+            permissionViewModel.shouldGoToSettings(isStorage = true) -> activity?.goToSettings()
             else -> downloadPermissionLauncher.launch(arrayOf(permission))
         }
     }
@@ -166,11 +168,14 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
     private val downloadPermissionLauncher =
         registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
             val allGranted = permissions.entries.all { it.value }
-            if (allGranted) { storageHelper.onGranted(); performDownload() }
-            else {
-                storageHelper.onDenied()
-                if (storageHelper.shouldGoToSettings()) activity?.goToSettings()
-                else showToast(getString(R.string.download_failed_please_try_again_later))
+            if (allGranted) {
+                permissionViewModel.onStorageGranted()
+                performDownload()
+            } else {
+                permissionViewModel.onStorageDenied()
+                // ✅ Chỉ toast, KHÔNG check goToSettings ở đây
+                // goToSettings sẽ được check ở downloadImage() lần nhấn tiếp theo
+                showToast(getString(R.string.download_failed_please_try_again_later))
             }
         }
     private fun performDownload() {

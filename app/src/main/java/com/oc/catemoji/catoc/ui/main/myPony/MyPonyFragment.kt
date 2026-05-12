@@ -48,6 +48,7 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     private lateinit var myAvatarAdapter: MyAvatarAdapter
     private lateinit var myDesignAdapter: MyDesignAdapter
     private var pendingDownloadPaths: ArrayList<String> = arrayListOf()
+    private val permissionViewModel: PermissionViewModel by activityViewModels()
 
     private val isAvatarTab = MutableStateFlow(true)
 
@@ -56,18 +57,7 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         private const val MIN_STICKERS_WHATSAPP = 3
         private const val MAX_STICKERS_WHATSAPP = 30
     }
-    private val downloadPermissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            val allGranted = permissions.entries.all { it.value }
-            if (allGranted) {
-                storageHelper.onGranted()
-                performBatchDownload()
-            } else {
-                storageHelper.onDenied()
-                if (storageHelper.shouldGoToSettings()) activity?.goToSettings()
-                else showToast(R.string.download_failed_please_try_again_later)
-            }
-        }
+
     private fun performBatchDownload() {
         viewModel.downloadFiles(requireContext(), pendingDownloadPaths)
         resetSelection()
@@ -229,7 +219,7 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             viewModelActivity.customizedCharacters.collect { customized ->
                 val list = customized
                     .filter { it.imageSave.isNotEmpty() && File(it.imageSave).exists() }
-//                    .sortedByDescending { it.updatedAt }
+                    .sortedByDescending { it.createdAt }
                     .map { MyAlbumModel(path = it.imageSave, idEdit = it.id, type = 1) }
 
                 myAvatarAdapter.submitList(list)
@@ -465,19 +455,28 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         if (selected.isEmpty()) { showToast(R.string.please_select_an_image); return }
         pendingDownloadPaths = ArrayList(selected.map { it.path })
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            performBatchDownload()
-            return
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { performBatchDownload(); return }
 
         val permission = android.Manifest.permission.WRITE_EXTERNAL_STORAGE
         when {
             requireContext().checkPermissions(arrayOf(permission)) -> performBatchDownload()
-            storageHelper.shouldGoToSettings() -> activity?.goToSettings()
+            permissionViewModel.shouldGoToSettings(isStorage = true) -> activity?.goToSettings()
             else -> downloadPermissionLauncher.launch(arrayOf(permission))
         }
     }
 
+    private val downloadPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val allGranted = permissions.entries.all { it.value }
+            if (allGranted) {
+                permissionViewModel.onStorageGranted()
+                performBatchDownload()
+            } else {
+                permissionViewModel.onStorageDenied()
+                // ✅ Chỉ toast, KHÔNG check goToSettings ở đây
+                showToast(R.string.download_failed_please_try_again_later)
+            }
+        }
     // ── SHARE: chỉ dùng imageSave (ảnh render) ───────────────────────────────
 
     /**

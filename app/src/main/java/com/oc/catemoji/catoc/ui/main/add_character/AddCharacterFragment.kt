@@ -119,15 +119,6 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             }
         }
 
-    private val permissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) {
-                permissionViewModel.updateStorageGranted( true)
-                launchImagePicker()
-            } else {
-                permissionViewModel.updateStorageGranted( false)
-            }
-        }
 
 //    private fun launchImagePicker() {
 //        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {

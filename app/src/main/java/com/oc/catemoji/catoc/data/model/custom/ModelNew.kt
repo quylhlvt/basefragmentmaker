@@ -52,6 +52,7 @@ data class CustomModel(
     val selections: ArrayList<SelectionIndex>  = arrayListOf(),
     val imageSave:  String                     = "",
     val isFlipped:  Boolean                    = false,
+    val createdAt:  Long                       = 0L,
     val updatedAt:  Long                       = System.currentTimeMillis()
 ) : Parcelable {
     val bodyPartCount: Int get() = listPath.size
