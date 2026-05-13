@@ -53,19 +53,20 @@ class RandomViewModel  @Inject constructor(
             val allTemplates = appDataManager.templates.value
             if (allTemplates.isEmpty()) return@launch
 
-            // ✅ Nếu offline → chỉ dùng offline templates
-            val templates = if (isOnline) allTemplates
+            val filtered = if (isOnline) allTemplates
             else allTemplates.filter { !it.id.startsWith("online_") }
 
-            if (templates.isEmpty()) return@launch
+            if (filtered.isEmpty()) return@launch
 
-            val idx      = templates.indices.random()
-            val template = templates[idx]
-            val sel      = randomSelections(template)
-            val paths    = resolvePaths(template, sel)
+            val template = filtered.random()
+            // ✅ Index từ allTemplates, không phải filtered
+            val realIndex = allTemplates.indexOf(template)
+
+            val sel   = randomSelections(template)
+            val paths = resolvePaths(template, sel)
 
             _randomItem.value = RandomItem(
-                templateIndex = idx,
+                templateIndex = realIndex,  // ✅
                 template      = template,
                 selections    = sel,
                 resolvedPaths = paths

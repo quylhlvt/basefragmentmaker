@@ -16,6 +16,7 @@ import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.engine.DiskCacheStrategy
+import com.bumptech.glide.request.target.Target.SIZE_ORIGINAL
 import com.oc.catemoji.catoc.core.base.BackPressHandler
 import com.oc.catemoji.catoc.core.extention.gone
 import com.oc.catemoji.catoc.core.extention.hideNavigation
@@ -141,9 +142,13 @@ class MainActivity : AppCompatActivity() , LoadingController{
                 binding.btnNo.visible()
                 binding.btnYes.setOnClickListener { onYes?.invoke() }
                 binding.btnNo.setOnClickListener { onNo?.invoke() }
+                binding.txtContent.visible()
+                binding.animationView.gone()
             } else {
                 binding.btnYes.gone()
                 binding.btnNo.gone()
+                binding.txtContent.gone()
+                binding.animationView.visible()
             }
 
             setCancelable(cancelable)
@@ -158,16 +163,8 @@ class MainActivity : AppCompatActivity() , LoadingController{
         }
     }
 
-    private fun preloadHomeDrawables() {
-        val resIds = listOf(
-            R.drawable.img_bg_home,
-            R.drawable.img_title_home,
-            R.drawable.img_bg_lang,
-            R.drawable.img_bg_home1,
-            R.drawable.img_avatar1,
-            R.drawable.img_avatar2,
-            R.drawable.img_avatar3,
-            R.drawable.img_avatar4,
+    private fun preloadHomeDrawables(onDone: () -> Unit) {
+        val flagResIds = listOf(
             R.drawable.ic_flag_hindi,
             R.drawable.ic_flag_spanish,
             R.drawable.ic_flag_french,
@@ -177,18 +174,48 @@ class MainActivity : AppCompatActivity() , LoadingController{
             R.drawable.ic_flag_germani,
             R.drawable.ic_select_lang,
             R.drawable.ic_un_select_lang,
-            R.drawable.img_bg_rcy_lang,
             R.drawable.select_language,
-            R.drawable.back_app
+            R.drawable.back_app,
         )
-        // Glide preload thực sự decode và cache bitmap
-        // chạy background tự động, không cần Dispatchers.IO
-        resIds.forEach { resId ->
+
+        val bgResIds = listOf(
+            R.drawable.img_bg_home,
+            R.drawable.img_title_home,
+            R.drawable.img_bg_lang,
+            R.drawable.img_bg_home1,
+            R.drawable.img_bg_rcy_lang,
+            R.drawable.img_avatar1,
+            R.drawable.img_avatar2,
+            R.drawable.img_avatar3,
+            R.drawable.img_avatar4,
+        )
+
+        val total = flagResIds.size + bgResIds.size
+        val doneCount = java.util.concurrent.atomic.AtomicInteger(0)
+        val checkDone = { if (doneCount.incrementAndGet() == total) onDone() }
+
+        // ✅ Flag icons — nhỏ, dùng override nhỏ + memory cache
+        flagResIds.forEach { resId ->
             Glide.with(this)
                 .load(resId)
                 .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                .preload()
+                .override(64, 64)           // ← giảm xuống 64 cho flag
+                .preload()                  // ← preload vào memory cache
+            checkDone()                     // ← không cần đợi callback
         }
+
+        bgResIds.forEach { resId ->
+            Glide.with(this)
+                .load(resId)
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .override(SIZE_ORIGINAL)
+                .into(object : com.bumptech.glide.request.target.CustomTarget<android.graphics.drawable.Drawable>() {
+                    override fun onResourceReady(resource: android.graphics.drawable.Drawable, transition: com.bumptech.glide.request.transition.Transition<in android.graphics.drawable.Drawable>?) { checkDone() }
+                    override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
+                    override fun onLoadFailed(errorDrawable: android.graphics.drawable.Drawable?) { checkDone() }
+                })
+
+    }
     }
     private lateinit var navController: NavController
     private val mainViewModel: ViewModelActivity by viewModels()
@@ -217,9 +244,12 @@ class MainActivity : AppCompatActivity() , LoadingController{
             }
         })
 
-        // Delay preload sang frame tiếp theo — không block first frame
         window.decorView.post {
-            preloadHomeDrawables()
+            preloadHomeDrawables {
+                runOnUiThread {
+                    mainViewModel.notifyImagesReady()
+                }
+            }
         }
 
         Log.d("PERF2", "onCreate END: ${System.currentTimeMillis()}")

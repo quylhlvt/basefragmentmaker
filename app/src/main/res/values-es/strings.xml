@@ -90,6 +90,7 @@
     <string name="cat_random">Gato aleatorio</string>
     <string name="random">Aleatorio</string>
     <string name="my_creation">Mi creación</string>
+    <string name="my_creation1">Mi creación</string>
     <string name="category">Categoría</string>
     <string name="image">Imagen</string>
     <string name="color">Color</string>
@@ -102,4 +103,8 @@
     <string name="unstable_connection_please_check_your_network_connection">Conexión inestable, comprueba tu conexión de red</string>
     <string name="ok">Aceptar</string>
     <string name="please_wait_a_few_seconds_for_data_to_load">Espera unos segundos para que se carguen los datos.</string>
+    <string name="create_package_name">Crear nombre del paquete</string>
+    <string name="enter_your_package_name">Ingresa el nombre del paquete</string>
+    <string name="please_enter_your_package_name">¡Por favor ingresa el nombre del paquete!</string>
+    <string name="this_action_may_contain_advertising">Esta acción puede contener anuncios</string>
 </resources>

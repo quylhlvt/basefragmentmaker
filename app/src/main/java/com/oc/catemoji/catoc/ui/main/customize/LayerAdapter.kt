@@ -156,7 +156,7 @@ class PartAdapter : BaseAdapter<String, ItemLayerBinding>(ItemLayerBinding::infl
 
         if (posPath == position) {
             focus.visible()
-            cardLayer.cardElevation = 8f
+
             cardLayer.setCardBackgroundColor(
                 ContextCompat.getColor(
                     ctx,
@@ -172,7 +172,7 @@ class PartAdapter : BaseAdapter<String, ItemLayerBinding>(ItemLayerBinding::infl
             cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
         } else {
             focus.invisible()
-            cardLayer.cardElevation = 0f
+
             cardLayer.setCardBackgroundColor(
                 ContextCompat.getColor(
                     ctx,

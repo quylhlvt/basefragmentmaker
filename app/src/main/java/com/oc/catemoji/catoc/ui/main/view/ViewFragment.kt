@@ -20,6 +20,7 @@ import com.oc.catemoji.catoc.core.extention.onClick
 import com.oc.catemoji.catoc.core.extention.safeNavigate
 import com.oc.catemoji.catoc.core.extention.setImageActionBar
 import com.oc.catemoji.catoc.core.extention.setTextActionBar
+import com.oc.catemoji.catoc.core.extention.toCleanSelections
 import com.oc.catemoji.catoc.core.extention.visible
 import com.oc.catemoji.catoc.core.helper.PermissionRequestHelper
 import com.oc.catemoji.catoc.databinding.FragmentViewBinding
@@ -67,7 +68,7 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                     setImageActionBar(actionBar.btnActionBarNextToRight, R.drawable.ic_share)
                     setImageActionBar(actionBar.btnActionBarRight, R.drawable.ic_home)
                     // ✅ Show 2 nút bottom
-                    txtLeft.apply  { visible(); text = getString(R.string.my_creation) }
+                    txtLeft.apply  { visible(); text = getString(R.string.my_creation1) }
                     txtRight.apply { visible(); text = getString(R.string.download) }
                 }
                 // ── Type 1: Avatar từ MyPony ──────────────────────────────────
@@ -215,7 +216,6 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
             .takeIf { it >= 0 }
             ?: run { showToast("Template not found"); return }
 
-        // ✅ Chỉ check internet nếu template là online
         val template = viewModelActivity.templates.value.getOrNull(templateIndex)
         if (template?.id?.startsWith("online_") == true && !isInternetAvailable(requireContext())) {
             showNoInternetDialog()
@@ -226,7 +226,7 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
             templateIndex   = templateIndex,
             isEdit          = true,
             customizedId    = idEdit,
-            savedSelections = customized.selections,
+            savedSelections = customized.selections.toCleanSelections(), // ✅ fix cast
             isFlipped       = customized.isFlipped
         )
         findNavController().safeNavigate(R.id.action_view_to_customize, args)

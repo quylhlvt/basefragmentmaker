@@ -59,15 +59,19 @@
                     app:cardCornerRadius="24dp"
                     app:cardElevation="0dp"
                     >
-
+                    <androidx.appcompat.widget.AppCompatImageView
+                        android:id="@+id/imvBg"
+                        android:layout_width="match_parent"
+                        android:layout_height="match_parent"
+                        android:scaleType="centerCrop"
+                        android:src="@drawable/bg_addbackground" />
                     <!--            imvImage-->
                     <androidx.appcompat.widget.AppCompatImageView
                         android:id="@+id/imvImage"
                         android:layout_width="match_parent"
                         android:layout_height="match_parent"
-                        android:scaleType="centerCrop"
                         android:adjustViewBounds="true"
-                        android:src="@drawable/img_permission" />
+                        android:src="@null" />
 
                     <!--        sflShimmer-->
                     <!--            <com.facebook.shimmer.ShimmerFrameLayout-->

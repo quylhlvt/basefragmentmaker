@@ -11,6 +11,7 @@ import android.view.ViewGroup
 import android.view.animation.DecelerateInterpolator
 import android.widget.ImageView
 import androidx.appcompat.widget.AppCompatImageView
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -25,7 +26,10 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import com.oc.catemoji.catoc.R
 import com.oc.catemoji.catoc.core.base.BaseFragment
+import com.oc.catemoji.catoc.core.extention.InternetExtension.isInternetAvailable
+import com.oc.catemoji.catoc.core.extention.InternetExtension.isNetworkConnected
 import com.oc.catemoji.catoc.core.extention.gone
+import com.oc.catemoji.catoc.core.extention.invisible
 import com.oc.catemoji.catoc.core.extention.onClick
 import com.oc.catemoji.catoc.core.extention.popBack
 import com.oc.catemoji.catoc.core.extention.setImageActionBar
@@ -41,6 +45,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.atomic.AtomicInteger
 
 @AndroidEntryPoint
@@ -67,7 +72,24 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): FragmentShowBinding = FragmentShowBinding.inflate(inflater, container, false)
+    private fun isOnlineTemplate(): Boolean {
+        val templateIndex = arguments?.getInt(ARG_TEMPLATE_INDEX, 0) ?: 0
+        return viewModelActivity.templates.value
+            .getOrNull(templateIndex)?.id?.startsWith("online_") == true
+    }
 
+    private fun checkOnlineNetworkOrShowDialog(): Boolean {
+        if (!isOnlineTemplate()) return false
+        return when {
+            !isInternetAvailable(requireContext()) -> {
+                showNoInternetDialog(); true
+            }
+            !isNetworkConnected(requireContext()) -> {
+                showUnstableNetworkDialog(); true
+            }
+            else -> false
+        }
+    }
     // ── INIT ──────────────────────────────────────────────────────────────────
 
     override fun initView() {
@@ -78,7 +100,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         }
         setupAdapters()
         readArgsAndInit()
-        startTimer()
+        startCountDown()
         val bitmap = viewModelActivity.cosplayBitmap
         if (bitmap != null && !bitmap.isRecycled) {
             binding.imvImage2.setImageBitmap(bitmap)
@@ -107,13 +129,66 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
             }
         }
     }
+    private fun startCountDown() {
+        binding.actionBar.btnActionBarLeft.isEnabled = false
+        binding.actionBar.btnActionBarRight.isEnabled = false
+        val colors = listOf(
+            ContextCompat.getColor(requireContext(), R.color.app_color5), // 3
+            ContextCompat.getColor(requireContext(), R.color.app_color6), // 2
+            ContextCompat.getColor(requireContext(), R.color.orange_F6)   // 1
+        )
+
+        binding.countDown.visibility = View.VISIBLE
+
+        viewLifecycleOwner.lifecycleScope.launch {
+            for (count in 3 downTo 1) {
+                val colorIndex = 3 - count
+                binding.tvCountDown.setTextColor(colors[colorIndex])
+                binding.tvCountDown.text = count.toString()
+
+                // reset state trước khi animate in
+                binding.tvCountDown.scaleX = 0.4f
+                binding.tvCountDown.scaleY = 0.4f
+                binding.tvCountDown.alpha = 0f
+
+                // pop in — chờ xong
+                suspendCancellableCoroutine { cont ->
+                    binding.tvCountDown.animate()
+                        .scaleX(1f).scaleY(1f)
+                        .alpha(1f)
+                        .setDuration(350)
+                        .withEndAction { cont.resume(Unit) {} }
+                        .start()
+                }
+
+                // giữ 500ms
+                kotlinx.coroutines.delay(500)
+
+                // pop out — chờ xong
+                suspendCancellableCoroutine { cont ->
+                    binding.tvCountDown.animate()
+                        .scaleX(1.5f).scaleY(1.5f)
+                        .alpha(0f)
+                        .setDuration(250)
+                        .withEndAction { cont.resume(Unit) {} }
+                        .start()
+                }
+            }
+
+            // Ẩn overlay, bắt đầu timer
+            binding.countDown.visibility = View.GONE
+            binding.actionBar.btnActionBarLeft.isEnabled = true
+            binding.actionBar.btnActionBarRight.isEnabled = true
+            binding.tvCountDown.alpha = 1f
+            binding.tvCountDown.scaleX = 1f
+            binding.tvCountDown.scaleY = 1f
+            startTimer()
+        }
+    }
     private fun readArgsAndInit() {
         val templateIndex = arguments?.getInt(ARG_TEMPLATE_INDEX, 0) ?: 0
-
-        @Suppress("UNCHECKED_CAST")
-        val targetSelections =
-            arguments?.getSerializable(ARG_SELECTIONS) as? ArrayList<SelectionIndex>
-                ?: return
+        val targetSelections: ArrayList<SelectionIndex> =
+            arguments?.getParcelableArrayList(ARG_SELECTIONS) ?: return
 
         viewModel.init(templateIndex, targetSelections)
     }
@@ -169,16 +244,11 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
     override fun viewListener() {
         binding.apply {
             actionBar.btnActionBarLeft.onClick { popBack() }
-            actionBar.btnActionBarRight.onClick {
-                navigateToSuccess()
-            }
+            actionBar.btnActionBarRight.onClick { navigateToSuccess() }
 
-            materialSmall.onClick {
-                imgShowBig.visible()
-            }
-            close.onClick {
-                imgShowBig.gone()
-            }
+            materialSmall.onClick { imgShowBig.visible() }
+            close.onClick { imgShowBig.gone() }
+
             end.onClick {
                 val navPos = viewModel.state.value.currentNavIndex
                 if (navPos < arrShowColor.size) arrShowColor[navPos] = false
@@ -186,22 +256,15 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
                     llColor.visibility = View.INVISIBLE
                 }.start()
             }
-            // imgRandom — randomize toàn bộ (giống btnDice ở ShowActivity)
-            imgRandom.onClick { viewModel.randomizeAll() }
 
-            // imgChangColor — reset về default (giống btnReset)
-            imgChangColor.onClick { viewModel.resetAll() }
-
-            adapterNav.onClick = { viewModel.selectNav(it) }
-            adapterColor.onClick = { viewModel.selectColor(it) }
-            adapterPart.onClick = { idx, type ->
-                when (type) {
-                    "none" -> viewModel.selectNone()
-                    "dice" -> viewModel.selectDiceCurrent()
-                    else -> viewModel.selectPath(idx)
-                }
+            // ── Random ────────────────────────────────────────────────────────────
+            imgRandom.onClick {
+                if (!checkOnlineNetworkOrShowDialog()) viewModel.randomizeAll() // ← guard
             }
+
+            // ── Color toggle ──────────────────────────────────────────────────────
             imgChangColor.onClick {
+                if (checkOnlineNetworkOrShowDialog()) return@onClick              // ← guard
                 val navPos = viewModel.state.value.currentNavIndex
                 if (!viewModel.state.value.hasMultipleColors) return@onClick
                 if (navPos < arrShowColor.size) arrShowColor[navPos] = true
@@ -209,6 +272,27 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
                 llColor.visibility = View.VISIBLE
                 llColor.alpha = 0f
                 llColor.animate().alpha(1f).setDuration(200).start()
+            }
+        }
+
+        // ── Nav ───────────────────────────────────────────────────────────────────
+        adapterNav.onClick = {
+            if (!checkOnlineNetworkOrShowDialog()) viewModel.selectNav(it)       // ← guard
+        }
+
+        // ── Color ─────────────────────────────────────────────────────────────────
+        adapterColor.onClick = {
+            if (!checkOnlineNetworkOrShowDialog()) viewModel.selectColor(it)     // ← guard
+        }
+
+        // ── Part ──────────────────────────────────────────────────────────────────
+        adapterPart.onClick = { idx, type ->
+            if (!checkOnlineNetworkOrShowDialog()) {                              // ← guard
+                when (type) {
+                    "none" -> viewModel.selectNone()
+                    "dice" -> viewModel.selectDiceCurrent()
+                    else   -> viewModel.selectPath(idx)
+                }
             }
         }
     }
@@ -346,6 +430,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
     private fun updateAdapters(state: ShowState) {
         adapterNav.setPos(state.currentNavIndex)
         adapterNav.submitList(state.listData)
+        binding.imgChangColor.isVisible = state.hasMultipleColors
 
         adapterColor.setPos(state.currentColorIndex)
 
@@ -358,6 +443,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         val navPos = state.currentNavIndex
 
         if (state.hasMultipleColors) {
+            binding.imgChangColor.visible()
             adapterColor.submitList(state.currentColors)
             binding.rcvColor.post {
                 binding.rcvColor.smoothScrollToPosition(state.currentColorIndex)
@@ -367,6 +453,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
                     binding.llColor.visibility = View.VISIBLE
                 }.start()
             } else {
+                binding.imgChangColor.invisible()
                 binding.llColor.animate().alpha(0f).setDuration(150).withEndAction {
                     binding.llColor.visibility = View.GONE
                 }.start()
@@ -469,7 +556,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
 
             // Restart
             binding.actionBar.tvCenter.text = "05:00"
-            startTimer()
+            startCountDown()
             readArgsAndInit()
             return
         }
@@ -506,12 +593,12 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         const val ARG_TEMPLATE_INDEX = "template_index"
         const val ARG_SELECTIONS = "selections"
 
-        fun newArgs(
+        fun newArgshow(
             templateIndex: Int,
             targetSelections: ArrayList<SelectionIndex>
         ) = Bundle().apply {
             putInt(ARG_TEMPLATE_INDEX, templateIndex)
-            putSerializable(ARG_SELECTIONS, targetSelections)
+            putParcelableArrayList(ARG_SELECTIONS, targetSelections)
         }
     }
 }

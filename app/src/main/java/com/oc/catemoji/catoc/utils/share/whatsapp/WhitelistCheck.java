@@ -11,7 +11,7 @@ import androidx.annotation.NonNull;
 
 @SuppressWarnings("FieldCanBeLocal")
 public class WhitelistCheck {
-    public static final String CONTENT_PROVIDER_AUTHORITY = "com.oc.catemoji.catoc.StickerContentProvider";
+    public static final String CONTENT_PROVIDER_AUTHORITY = "com.oc.catemoji.catoc.utils.share.whatsapp.StickerContentProvider";
     private static final String AUTHORITY_QUERY_PARAM = "authority";
     private static final String IDENTIFIER_QUERY_PARAM = "identifier";
     private static String STICKER_APP_AUTHORITY = CONTENT_PROVIDER_AUTHORITY;

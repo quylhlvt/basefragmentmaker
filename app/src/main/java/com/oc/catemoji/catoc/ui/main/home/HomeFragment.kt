@@ -84,14 +84,14 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
                     findNavController().navigate(R.id.action_home_to_myPony)
                 }
             }
-            btnRandom.onClick(800) {
+            btnRandom.onClick(1000) {
                 if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
                     showLoadingDataDialog()
                 } else {
                     findNavController().navigate(R.id.action_home_to_random)
                 }
             }
-            btnCosPlay.onClick(800) {
+            btnCosPlay.onClick(1000) {
                 if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
                     showLoadingDataDialog()
                 } else {

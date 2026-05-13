@@ -26,6 +26,8 @@ import com.oc.catemoji.catoc.core.extention.setTextActionBar
 import com.oc.catemoji.catoc.core.extention.visible
 import com.oc.catemoji.catoc.databinding.FragmentCosplayBinding
 import com.oc.catemoji.catoc.ui.main.customize.CustomizeFragment
+import com.oc.catemoji.catoc.ui.main.random.RandomViewModel
+import com.oc.catemoji.catoc.ui.main.show.ShowFragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
@@ -96,10 +98,9 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
                     viewModelActivity.cosplayBitmap = cached
                 }
 
-                val args = CustomizeFragment.newArgs(
+                val args = ShowFragment.newArgshow(
                     templateIndex = item.templateIndex,
-                    isEdit = false,
-                    savedSelections = item.selections
+                    targetSelections = item.selections
                 )
                 findNavController().navigate(R.id.action_cosplay_to_show, args)
             }
@@ -152,6 +153,7 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
         viewLifecycleOwner.lifecycleScope.launch {
             val paths = item.resolvedPaths.filterNotNull()
             if (paths.isEmpty()) return@launch
+            binding.imvImage.setImageDrawable(null)
 
             showLoadingSafe()
 
@@ -162,8 +164,8 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
                             Glide.with(requireContext())
                                 .asBitmap()
                                 .load(path)
-                                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .override(512, 512)
+                                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                                .override(512)
                                 .submit()
                                 .get()
                         }.getOrNull()
@@ -176,7 +178,7 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
 
             val merged = mergeBitmaps(bitmaps)
 
-            // Lưu vào cache
+            // ✅ Lưu vào cache
             viewModel.setCachedBitmap(merged)
 
             withContext(Dispatchers.Main) {
@@ -186,16 +188,9 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
     }
 
     private fun showBitmap(bitmap: Bitmap) {
-        binding.material2.apply {
-            removeAllViews()
-            addView(AppCompatImageView(requireContext()).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                scaleType = ImageView.ScaleType.CENTER_CROP
-                setImageBitmap(bitmap)
-            })
+        binding.imvImage.apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setImageBitmap(bitmap)
         }
     }
 

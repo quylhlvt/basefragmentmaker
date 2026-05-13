@@ -14,7 +14,7 @@ data class SelectionIndex(
     val bodyPartIndex: Int = 0,
     val colorIndex:    Int = 0,
     val pathIndex:     Int = 0
-) : Parcelable, java.io.Serializable
+) : Parcelable
 
 // ─────────────────────────────────────────────
 //  ColorModel

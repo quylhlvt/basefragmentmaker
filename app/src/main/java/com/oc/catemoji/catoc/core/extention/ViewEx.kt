@@ -82,13 +82,12 @@ fun View.select() {
 //        }
 //    }
 //}
-private var lastClickTime = 0L
+private val lastClickTime = java.util.concurrent.atomic.AtomicLong(0L)
 
 fun View.onClick(interval: Long = 200, action: (View) -> Unit) {
     setOnClickListener {
-        val currentTime = System.currentTimeMillis()
-        if (currentTime - lastClickTime >= interval) {
-            lastClickTime = currentTime
+        val now = System.currentTimeMillis()
+        if (lastClickTime.getAndSet(now).let { now - it >= interval }) {
             action(it)
         }
     }

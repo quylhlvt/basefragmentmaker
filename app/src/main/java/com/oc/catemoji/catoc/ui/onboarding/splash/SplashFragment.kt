@@ -112,6 +112,9 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
                     mainViewModel.templates.first { list ->
                         list.any { it.id.startsWith("online_") }
                     }
+                },
+                waitForImages = {
+                    mainViewModel.imagesReady.first { it }  // ✅ chờ true
                 }
             )
         }

@@ -5,6 +5,7 @@ import android.util.Log
 import com.oc.catemoji.catoc.data.model.custom.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
+import com.oc.catemoji.catoc.core.extention.withCleanListPath
 import com.tencent.mmkv.MMKV
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
@@ -73,7 +74,13 @@ class AppDataManager @Inject constructor(
 
     private var isDataLoaded      = false
     private var isDataQuickLoaded = false
-
+    // Thêm vào AppDataManager companion object hoặc top-level
+    private inline fun <reified T> Gson.safeFromJson(json: String): T? {
+        return runCatching {
+            val type = object : TypeToken<T>() {}.type
+            fromJson<T>(json, type)
+        }.getOrNull()
+    }
     // ── INIT ─────────────────────────────────────────────────────────────────
 
     suspend fun loadInitialData() {
@@ -111,16 +118,17 @@ class AppDataManager @Inject constructor(
 
     // In AppDataManager:
     suspend fun loadQuickData(): Boolean = withContext(Dispatchers.IO) {
-        Log.d("PERF2", "loadQuickData START: ${System.currentTimeMillis()}")
-
         val cached = loadTemplatesFromJson()
-        Log.d("PERF2", "loadQuickData fromJson done: ${System.currentTimeMillis()}")
 
         if (cached.isNotEmpty()) {
             _templates.value = cached
-            loadCustomizedCharacters()
-            combineCharacterLists()
         }
+
+        // ✅ Luôn load customized, kể cả khi templates chưa có
+        // listPath sẽ rỗng tạm thời, mergeApiTemplates() fix sau
+        loadCustomizedCharacters()
+        combineCharacterLists()
+
         coroutineScope {
             launch { loadBackgrounds() }
             launch { loadBackgroundTexts() }
@@ -128,9 +136,8 @@ class AppDataManager @Inject constructor(
             launch { loadSpeechs() }
             launch { loadMyDesigns() }
         }
-        Log.d("PERF2", "loadQuickData END: ${System.currentTimeMillis()}")
 
-        cached.isNotEmpty() // ← return Boolean
+        cached.isNotEmpty()
     }
 
 
@@ -139,13 +146,29 @@ class AppDataManager @Inject constructor(
      * - Giữ nguyên local templates (template_*)
      * - Thay thế/thêm online templates (online_*)
      */
-    fun mergeApiTemplates(onlineTemplates: List<CustomModel>) {
+    // Trong mergeApiTemplates — sau khi có online templates, re-resolve customized
+    suspend fun mergeApiTemplates(onlineTemplates: List<CustomModel>) = withContext(Dispatchers.IO) {
         val localOnly = _templates.value.filter { !it.id.startsWith("online_") }
-        _templates.value = onlineTemplates + localOnly
-        combineCharacterLists()
-        Log.d(TAG, "✅ Merged: ${onlineTemplates.size} online + ${localOnly.size} local templates")
-    }
+        val merged = onlineTemplates + localOnly
+        _templates.value = merged
+        saveTemplatesToJson(merged)  // ← fix mất online templates sau restart
 
+        // ✅ Re-resolve customized đang có listPath rỗng do online templates chưa có lúc load
+        val reResolved = _customizedCharacters.value.map { customized ->
+            if (customized.listPath.isNotEmpty()) return@map customized  // đã ổn
+
+            val template = merged.find { it.id == customized.templateId }
+                ?: merged.find { it.avatar == customized.avatar }
+                ?: return@map customized  // vẫn không tìm được → giữ nguyên
+
+            Log.d(TAG, "🔄 Re-resolved listPath for customized=${customized.id}")
+            customized.copy(listPath = template.listPath)
+        }
+        _customizedCharacters.value = reResolved
+
+        combineCharacterLists()
+        Log.d(TAG, "✅ Merged + saved: ${onlineTemplates.size} online + ${localOnly.size} local")
+    }
 
     // ── TEMPLATE LOADING ─────────────────────────────────────────────────────
 
@@ -293,11 +316,12 @@ class AppDataManager @Inject constructor(
     private suspend fun loadTemplatesFromJson(): List<CustomModel> = withContext(Dispatchers.IO) {
         runCatching {
             val json = mmkv.decodeString(KEY_TEMPLATES) ?: return@withContext emptyList()
-            val type = object : TypeToken<List<CustomModel>>() {}.type
-            gson.fromJson<List<CustomModel>>(json, type) ?: emptyList()
+            val type = object : TypeToken<ArrayList<CustomModel>>() {}.type
+            val raw: ArrayList<CustomModel> = gson.fromJson(json, type) ?: return@withContext emptyList()
+            // ✅ Fix toàn bộ nested LinkedTreeMap → đúng type
+            raw.map { it.withCleanListPath() }
         }.getOrDefault(emptyList())
     }
-
     // ── CUSTOMIZED CHARACTERS ─────────────────────────────────────────────────
 
 
@@ -306,10 +330,13 @@ class AppDataManager @Inject constructor(
     private suspend fun saveCustomizedCharacters(characters: List<CustomModel>) = withContext(Dispatchers.IO) {
         runCatching {
             val dtos = characters.map { it.toDto() }
-            mmkv.encode(KEY_CUSTOMIZED, gson.toJson(dtos))
-        }.onFailure { Log.e(TAG, "❌ Save customized error", it) }
+            val json = gson.toJson(dtos)
+            val saved = mmkv.encode(KEY_CUSTOMIZED, json)
+            Log.d(TAG, "✅ Saved ${characters.size} customized (${json.length} bytes), success=$saved")
+        }.onFailure {
+            Log.e(TAG, "❌ saveCustomizedCharacters error: ${it.message}", it)
+        }
     }
-
     suspend fun saveApiCache(templates: List<CustomModel>) = withContext(Dispatchers.IO) {
         runCatching {
             mmkv.encode(KEY_API_CACHE, gson.toJson(templates))
@@ -319,23 +346,33 @@ class AppDataManager @Inject constructor(
     private suspend fun loadCustomizedCharacters() = withContext(Dispatchers.IO) {
         runCatching {
             val json = mmkv.decodeString(KEY_CUSTOMIZED)
-            if (json.isNullOrEmpty()) { _customizedCharacters.value = emptyList(); return@withContext }
+            if (json.isNullOrEmpty()) {
+                _customizedCharacters.value = emptyList()
+                return@withContext
+            }
 
             val type = object : TypeToken<List<CustomizedCharacterDto>>() {}.type
             val dtos: List<CustomizedCharacterDto> = gson.fromJson(json, type) ?: emptyList()
 
-            val models = dtos.map { dto ->
-                val template = _templates.value.find { t ->
-                    t.id == dto.templateId || t.avatar == dto.avatar
-                }
-                dto.toModel(templateListPath = template?.listPath ?: arrayListOf())
+            val fixedModels = dtos.map { dto ->
+                val template = _templates.value.find { it.id == dto.templateId }
+                    ?: _templates.value.find { it.avatar == dto.avatar }
+
+                // ✅ template null → vẫn tạo model, listPath rỗng tạm thời
+                // mergeApiTemplates() sẽ re-resolve sau khi online templates về
+                val model = dto.toModel(templateListPath = template?.listPath ?: arrayListOf())
+
+                val selJson = gson.toJson(model.selections)
+                val selType = object : TypeToken<ArrayList<SelectionIndex>>() {}.type
+                val cleanSel: ArrayList<SelectionIndex> = gson.fromJson(selJson, selType)
+                model.copy(selections = cleanSel)
             }
 
-            _customizedCharacters.value = models
-            Log.d(TAG, "✅ Loaded ${models.size} customized from dto")
+            _customizedCharacters.value = fixedModels
+            Log.d(TAG, "✅ Loaded ${fixedModels.size} customized (templates available: ${_templates.value.size})")
         }.onFailure {
             _customizedCharacters.value = emptyList()
-            Log.e(TAG, "❌ Load customized error", it)
+            Log.e(TAG, "❌ Load customized error: ${it.message}", it)
         }
     }
     suspend fun updateCustomizedCharacter(character: CustomModel) = withContext(Dispatchers.IO) {
@@ -361,8 +398,8 @@ class AppDataManager @Inject constructor(
 
     private fun combineCharacterLists() {
         _characters.value = _templates.value + _customizedCharacters.value
+        Log.d(TAG, "🔗 combine: templates=${_templates.value.size} + customized=${_customizedCharacters.value.size} = ${_characters.value.size}")
     }
-
     fun prependOnlineTemplates(onlineTemplates: List<CustomModel>) {
         val existing = _templates.value.filter { !it.id.startsWith("online_") }
         _templates.value = onlineTemplates + existing

@@ -90,19 +90,44 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
             )
         }
     }
-
+    override fun onResume() {
+        super.onResume()
+        // ✅ Cập nhật lại UI khi quay về từ Settings hoặc sau khi grant
+        updatePermissionUI(
+            requireContext().checkPermissions(PermissionHelper.storagePermission),
+            true
+        )
+        updatePermissionUI(
+            requireContext().checkPermissions(PermissionHelper.notificationPermission),
+            false
+        )
+    }
+    @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
         requestCode: Int, permissions: Array<String>, grantResults: IntArray
     ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+
         val granted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+
         when (requestCode) {
             RequestKey.STORAGE_PERMISSION_CODE -> {
-                if (granted) { viewModel.onStorageGranted(); updatePermissionUI(true, true) }
-                else viewModel.onStorageDenied()  // ✅ ViewModel đếm
+                if (granted) {
+                    viewModel.onStorageGranted()
+                } else {
+                    viewModel.onStorageDenied()
+                }
+                // ✅ Luôn update UI dù granted hay denied
+                updatePermissionUI(granted, true)
             }
             RequestKey.NOTIFICATION_PERMISSION_CODE -> {
-                if (granted) { viewModel.onNotificationGranted(); updatePermissionUI(true, false) }
-                else viewModel.onNotificationDenied()
+                if (granted) {
+                    viewModel.onNotificationGranted()
+                } else {
+                    viewModel.onNotificationDenied()
+                }
+                // ✅ Luôn update UI dù granted hay denied
+                updatePermissionUI(granted, false)
             }
         }
     }

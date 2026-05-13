@@ -20,22 +20,19 @@ class LanguageAdapter (val context: Context) : BaseAdapter<LanguageModel, ItemLa
         binding: ItemLanguageBinding, item: LanguageModel, position: Int
     ) {
         binding.apply {
-            loadImage(root, item.flag, imvFlag, false)
+            // ✅ Dùng setImageResource thay Glide — resource tĩnh không cần Glide
+            imvFlag.setImageResource(item.flag)
+
             tvLang.text = item.name
 
-            val (ratio, color) = if (item.activate) {
-                R.drawable.ic_select_lang to context.getColor(R.color.white)
-            } else {
-                R.drawable.ic_un_select_lang to context.getColor(R.color.app_color)
-            }
-            loadImage(root, ratio, btnRadio, false)
+            // ✅ setImageResource cho radio button
+            btnRadio.setImageResource(
+                if (item.activate) R.drawable.ic_select_lang else R.drawable.ic_un_select_lang
+            )
 
-           if (item.activate) flFocus.visible() else flFocus.invisible()
+            if (item.activate) flFocus.visible() else flFocus.invisible()
 
-
-            root.onClick {
-                onItemClick.invoke(item.code)
-            }
+            root.onClick { onItemClick.invoke(item.code) }
         }
     }
     @SuppressLint("NotifyDataSetChanged")

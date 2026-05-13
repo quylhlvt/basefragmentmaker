@@ -63,6 +63,18 @@ fun loadImage(
         .error(shimmerDrawable)
         .into(imageView)
 }
+fun loadImage(
+    viewGroup: ViewGroup,
+    path: Int,
+    imageView: ImageView,
+) {
+    Glide.with(viewGroup)
+        .load(path)
+        .apply(softwareOptions)
+        .diskCacheStrategy(DiskCacheStrategy.RESOURCE) // ✅ luôn cache
+        .override(96, 96)                              // ✅ size nhỏ hơn cho flag icons
+        .into(imageView)
+}
 
 fun loadImage(
     viewGroup: ViewGroup,

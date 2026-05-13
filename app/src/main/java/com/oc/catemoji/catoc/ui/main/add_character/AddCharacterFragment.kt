@@ -10,6 +10,7 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
 import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
@@ -75,6 +76,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     lateinit var imageManager: CharacterImageManager
 
     private val permissionViewModel: PermissionViewModel by viewModels()
+    private var keyboardLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     // ── Keyboard state ──────────────────────────────────────────────────────
     // Source of truth duy nhất: layout change listener đo thực tế
@@ -257,7 +259,6 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
         initRcv()
         initDrawView()
-        hideLoadingSafe()
 
         if (!viewModel.isInitialized) {
             initData()
@@ -299,7 +300,8 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
     private fun setupKeyboardListenerLegacy() {
         val threshold = 150.dp(requireContext())
-        binding.root.viewTreeObserver.addOnGlobalLayoutListener {
+
+        keyboardLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
             val rect = android.graphics.Rect()
             binding.root.getWindowVisibleDisplayFrame(rect)
             val screenHeight = binding.root.rootView.height
@@ -310,6 +312,8 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                 onKeyboardClose()
             }
         }
+
+        binding.root.viewTreeObserver.addOnGlobalLayoutListener(keyboardLayoutListener)
     }
 
     private fun onKeyboardOpen() {
@@ -318,7 +322,13 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             binding.flFunction.translationY = (-170).dp(requireContext()).toFloat()
         }
     }
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        keyboardLayoutListener?.let {
+            binding.root.viewTreeObserver.removeOnGlobalLayoutListener(it)
+        }
+        keyboardLayoutListener = null
+    }
     private fun onKeyboardClose() {
         // ✅ Android 9-: ignore nếu speech dialog đang mở
         // vì GlobalLayoutListener fire false-close khi dialog transition
@@ -403,7 +413,9 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                     viewModel.loadDrawableEmoji(customizeBitmap, isCharacter = true)
                 )
                 viewModelActivity.customizeBitmap = null // clear sau khi dùng
-                hideLoadingSafe()
+                binding.drawView.post {
+                    hideLoadingSafe()
+                }
             } else if (imagepath.isNotEmpty()) {
                 addDrawable(imagepath, isCharacter = true) {
                     hideLoadingSafe()
@@ -509,10 +521,12 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                 ) {
                     binding.drawView.addDraw(viewModel.loadDrawableEmoji(resource, isCharacter))
                     requireActivity().hideNavigation(true)
+                    onDone?.invoke()
                 }
                 override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
                 override fun onLoadFailed(errorDrawable: android.graphics.drawable.Drawable?) {
                     showToast("Don't Download sticker")
+                    onDone?.invoke()
                 }
             })
     }

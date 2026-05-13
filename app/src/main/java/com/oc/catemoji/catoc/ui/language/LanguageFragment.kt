@@ -62,13 +62,12 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         return true
     }
     override fun setupPreViews() {
-        // ❌ Xóa Glide load background — đã set android:src trong XML rồi
-        // Chỉ update nếu cần đổi bg runtime
+
         val isFirst = !SharedPreferencesManager.isLanuageScreen()
         if (!isFirst) {
-            // Chỉ đổi khi không phải lần đầu
             binding.imageBgLang.setImageResource(R.drawable.img_bg_home)
         }
+
 
         binding.recycleLanguage.apply {
             adapter = languageAdapter
