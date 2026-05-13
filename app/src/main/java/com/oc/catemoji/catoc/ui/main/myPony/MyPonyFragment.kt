@@ -18,7 +18,7 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.oc.catemoji.catoc.R
 import com.oc.catemoji.catoc.core.dialog.CreateNameDialog
-import com.oc.catemoji.catoc.core.extention.InternetExtension.isInternetAvailable
+import com.oc.catemoji.catoc.core.extention.InternetExtension.isNetworkConnected
 import com.oc.catemoji.catoc.core.extention.checkPermissions
 import com.oc.catemoji.catoc.core.extention.goToSettings
 import com.oc.catemoji.catoc.core.extention.gone
@@ -111,13 +111,13 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
                 imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_selected)
                 recycleAvatar.visible()
                 recycleDesign.gone()
-                loadAvatarData()
+                // ❌ Bỏ loadAvatarData() — dùng StateFlow
             } else {
                 imvFocusMyDesign.setImageResource(R.drawable.bg_btn_type_selected)
                 imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_unselected)
                 recycleAvatar.gone()
                 recycleDesign.visible()
-                loadDesignData()
+                loadDesignData() // Design vẫn load thủ công vì không có StateFlow
             }
         }
     }
@@ -215,14 +215,15 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     }
 
     // ── OBSERVE ───────────────────────────────────────────────────────────────
-// MyPonyFragment.kt — observeData()
     override fun observeData() {
-        // ✅ Avatar: collect từ viewModelActivity (source of truth)
+        // ✅ Chỉ dùng 1 nguồn duy nhất cho avatar
         viewLifecycleOwner.lifecycleScope.launch {
             viewModelActivity.customizedCharacters.collect { customized ->
                 val list = customized
-                    .filter { it.imageSave.isNotEmpty() && File(it.imageSave).exists() }
-                    .sortedByDescending { it.createdAt }
+                    .filter {
+                        it.imageSave.isNotEmpty() && File(it.imageSave).exists()
+                    }
+                    .sortedByDescending { it.createdAt } // ← dùng createdAt đã fix
                     .map { MyAlbumModel(path = it.imageSave, idEdit = it.id, type = 1) }
 
                 myAvatarAdapter.submitList(list)
@@ -231,7 +232,7 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             }
         }
 
-        // ✅ Design: giữ nguyên collect từ viewModel.myDesignList
+        // Design giữ nguyên
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.myDesignList.collect { list ->
                 myDesignAdapter.submitList(list)
@@ -243,14 +244,10 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.downloadState.collect { state ->
                 when (state) {
-                    MyPonyViewModel.DownloadState.SUCCESS -> showToast(
-                        getString(
-                            R.string.download_success,
-                            getString(R.string.app_name)
-                        )
-                    )
-
-                    MyPonyViewModel.DownloadState.ERROR -> showToast(R.string.download_failed_please_try_again_later)
+                    MyPonyViewModel.DownloadState.SUCCESS ->
+                        showToast(getString(R.string.download_success, getString(R.string.app_name)))
+                    MyPonyViewModel.DownloadState.ERROR ->
+                        showToast(R.string.download_failed_please_try_again_later)
                     else -> {}
                 }
             }
@@ -422,16 +419,22 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             ?: run { showUnstableNetworkDialog(); return }
 
         val template = viewModelActivity.templates.value.getOrNull(templateIndex)
-        if (template?.id?.startsWith("online_") == true && !isInternetAvailable(requireContext())) {
-            showUnstableNetworkDialog()
-            return
+
+        // ✅ Thêm check: online template + mất mạng hoặc data chưa đủ
+        if (template?.id?.startsWith("online_") == true) {
+            val onlineTemplateCount = viewModelActivity.templates.value
+                .count { it.id.startsWith("online_") }
+            if (!isNetworkConnected(requireContext()) || onlineTemplateCount < 2) {
+                showUnstableNetworkDialog()
+                return
+            }
         }
 
         val args = CustomizeFragment.newArgs(
             templateIndex   = templateIndex,
             isEdit          = true,
             customizedId    = idEdit,
-            savedSelections = customized.selections.toCleanSelections(), // ✅ fix cast
+            savedSelections = customized.selections.toCleanSelections(),
             isFlipped       = customized.isFlipped
         )
         findNavController().navigate(R.id.action_mypony_to_custom, args)
@@ -584,6 +587,12 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     override fun onResume() {
         super.onResume()
+        if (isAvatarTab.value) {
+            // Avatar tự cập nhật qua StateFlow, không cần load thủ công
+            updateEmptyState(myAvatarAdapter.items.isEmpty())
+        } else {
+            loadDesignData()
+        }
         applyTabUI(isAvatarTab.value)
     }
 }

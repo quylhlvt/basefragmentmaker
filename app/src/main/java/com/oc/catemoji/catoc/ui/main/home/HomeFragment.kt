@@ -26,6 +26,7 @@ import com.oc.catemoji.catoc.ViewModelActivity
 import com.oc.catemoji.catoc.core.base.BackPressHandler
 import com.oc.catemoji.catoc.core.base.BaseFragment
 import com.oc.catemoji.catoc.core.extention.InternetExtension.isInternetAvailable
+import com.oc.catemoji.catoc.core.extention.InternetExtension.isNetworkConnected
 import com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
 import com.oc.catemoji.catoc.core.extention.gone
 import com.oc.catemoji.catoc.core.extention.onClick
@@ -71,32 +72,16 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     override fun viewListener() {
         binding.apply {
             btnCreate.onClick {
-                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
-                    showLoadingDataDialog()
-                } else {
                     findNavController().navigate(R.id.action_home_to_createPony)
-                }
             }
             btnMyAlbum.onClick {
-                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
-                    showLoadingDataDialog()
-                } else {
                     findNavController().navigate(R.id.action_home_to_myPony)
-                }
             }
             btnRandom.onClick(1000) {
-                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
-                    showLoadingDataDialog()
-                } else {
                     findNavController().navigate(R.id.action_home_to_random)
-                }
             }
             btnCosPlay.onClick(1000) {
-                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
-                    showLoadingDataDialog()
-                } else {
                     findNavController().navigate(R.id.action_home_to_cosplay)
-                }
             }
             actionBar.btnActionBarRight.onClick { toSettingFromHome() }
         }

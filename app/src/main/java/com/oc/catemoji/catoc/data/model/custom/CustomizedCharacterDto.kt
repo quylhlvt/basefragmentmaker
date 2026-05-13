@@ -12,7 +12,9 @@ data class CustomizedCharacterDto(
     val selections: ArrayList<SelectionIndex> = arrayListOf(),
     val imageSave:  String                    = "",  // path ảnh render đã lưu
     val isFlipped:  Boolean                   = false,
-    val updatedAt:  Long                      = System.currentTimeMillis()
+    val updatedAt:  Long                      = System.currentTimeMillis(),
+    val createdAt:  Long                      = System.currentTimeMillis() // ← THÊM
+
 )
 
 // Extension convert 2 chiều
@@ -23,7 +25,8 @@ fun CustomModel.toDto() = CustomizedCharacterDto(
     selections = ArrayList(selections),
     imageSave  = imageSave,
     isFlipped  = isFlipped,
-    updatedAt  = updatedAt
+    updatedAt  = updatedAt,
+    createdAt  = createdAt
 )
 
 fun CustomizedCharacterDto.toModel(templateListPath: ArrayList<BodyPartModel> = arrayListOf()) = CustomModel(
@@ -34,5 +37,6 @@ fun CustomizedCharacterDto.toModel(templateListPath: ArrayList<BodyPartModel> = 
     selections = ArrayList(selections),
     imageSave  = imageSave,
     isFlipped  = isFlipped,
-    updatedAt  = updatedAt
+    updatedAt  = updatedAt,
+    createdAt  = createdAt
 )

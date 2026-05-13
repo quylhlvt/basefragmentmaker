@@ -214,19 +214,25 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
 
         val templateIndex = viewModelActivity.getTemplateIndexForCustomized(idEdit)
             .takeIf { it >= 0 }
-            ?: run { showToast("Template not found"); return }
+            ?: run { showUnstableNetworkDialog(); return }  // ✅ không tìm thấy template → có thể do chưa load online
 
         val template = viewModelActivity.templates.value.getOrNull(templateIndex)
-        if (template?.id?.startsWith("online_") == true && !isInternetAvailable(requireContext())) {
-            showNoInternetDialog()
-            return
+
+        // ✅ Thêm check: online template + mất mạng + online templates < 2
+        if (template?.id?.startsWith("online_") == true) {
+            val onlineTemplateCount = viewModelActivity.templates.value
+                .count { it.id.startsWith("online_") }
+            if (!isInternetAvailable(requireContext()) || onlineTemplateCount < 2) {
+                showUnstableNetworkDialog()
+                return
+            }
         }
 
         val args = CustomizeFragment.newArgs(
             templateIndex   = templateIndex,
             isEdit          = true,
             customizedId    = idEdit,
-            savedSelections = customized.selections.toCleanSelections(), // ✅ fix cast
+            savedSelections = customized.selections.toCleanSelections(),
             isFlipped       = customized.isFlipped
         )
         findNavController().safeNavigate(R.id.action_view_to_customize, args)

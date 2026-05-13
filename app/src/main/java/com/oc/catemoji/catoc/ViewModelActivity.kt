@@ -30,7 +30,8 @@ class ViewModelActivity @Inject constructor(
     val appDataManager: AppDataManager,
     private val networkFlow: Flow<Boolean>,
     @ApplicationContext private val context: Context
-) : ViewModel() {
+) :
+    ViewModel() {
 
     // ── EXPOSED FLOWS ─────────────────────────────────────────────────────────
 

@@ -29,7 +29,6 @@ import com.oc.catemoji.catoc.core.extention.invisible
 import com.oc.catemoji.catoc.databinding.ItemBottomCustomBinding
 
 // ── NAV ADAPTER ───────────────────────────────────────────────────────────────
-// ── NAV ADAPTER ───────────────────────────────────────────────────────────────
 class NavAdapter :
     BaseAdapter<BodyPartModel, ItemBottomCustomBinding>(ItemBottomCustomBinding::inflate) {
 

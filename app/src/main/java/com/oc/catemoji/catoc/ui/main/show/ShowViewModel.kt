@@ -22,7 +22,8 @@ import kotlin.math.roundToInt
 @HiltViewModel
 class ShowViewModel @Inject constructor(
     private val appDataManager: AppDataManager
-) : ViewModel() {
+) :
+    ViewModel() {
 
     private val _state = MutableStateFlow(ShowState())
     val state: StateFlow<ShowState> = _state.asStateFlow()
