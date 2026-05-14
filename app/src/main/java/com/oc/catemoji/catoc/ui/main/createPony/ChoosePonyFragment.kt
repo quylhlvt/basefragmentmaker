@@ -131,7 +131,7 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
 
                             if (isFirstLoad && !isFetching) {
                                 isFirstLoad = false
-                                if (filteredTemplates.size <= 1) showLoadingDataDialog()
+                                if (filteredTemplates.size <= 1) showNoInternetDialog()
                             }
                         }
                 }

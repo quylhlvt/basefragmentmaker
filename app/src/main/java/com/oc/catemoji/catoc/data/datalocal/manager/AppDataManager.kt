@@ -17,7 +17,8 @@ import javax.inject.Singleton
 @Singleton
 class AppDataManager @Inject constructor(
     @ApplicationContext private val context: Context
-) {
+)
+{
     companion object {
         private const val TAG             = "AppDataManager"
         private const val ASSET_PREFIX    = "file:///android_asset"
@@ -31,7 +32,15 @@ class AppDataManager @Inject constructor(
         private const val KEY_API_CACHE   = "api_cache"
 
     }
-    private val mmkv = MMKV.defaultMMKV()
+    private val mmkv by lazy {
+        // ✅ Dùng applicationContext.filesDir trực tiếp, không phụ thuộc context wrap
+        val mmkvDir = java.io.File(context.filesDir, "mmkv_store").also { it.mkdirs() }
+        MMKV.mmkvWithID("app_data", MMKV.SINGLE_PROCESS_MODE, null, mmkvDir.absolutePath)!!.also {
+            Log.d(TAG, "🔑 MMKV path=${mmkvDir.absolutePath}, id=${it.mmapID()}")
+            val f = java.io.File(mmkvDir, "app_data")
+            Log.d(TAG, "🔑 file exists=${f.exists()}, size=${f.length()}")
+        }
+    }
     private val gson = Gson()
 
     // ── STATE FLOWS ──────────────────────────────────────────────────────────
@@ -118,14 +127,20 @@ class AppDataManager @Inject constructor(
 
     // In AppDataManager:
     suspend fun loadQuickData(): Boolean = withContext(Dispatchers.IO) {
-        val cached = loadTemplatesFromJson()
+        val rawTemplateJson = mmkv.decodeString(KEY_TEMPLATES)
+        val rawCustomizedJson = mmkv.decodeString(KEY_CUSTOMIZED)
+        Log.d(TAG, "🔍 MMKV templates json length: ${rawTemplateJson?.length ?: 0}")
+        Log.d(TAG, "🔍 MMKV customized json length: ${rawCustomizedJson?.length ?: 0}")
 
+        val cached = loadTemplatesFromJson()
+        Log.d(TAG, "🔍 loadTemplatesFromJson result: ${cached.size}")
         if (cached.isNotEmpty()) {
             _templates.value = cached
+            Log.d(TAG, "✅ ${cached.size} templates from cache")
         }
 
-        // ✅ Luôn load customized, kể cả khi templates chưa có
-        // listPath sẽ rỗng tạm thời, mergeApiTemplates() fix sau
+        // ✅ Chỉ load customized SAU KHI _templates.value đã có dữ liệu
+        // (code hiện tại đã làm vậy nhưng thứ tự đúng rồi — vấn đề là templates cache bị rỗng)
         loadCustomizedCharacters()
         combineCharacterLists()
 
@@ -309,9 +324,6 @@ class AppDataManager @Inject constructor(
 
     // ── TEMPLATE CACHE ────────────────────────────────────────────────────────
 
-    private fun saveTemplatesToJson(templates: List<CustomModel>) = runCatching {
-        mmkv.encode(KEY_TEMPLATES, gson.toJson(templates))
-    }.onFailure { Log.e(TAG, "❌ Cache save error", it) }
 
     private suspend fun loadTemplatesFromJson(): List<CustomModel> = withContext(Dispatchers.IO) {
         runCatching {
@@ -332,22 +344,17 @@ class AppDataManager @Inject constructor(
         runCatching {
             val dtos = characters.map { it.toDto() }
             val json = gson.toJson(dtos)
-
-            // ✅ Thử MMKV trước
-            val saved = mmkv.encode(KEY_CUSTOMIZED, json)
-            if (!saved) {
-                // ✅ Fallback: SharedPreferences nếu MMKV fail
-                context.getSharedPreferences("app_backup", Context.MODE_PRIVATE)
-                    .edit()
-                    .putString(KEY_CUSTOMIZED, json)
-                    .apply()
-                Log.w(TAG, "⚠️ MMKV failed, saved to SharedPreferences fallback")
-            }
-            Log.d(TAG, "✅ Saved ${characters.size} customized, success=$saved")
-        }.onFailure {
-            Log.e(TAG, "❌ saveCustomizedCharacters error: ${it.message}", it)
-        }
+            Log.d(TAG, "💾 Saving ${characters.size} customized, json length=${json.length}")
+            mmkv.encode(KEY_CUSTOMIZED, json)
+            mmkv.sync()  // ✅ force flush xuống disk ngay lập tức
+            Log.d(TAG, "✅ Saved customized OK")
+        }.onFailure { Log.e(TAG, "❌ saveCustomizedCharacters: ${it.message}", it) }
     }
+
+    private fun saveTemplatesToJson(templates: List<CustomModel>) = runCatching {
+        mmkv.encode(KEY_TEMPLATES, gson.toJson(templates))
+        mmkv.sync()  // ✅ flush templates cũng
+    }.onFailure { Log.e(TAG, "❌ Cache save error", it) }
 
     private suspend fun loadCustomizedCharacters() = withContext(Dispatchers.IO) {
         runCatching {

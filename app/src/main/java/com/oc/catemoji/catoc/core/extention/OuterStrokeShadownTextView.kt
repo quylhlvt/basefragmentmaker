@@ -39,7 +39,10 @@ class OuterStrokeShadownTextView : AppCompatTextView {
             extraPadding = (outerStrokeWidth * dp(2)).toInt()
         }
     }
-
+    fun setOuterStrokeColor(color: Int) {
+        outerStrokeColor = color
+        invalidate()
+    }
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
         if (extraPadding > 0) {

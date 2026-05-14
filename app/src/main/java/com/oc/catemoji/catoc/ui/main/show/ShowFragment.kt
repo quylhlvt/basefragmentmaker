@@ -82,7 +82,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         if (!isOnlineTemplate()) return false
         return when {
             !isInternetAvailable(requireContext()) -> {
-                showNoInternetDialog(); true
+                showUnstableNetworkDialog(); true
             }
             !isNetworkConnected(requireContext()) -> {
                 showUnstableNetworkDialog(); true

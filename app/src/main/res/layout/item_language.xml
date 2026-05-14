@@ -1,6 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
@@ -10,9 +9,26 @@
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/flMain"
         android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:background="@drawable/frame_select_language"
+        android:layout_height="60dp"
         android:elevation="2dp">
+
+        <ImageView
+            android:id="@+id/imgLangBg"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginStart="4dp"
+            android:layout_marginTop="4dp"
+            android:background="@drawable/frame_bg_lang"
+            android:scaleType="fitXY" />
+
+        <ImageView
+            android:id="@+id/imgLangFor"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_marginEnd="4dp"
+            android:layout_marginBottom="4dp"
+            android:scaleType="fitXY"
+            android:src="@drawable/frame_unselect_language" />
 
         <ImageView
             android:id="@+id/imvFlag"
@@ -20,19 +36,19 @@
             android:layout_height="36dp"
             android:layout_marginStart="8dp"
             android:src="@drawable/ic_flag_english"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintBottom_toBottomOf="@+id/imgLangFor"
+            app:layout_constraintStart_toStartOf="@+id/imgLangFor"
+            app:layout_constraintTop_toTopOf="@+id/imgLangFor" />
 
         <ImageView
             android:id="@+id/btnRadio"
-            android:layout_width="36dp"
-            android:layout_height="36dp"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
             android:layout_margin="8dp"
             android:src="@drawable/ic_un_select_lang"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent" />
+            app:layout_constraintBottom_toBottomOf="@+id/imgLangFor"
+            app:layout_constraintEnd_toEndOf="@+id/imgLangFor"
+            app:layout_constraintTop_toTopOf="@+id/imgLangFor" />
 
         <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
             android:id="@+id/tvLang"
@@ -40,28 +56,19 @@
             android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:layout_marginStart="6dp"
-            android:fontFamily="@font/baloo2_extrabold"
+            android:fontFamily="@font/atma_bold"
             android:gravity="start"
             android:text="language"
-            android:textColor="@color/white"
-            android:textSize="18dp"
+            android:textColor="@color/app_color"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="@+id/imvFlag"
             app:layout_constraintEnd_toStartOf="@+id/btnRadio"
             app:layout_constraintStart_toEndOf="@+id/imvFlag"
             app:layout_constraintTop_toTopOf="@+id/imvFlag"
-            app:outerStrokeColor="@color/app_color"
-            app:outerStrokeWidth="1.3dp" />
+            app:outerStrokeColor="@color/white"
+            app:outerStrokeWidth="1dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <!-- Focus overlay — đặt trên cùng bằng FrameLayout -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/flFocus"
-        android:layout_width="match_parent"
-        android:layout_height="34dp"
-        android:elevation="1dp"
-        app:cardBackgroundColor="#40000000"
-        app:cardCornerRadius="16dp"
-        app:strokeWidth="0dp" />
 
 </FrameLayout>

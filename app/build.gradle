@@ -73,6 +73,10 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
+    //datastore
+    implementation "androidx.datastore:datastore-preferences:1.1.1"
+
+    //mmkv
     implementation("com.tencent:mmkv:2.4.0")
     // Navigation Component
     implementation("androidx.navigation:navigation-fragment-ktx:2.8.3")

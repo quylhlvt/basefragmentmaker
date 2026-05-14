@@ -198,7 +198,7 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                     isAvatar = imageType == 1,
                     idEdit   = idEdit,
                     onDone   = {
-                        findNavController().safeNavigate(R.id.action_view_to_myPony)
+                        findNavController().navigateUp()
                     }
                 )
             },

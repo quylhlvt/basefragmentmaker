@@ -76,18 +76,19 @@ class ViewModelActivity @Inject constructor(
     private fun loadInitialData() {
         viewModelScope.launch {
             try {
-                // ✅ Bước 1: Load local data trước (templates + customized)
-                val hasCache = appDataManager.loadQuickData()
+                // ✅ Bước 1: Load cache templates TRƯỚC (synchronous trên IO)
+                val hasCache = withContext(Dispatchers.IO) {
+                    appDataManager.loadQuickData()
+                }
 
                 if (!hasCache) {
-                    // Chưa có cache → load từ assets
                     appDataManager.loadInitialData()
                 }
 
-                // ✅ Bước 2: Log để verify customized đã load
                 Log.d("ViewModelActivity", "📦 After quick load — customized: ${appDataManager.customizedCharacters.value.size}")
 
-                // ✅ Bước 3: Fetch online SAU KHI local data đã ổn định
+                // ✅ Bước 2: Fetch online SAU KHI local đã ổn định
+                // Gọi trực tiếp, KHÔNG launch(IO) riêng → tránh race condition
                 fetchOnlineTemplatesInternal()
 
                 Log.d("ViewModelActivity", "📦 After online fetch — customized: ${appDataManager.customizedCharacters.value.size}")
@@ -124,6 +125,7 @@ class ViewModelActivity @Inject constructor(
             Log.e("ViewModelActivity", "❌ fetchOnlineTemplates error: ${e.message}", e)
         } finally {
             _isFetchingOnline.value = false
+            _imagesReady.value = true
         }
     }
 

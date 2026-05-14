@@ -20,6 +20,7 @@ import com.oc.catemoji.catoc.core.extention.gone
 import com.oc.catemoji.catoc.core.extention.invisible
 import com.oc.catemoji.catoc.core.extention.onClick
 import com.oc.catemoji.catoc.core.extention.popBack
+import com.oc.catemoji.catoc.core.extention.setTextActionBar
 import com.oc.catemoji.catoc.core.extention.toHomeFromLanguage
 import com.oc.catemoji.catoc.core.extention.toIntroFromLanguage
 import com.oc.catemoji.catoc.core.extention.toSettingFromLang
@@ -64,15 +65,11 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     override fun setupPreViews() {
 
         val isFirst = !SharedPreferencesManager.isLanuageScreen()
-        if (!isFirst) {
-            binding.imageBgLang.setImageResource(R.drawable.img_bg_home)
-        }
 
 
         binding.recycleLanguage.apply {
             adapter = languageAdapter
             itemAnimator = null
-            background = ContextCompat.getDrawable(requireContext(), R.drawable.img_bg_rcy_lang)
         }
 
         val currentLang = SharedPreferencesManager.isLanguageKey()
@@ -87,13 +84,13 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
     private fun updateActionBar(isFirst: Boolean) {
         binding.apply {
             if (isFirst) {
+                setTextActionBar(actionBar.tvStart, getString(R.string.language))
                 actionBar.btnActionBarRight.invisible()
                 actionBar.btnActionBarRight.setImageResource(R.drawable.select_language)
             } else {
+                setTextActionBar(actionBar.tvCenter, getString(R.string.language))
                 actionBar.btnActionBarLeft.visible()
                 actionBar.btnActionBarRight.setImageResource(R.drawable.select_language)
-                // ❌ Xóa Glide — dùng setImageResource trực tiếp
-                imageBgLang.setImageResource(R.drawable.img_bg_home)
             }
         }
     }
@@ -120,8 +117,10 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         binding.actionBar.apply {
             btnActionBarRight.gone()
             btnActionBarLeft.setImageResource(R.drawable.back_app)
+            tvStart.isSelected = true
+            tvCenter.isSelected = true
         }
-        binding.layoutTitle.txtLang.isSelected = true
+
 
         // ✅ Bỏ initRcv() — đã làm trong setupPreViews
         updateActionBar(viewModel.isFirstLanguage.value)
@@ -163,9 +162,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         binding.recycleLanguage.apply {
             adapter = languageAdapter
             itemAnimator = null
-            post {
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.img_bg_rcy_lang)
-            }
+
         }
     }
     private fun handleRcv() {

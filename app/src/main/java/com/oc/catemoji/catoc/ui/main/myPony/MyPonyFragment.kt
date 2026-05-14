@@ -111,12 +111,14 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
                 imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_selected)
                 recycleAvatar.visible()
                 recycleDesign.gone()
+                updateEmptyState(myAvatarAdapter.items.isEmpty())
                 // ❌ Bỏ loadAvatarData() — dùng StateFlow
             } else {
                 imvFocusMyDesign.setImageResource(R.drawable.bg_btn_type_selected)
                 imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_unselected)
                 recycleAvatar.gone()
                 recycleDesign.visible()
+                updateEmptyState(myDesignAdapter.items.isEmpty())
                 loadDesignData() // Design vẫn load thủ công vì không có StateFlow
             }
         }
@@ -587,12 +589,9 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     override fun onResume() {
         super.onResume()
-        if (isAvatarTab.value) {
-            // Avatar tự cập nhật qua StateFlow, không cần load thủ công
-            updateEmptyState(myAvatarAdapter.items.isEmpty())
-        } else {
+        applyTabUI(isAvatarTab.value)
+        if (!isAvatarTab.value) {
             loadDesignData()
         }
-        applyTabUI(isAvatarTab.value)
     }
 }

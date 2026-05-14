@@ -186,8 +186,6 @@ class PartAdapter : BaseAdapter<String, ItemLayerBinding>(ItemLayerBinding::infl
             )
             cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
         }
-        sflShimmer.visible()
-        sflShimmer.startShimmer()
         val thumbPath = listThumb.getOrElse(position) { item }
         when (item) {
             "none" -> {
@@ -205,6 +203,9 @@ class PartAdapter : BaseAdapter<String, ItemLayerBinding>(ItemLayerBinding::infl
             }
 
             else -> {
+                sflShimmer.visible()
+                sflShimmer.startShimmer()
+                val thumbPath = listThumb.getOrElse(position) { item }
                 Glide.with(imvImage)
                     .load(thumbPath)
                     .diskCacheStrategy(DiskCacheStrategy.RESOURCE)

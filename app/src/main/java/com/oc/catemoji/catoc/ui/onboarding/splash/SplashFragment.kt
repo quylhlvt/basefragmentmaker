@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.oc.catemoji.catoc.R
 import com.oc.catemoji.catoc.ViewModelActivity
+import com.oc.catemoji.catoc.core.base.BackPressHandler
 import com.oc.catemoji.catoc.core.base.BaseFragment
 import com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
 import com.oc.catemoji.catoc.core.extention.dpToPx
@@ -40,7 +41,7 @@ import kotlinx.coroutines.withTimeoutOrNull
 class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     FragmentSplashBinding::inflate,
     SplashViewModel::class.java
-) {
+) , BackPressHandler {
     private val mainViewModel: ViewModelActivity by activityViewModels()
 
     private var progressAnimator: ValueAnimator? = null
@@ -48,7 +49,7 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     private var hasNavigated = false
 
     companion object {
-        private const val MIN_SPLASH_MS  = 2_000L
+        private const val MIN_SPLASH_MS  = 3_000L
         private const val API_TIMEOUT_MS = 8_000L
     }
 
@@ -58,22 +59,10 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
         // ✅ Warm up font — giữ nguyên, nhẹ
         ResourcesCompat.getFont(requireContext(), R.font.baloo2_extrabold)
 
-        // ✅ Bỏ OuterStrokeShadownTextView warm up — không cần thiết
-        // val dummyView = OuterStrokeShadownTextView(requireContext())
-
-        // ✅ Bỏ AsyncLayoutInflater ở đây — inflate fragment_home quá nặng
-        // AsyncLayoutInflater(requireContext()).inflate(R.layout.fragment_home, null) { _, _, _ -> }
 
         checkAndClearDataIfNewVersion()
 
-        binding.progressWrapper.post {
-            startFakeProgress()
 
-            // ✅ Preload fragment_home SAU khi splash đã hiển thị xong
-            AsyncLayoutInflater(requireContext()).inflate(
-                R.layout.fragment_home, null
-            ) { _, _, _ -> }
-        }
     }
     private fun checkAndClearDataIfNewVersion() {
         val context = requireContext()
@@ -104,27 +93,26 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     override fun viewListener() {}
 
     override fun observeData() {
-        // Launch trên background, không block main thread
         viewLifecycleOwner.lifecycleScope.launch {
-            viewModel.startSplashTimer(
-                hasOnlineTemplates = mainViewModel.templates.value.any { it.id.startsWith("online_") },
-                waitForOnline = {
-                    mainViewModel.templates.first { list ->
-                        list.any { it.id.startsWith("online_") }
-                    }
-                },
-                waitForImages = {
-                    mainViewModel.imagesReady.first { it }  // ✅ chờ true
-                }
-            )
-        }
+            val startTime = System.currentTimeMillis()
 
-        viewLifecycleOwner.lifecycleScope.launch {
-            viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                viewModel.readyToNavigate.collect {
-                    completeProgress { goToHome() }
-                }
+            if (isNetworkAvailable()) {
+                // Có mạng: đợi imagesReady (set sau khi fetch + prefetch xong)
+                withTimeoutOrNull(API_TIMEOUT_MS) {
+                    mainViewModel.imagesReady.first { it }
+                } ?: Log.e("Splash", "⏰ timeout, dùng local data")
+            } else {
+                // Không mạng: chỉ đợi local templates
+                withTimeoutOrNull(5_000L) {
+                    mainViewModel.templates.first { it.isNotEmpty() }
+                } ?: Log.e("Splash", "⏰ local timeout")
             }
+
+            val elapsed = System.currentTimeMillis() - startTime
+            val remaining = MIN_SPLASH_MS - elapsed
+            if (remaining > 0) delay(remaining)
+
+            goToHome()
         }
     }
 
@@ -138,71 +126,6 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
 
     // ── PROGRESS ──────────────────────────────────────────────────────────────
 
-    // Giả lập 80% progress trong MIN_SPLASH_MS, dừng chờ data
-    private fun startFakeProgress() {
-        animateOverlayTo(targetFraction = 0.2f, duration = MIN_SPLASH_MS)
-    }
-    private fun animateOverlayTo(
-        targetFraction: Float,
-        duration: Long,
-        onEnd: (() -> Unit)? = null
-    ) {
-        progressAnimator?.cancel()
-
-        val overlay   = binding.progressOverlay
-        val capRight  = binding.progressCap
-        val container = binding.progressWrapper
-
-        val containerWidth = container.width
-        if (containerWidth <= 0) { onEnd?.invoke(); return }
-
-        // Offset bù cho capRight margin (10dp start) + độ rộng cap (11dp)
-        val density = resources.displayMetrics.density
-        val capOffset = (10 + 11) * density  // marginStart + width của capRight
-
-        progressAnimator = ValueAnimator.ofFloat(currentOverlayFraction, targetFraction).apply {
-            this.duration = duration
-            interpolator  = DecelerateInterpolator()
-
-            addUpdateListener { anim ->
-                val fraction = anim.animatedValue as Float
-                currentOverlayFraction = fraction
-
-                val density = resources.displayMetrics.density
-                val total   = container.width.toFloat()
-
-                // overlay.left = marginStart = 18dp (vị trí gốc của overlay trong container clip)
-                // fraction=1 → overlay dịch trái về x=0 → translateX = -overlay.left
-                // fraction=0 → overlay dịch phải ra ngoài → translateX = total - overlay.left
-                val overlayLeft = overlay.left.toFloat() - dpToPx(requireContext(),18)  // lấy trực tiếp từ view, không cần tính dp
-
-                val translateX = (total - overlayLeft) * (1f - fraction) - overlayLeft * fraction
-                // rút gọn: translateX = (total - overlayLeft) * (1f - fraction) - overlayLeft * fraction
-                //        = total*(1-f) - overlayLeft*(1-f) - overlayLeft*f
-                //        = total*(1-f) - overlayLeft
-
-                // Đơn giản hơn:
-                val tx = total * (1f - fraction) - overlayLeft
-
-                overlay.translationX = tx
-                capRight.translationX = tx
-            }
-
-            addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) { onEnd?.invoke() }
-                override fun onAnimationCancel(animation: Animator) {}
-            })
-
-            start()
-        }
-    }
-
-    private fun completeProgress(onDone: () -> Unit) {
-        animateOverlayTo(targetFraction = 0f, duration = 500L, onEnd = {
-            binding.progressWrapper.visibility = View.GONE
-            onDone()
-        })
-    }
     // ── NAVIGATE ──────────────────────────────────────────────────────────────
 
     private fun goToHome() {
@@ -244,5 +167,9 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
         super.onDestroyView()
         progressAnimator?.cancel()
         progressAnimator = null
+    }
+
+    override fun onBackPressed(): Boolean {
+        return true
     }
 }
