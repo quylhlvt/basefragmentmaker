@@ -13,7 +13,9 @@ import dagger.hilt.android.HiltAndroidApp
 class MyApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        MMKV.initialize(this)
+        val mmkvDir = java.io.File(filesDir, "mmkv_store").also { it.mkdirs() }
+        MMKV.initialize(this, mmkvDir.absolutePath)
+        Log.d("MyApplication", "MMKV initialized at: ${mmkvDir.absolutePath}")
         Thread {
             try {
                 // 1. Font — giảm ~100-300ms cho lần đầu

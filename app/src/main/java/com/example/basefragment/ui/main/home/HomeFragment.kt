@@ -1,44 +1,27 @@
 package com.example.basefragment.ui.main.home
 
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.fragment.app.viewModels
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.FrameLayout
-import android.widget.ImageView
-import android.widget.LinearLayout
-import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.content.ContextCompat
-import androidx.core.content.res.ResourcesCompat
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.navigation.fragment.findNavController
-import com.bumptech.glide.Glide
-import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
-import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
-import com.example.basefragment.core.extention.OuterStrokeShadownTextView
-import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.toSettingFromHome
-import com.example.basefragment.core.helper.RateHelper
 import com.example.basefragment.core.helper.RateHelper.showRateDialog
 import com.example.basefragment.databinding.FragmentHomeBinding
 import com.example.basefragment.utils.state.RateState
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 import java.lang.System.exit
 
 @AndroidEntryPoint
@@ -78,6 +61,12 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
                 findNavController().navigate(R.id.action_home_to_myPony)
             }
             btnRandom.onClick(1000) {
+                findNavController().navigate(R.id.action_home_to_random)
+            }
+            btnQuick.onClick(1000) {
+                findNavController().navigate(R.id.action_home_to_random)
+            }
+            btnWeb.onClick(1000) {
                 findNavController().navigate(R.id.action_home_to_random)
             }
             btnCosPlay.onClick(1000) {

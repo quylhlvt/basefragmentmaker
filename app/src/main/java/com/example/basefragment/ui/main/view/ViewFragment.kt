@@ -36,8 +36,7 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
     ViewViewModel::class.java
 ) {
 
-    private val permissionViewModel:
-            PermissionViewModel by activityViewModels()
+    private val permissionViewModel: PermissionViewModel by activityViewModels()
 
     private var currentImagePath: String = ""
     private val imagePath: String by lazy { arguments?.getString("imagePath") ?: "" }
@@ -199,7 +198,7 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                     isAvatar = imageType == 1,
                     idEdit   = idEdit,
                     onDone   = {
-                        findNavController().safeNavigate(R.id.action_view_to_myPony)
+                        findNavController().navigateUp()
                     }
                 )
             },

@@ -9,6 +9,10 @@ import com.tencent.mmkv.MMKV
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.plus
 import java.io.File
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -16,7 +20,8 @@ import javax.inject.Singleton
 @Singleton
 class AppDataManager @Inject constructor(
     @ApplicationContext private val context: Context
-) {
+)
+{
     companion object {
         private const val TAG             = "AppDataManager"
         private const val ASSET_PREFIX    = "file:///android_asset"
@@ -30,7 +35,15 @@ class AppDataManager @Inject constructor(
         private const val KEY_API_CACHE   = "api_cache"
 
     }
-    private val mmkv = MMKV.defaultMMKV()
+    private val mmkv by lazy {
+        // ✅ Dùng applicationContext.filesDir trực tiếp, không phụ thuộc context wrap
+        val mmkvDir = java.io.File(context.filesDir, "mmkv_store").also { it.mkdirs() }
+        MMKV.mmkvWithID("app_data", MMKV.SINGLE_PROCESS_MODE, null, mmkvDir.absolutePath)!!.also {
+            Log.d(TAG, "🔑 MMKV path=${mmkvDir.absolutePath}, id=${it.mmapID()}")
+            val f = java.io.File(mmkvDir, "app_data")
+            Log.d(TAG, "🔑 file exists=${f.exists()}, size=${f.length()}")
+        }
+    }
     private val gson = Gson()
 
     // ── STATE FLOWS ──────────────────────────────────────────────────────────
@@ -73,7 +86,13 @@ class AppDataManager @Inject constructor(
 
     private var isDataLoaded      = false
     private var isDataQuickLoaded = false
-
+    // Thêm vào AppDataManager companion object hoặc top-level
+    private inline fun <reified T> Gson.safeFromJson(json: String): T? {
+        return runCatching {
+            val type = object : TypeToken<T>() {}.type
+            fromJson<T>(json, type)
+        }.getOrNull()
+    }
     // ── INIT ─────────────────────────────────────────────────────────────────
 
     suspend fun loadInitialData() {
@@ -111,16 +130,23 @@ class AppDataManager @Inject constructor(
 
     // In AppDataManager:
     suspend fun loadQuickData(): Boolean = withContext(Dispatchers.IO) {
-        Log.d("PERF2", "loadQuickData START: ${System.currentTimeMillis()}")
+        val rawTemplateJson = mmkv.decodeString(KEY_TEMPLATES)
+        val rawCustomizedJson = mmkv.decodeString(KEY_CUSTOMIZED)
+        Log.d(TAG, "🔍 MMKV templates json length: ${rawTemplateJson?.length ?: 0}")
+        Log.d(TAG, "🔍 MMKV customized json length: ${rawCustomizedJson?.length ?: 0}")
 
         val cached = loadTemplatesFromJson()
-        Log.d("PERF2", "loadQuickData fromJson done: ${System.currentTimeMillis()}")
-
+        Log.d(TAG, "🔍 loadTemplatesFromJson result: ${cached.size}")
         if (cached.isNotEmpty()) {
             _templates.value = cached
-            loadCustomizedCharacters()
-            combineCharacterLists()
+            Log.d(TAG, "✅ ${cached.size} templates from cache")
         }
+
+        // ✅ Chỉ load customized SAU KHI _templates.value đã có dữ liệu
+        // (code hiện tại đã làm vậy nhưng thứ tự đúng rồi — vấn đề là templates cache bị rỗng)
+        loadCustomizedCharacters()
+        combineCharacterLists()
+
         coroutineScope {
             launch { loadBackgrounds() }
             launch { loadBackgroundTexts() }
@@ -128,9 +154,8 @@ class AppDataManager @Inject constructor(
             launch { loadSpeechs() }
             launch { loadMyDesigns() }
         }
-        Log.d("PERF2", "loadQuickData END: ${System.currentTimeMillis()}")
 
-        cached.isNotEmpty() // ← return Boolean
+        cached.isNotEmpty()
     }
 
 
@@ -139,13 +164,29 @@ class AppDataManager @Inject constructor(
      * - Giữ nguyên local templates (template_*)
      * - Thay thế/thêm online templates (online_*)
      */
-    fun mergeApiTemplates(onlineTemplates: List<CustomModel>) {
+    // Trong mergeApiTemplates — sau khi có online templates, re-resolve customized
+    suspend fun mergeApiTemplates(onlineTemplates: List<CustomModel>) = withContext(Dispatchers.IO) {
         val localOnly = _templates.value.filter { !it.id.startsWith("online_") }
-        _templates.value = onlineTemplates + localOnly
-        combineCharacterLists()
-        Log.d(TAG, "✅ Merged: ${onlineTemplates.size} online + ${localOnly.size} local templates")
-    }
+        val merged = onlineTemplates + localOnly
+        _templates.value = merged
+        saveTemplatesToJson(merged)  // ← fix mất online templates sau restart
 
+        // ✅ Re-resolve customized đang có listPath rỗng do online templates chưa có lúc load
+        val reResolved = _customizedCharacters.value.map { customized ->
+            if (customized.listPath.isNotEmpty()) return@map customized  // đã ổn
+
+            val template = merged.find { it.id == customized.templateId }
+                ?: merged.find { it.avatar == customized.avatar }
+                ?: return@map customized  // vẫn không tìm được → giữ nguyên
+
+            Log.d(TAG, "🔄 Re-resolved listPath for customized=${customized.id}")
+            customized.copy(listPath = template.listPath)
+        }
+        _customizedCharacters.value = reResolved
+
+        combineCharacterLists()
+        Log.d(TAG, "✅ Merged + saved: ${onlineTemplates.size} online + ${localOnly.size} local")
+    }
 
     // ── TEMPLATE LOADING ─────────────────────────────────────────────────────
 
@@ -286,58 +327,82 @@ class AppDataManager @Inject constructor(
 
     // ── TEMPLATE CACHE ────────────────────────────────────────────────────────
 
-    private fun saveTemplatesToJson(templates: List<CustomModel>) = runCatching {
-        mmkv.encode(KEY_TEMPLATES, gson.toJson(templates))
-    }.onFailure { Log.e(TAG, "❌ Cache save error", it) }
 
     private suspend fun loadTemplatesFromJson(): List<CustomModel> = withContext(Dispatchers.IO) {
         runCatching {
             val json = mmkv.decodeString(KEY_TEMPLATES) ?: return@withContext emptyList()
-            val type = object : TypeToken<List<CustomModel>>() {}.type
-            gson.fromJson<List<CustomModel>>(json, type) ?: emptyList()
+            val type = object : TypeToken<ArrayList<CustomModel>>() {}.type
+            val raw: ArrayList<CustomModel> = gson.fromJson(json, type) ?: return@withContext emptyList()
+            // ✅ Fix toàn bộ nested LinkedTreeMap → đúng type
+            raw.map { it.withCleanListPath() }
         }.getOrDefault(emptyList())
     }
-
     // ── CUSTOMIZED CHARACTERS ─────────────────────────────────────────────────
 
 
 // Chỉ sửa 2 hàm này trong AppDataManager
 
+    // AppDataManager.kt
     private suspend fun saveCustomizedCharacters(characters: List<CustomModel>) = withContext(Dispatchers.IO) {
         runCatching {
             val dtos = characters.map { it.toDto() }
-            mmkv.encode(KEY_CUSTOMIZED, gson.toJson(dtos))
-        }.onFailure { Log.e(TAG, "❌ Save customized error", it) }
+            val json = gson.toJson(dtos)
+            Log.d(TAG, "💾 Saving ${characters.size} customized, json length=${json.length}")
+            mmkv.encode(KEY_CUSTOMIZED, json)
+            mmkv.sync()  // ✅ force flush xuống disk ngay lập tức
+            Log.d(TAG, "✅ Saved customized OK")
+        }.onFailure { Log.e(TAG, "❌ saveCustomizedCharacters: ${it.message}", it) }
     }
 
+    private fun saveTemplatesToJson(templates: List<CustomModel>) = runCatching {
+        mmkv.encode(KEY_TEMPLATES, gson.toJson(templates))
+        mmkv.sync()  // ✅ flush templates cũng
+    }.onFailure { Log.e(TAG, "❌ Cache save error", it) }
+
+    private suspend fun loadCustomizedCharacters() = withContext(Dispatchers.IO) {
+        runCatching {
+            // ✅ Thử MMKV trước, fallback SharedPreferences
+            var json = mmkv.decodeString(KEY_CUSTOMIZED)
+            if (json.isNullOrEmpty()) {
+                json = context.getSharedPreferences("app_backup", Context.MODE_PRIVATE)
+                    .getString(KEY_CUSTOMIZED, null)
+                if (!json.isNullOrEmpty()) {
+                    Log.w(TAG, "⚠️ Loaded from SharedPreferences fallback")
+                }
+            }
+
+            if (json.isNullOrEmpty()) {
+                _customizedCharacters.value = emptyList()
+                return@withContext
+            }
+
+            val type = object : TypeToken<List<CustomizedCharacterDto>>() {}.type
+            val dtos: List<CustomizedCharacterDto> = gson.fromJson(json, type) ?: emptyList()
+
+            val fixedModels = dtos.map { dto ->
+                val template = _templates.value.find { it.id == dto.templateId }
+                    ?: _templates.value.find { it.avatar == dto.avatar }
+                val model = dto.toModel(templateListPath = template?.listPath ?: arrayListOf())
+                val selJson = gson.toJson(model.selections)
+                val selType = object : TypeToken<ArrayList<SelectionIndex>>() {}.type
+                val cleanSel: ArrayList<SelectionIndex> = gson.fromJson(selJson, selType)
+                model.copy(selections = cleanSel)
+            }
+
+            _customizedCharacters.value = fixedModels
+            Log.d(TAG, "✅ Loaded ${fixedModels.size} customized")
+        }.onFailure {
+            _customizedCharacters.value = emptyList()
+            Log.e(TAG, "❌ Load customized error: ${it.message}", it)
+        }
+    }
     suspend fun saveApiCache(templates: List<CustomModel>) = withContext(Dispatchers.IO) {
         runCatching {
             mmkv.encode(KEY_API_CACHE, gson.toJson(templates))
             Log.d(TAG, "✅ Saved ${templates.size} API templates to cache")
         }.onFailure { Log.e(TAG, "❌ saveApiCache error", it) }
     }
-    private suspend fun loadCustomizedCharacters() = withContext(Dispatchers.IO) {
-        runCatching {
-            val json = mmkv.decodeString(KEY_CUSTOMIZED)
-            if (json.isNullOrEmpty()) { _customizedCharacters.value = emptyList(); return@withContext }
 
-            val type = object : TypeToken<List<CustomizedCharacterDto>>() {}.type
-            val dtos: List<CustomizedCharacterDto> = gson.fromJson(json, type) ?: emptyList()
-
-            val models = dtos.map { dto ->
-                val template = _templates.value.find { t ->
-                    t.id == dto.templateId || t.avatar == dto.avatar
-                }
-                dto.toModel(templateListPath = template?.listPath ?: arrayListOf())
-            }
-
-            _customizedCharacters.value = models
-            Log.d(TAG, "✅ Loaded ${models.size} customized from dto")
-        }.onFailure {
-            _customizedCharacters.value = emptyList()
-            Log.e(TAG, "❌ Load customized error", it)
-        }
-    }
     suspend fun updateCustomizedCharacter(character: CustomModel) = withContext(Dispatchers.IO) {
         val list  = _customizedCharacters.value.toMutableList()
         val index = list.indexOfFirst { it.id == character.id }
@@ -361,8 +426,8 @@ class AppDataManager @Inject constructor(
 
     private fun combineCharacterLists() {
         _characters.value = _templates.value + _customizedCharacters.value
+        Log.d(TAG, "🔗 combine: templates=${_templates.value.size} + customized=${_customizedCharacters.value.size} = ${_characters.value.size}")
     }
-
     fun prependOnlineTemplates(onlineTemplates: List<CustomModel>) {
         val existing = _templates.value.filter { !it.id.startsWith("online_") }
         _templates.value = onlineTemplates + existing
@@ -426,12 +491,24 @@ class AppDataManager @Inject constructor(
 
     // ── MY DESIGNS ────────────────────────────────────────────────────────────
 
+    // AppDataManager.kt — loadMyDesigns()
     private suspend fun loadMyDesigns() = withContext(Dispatchers.IO) {
         runCatching {
             val json = mmkv.decodeString(KEY_MY_DESIGNS)
-            if (json.isNullOrEmpty()) { _myDesignPaths.value = emptyList(); return@withContext }
+            if (json.isNullOrEmpty()) {
+                _myDesignPaths.value = emptyList()
+                return@withContext
+            }
             val type = object : TypeToken<List<String>>() {}.type
-            _myDesignPaths.value = gson.fromJson<List<String>>(json, type) ?: emptyList()
+            val all: List<String> = gson.fromJson(json, type) ?: emptyList()
+
+            // ✅ Filter file không còn tồn tại + auto-cleanup
+            val existing = all.filter { File(it).exists() }
+            if (existing.size != all.size) {
+                Log.w(TAG, "⚠️ Cleaned ${all.size - existing.size} missing design paths")
+                saveMyDesignToJson(existing) // ← tự cleanup luôn
+            }
+            _myDesignPaths.value = existing
         }.onFailure { Log.e(TAG, "❌ loadMyDesigns", it) }
     }
 

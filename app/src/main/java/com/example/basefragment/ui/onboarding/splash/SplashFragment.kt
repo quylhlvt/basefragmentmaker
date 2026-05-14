@@ -22,6 +22,7 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
+import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.OuterStrokeShadownTextView
 import com.example.basefragment.core.extention.dpToPx
@@ -43,7 +44,7 @@ import kotlin.times
 class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     FragmentSplashBinding::inflate,
     SplashViewModel::class.java
-) {
+) , BackPressHandler{
     private val mainViewModel: ViewModelActivity by activityViewModels()
 
     private var progressAnimator: ValueAnimator? = null
@@ -54,7 +55,9 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
         private const val MIN_SPLASH_MS  = 2_000L
         private const val API_TIMEOUT_MS = 8_000L
     }
-
+    override fun onBackPressed(): Boolean {
+        return true
+    }
     // ── INIT ──────────────────────────────────────────────────────────────────
 
     override fun initView() {

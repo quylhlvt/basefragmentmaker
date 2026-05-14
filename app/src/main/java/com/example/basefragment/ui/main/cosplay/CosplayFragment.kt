@@ -93,11 +93,18 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
             }
             show.onClick {
                 val item = viewModel.randomItem.value ?: return@onClick
+
+                val isOnline = isNetworkConnected(requireContext()) && isInternetAvailable(requireContext())
+                val templateId = viewModelActivity.templates.value.getOrNull(item.templateIndex)?.id ?: ""
+                if (templateId.startsWith("online_") && !isOnline) {
+                    showUnstableNetworkDialog()
+                    return@onClick
+                }
+
                 val cached = viewModel.cachedBitmap
                 if (cached != null && !cached.isRecycled) {
                     viewModelActivity.cosplayBitmap = cached
                 }
-
                 val args = ShowFragment.newArgshow(
                     templateIndex = item.templateIndex,
                     targetSelections = item.selections

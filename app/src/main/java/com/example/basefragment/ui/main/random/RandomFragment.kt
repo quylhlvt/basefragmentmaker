@@ -88,6 +88,14 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
             }
             actionBar.btnActionBarRight.onClick {
                 val item = viewModel.randomItem.value ?: return@onClick
+
+                val isOnline = isNetworkConnected(requireContext()) && isInternetAvailable(requireContext())
+                val templateId = viewModelActivity.templates.value.getOrNull(item.templateIndex)?.id ?: ""
+                if (templateId.startsWith("online_") && !isOnline) {
+                    showUnstableNetworkDialog()
+                    return@onClick
+                }
+
                 val args = CustomizeFragment.newArgs(
                     templateIndex = item.templateIndex,
                     isEdit = false,

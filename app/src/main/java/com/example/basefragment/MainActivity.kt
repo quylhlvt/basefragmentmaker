@@ -1,6 +1,5 @@
 package com.example.basefragment
 
-import android.app.Application
 import android.app.Dialog
 import android.content.Context
 import android.content.res.Configuration
@@ -11,14 +10,8 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.content.res.ResourcesCompat
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import androidx.navigation.fragment.NavHostFragment
 import com.bumptech.glide.Glide
@@ -31,9 +24,6 @@ import com.example.basefragment.core.extention.visible
 import com.example.basefragment.core.helper.SharedPreferencesManager
 import com.example.basefragment.databinding.DialogbaseBinding
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.HiltAndroidApp
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import java.util.Locale
 
 interface LoadingController {
