@@ -27,9 +27,8 @@ import com.bumptech.glide.load.DataSource
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.invisible
 import com.example.basefragment.databinding.ItemBottomCustomBinding
+import kotlin.text.clear
 
-// ── NAV ADAPTER ───────────────────────────────────────────────────────────────
-// ── NAV ADAPTER ───────────────────────────────────────────────────────────────
 class NavAdapter :
     BaseAdapter<BodyPartModel, ItemBottomCustomBinding>(ItemBottomCustomBinding::inflate) {
 
@@ -46,66 +45,66 @@ class NavAdapter :
     override fun onBind(binding: ItemBottomCustomBinding, item: BodyPartModel, position: Int) {
         binding.apply {
             val ctx = root.context
-        if (posNav == position) {
-            focus.visible()
-            cardLayer.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color4
+            if (posNav == position) {
+                focus.visible()
+                cardLayer.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        ctx,
+                        R.color.app_color4
+                    )
                 )
-            )
-            cardLayerImg.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color5
-                )
-            )
-            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
-        } else {
-            focus.invisible()
-            cardLayer.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color8
-                )
-            )
                 cardLayerImg.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color9
+                    ContextCompat.getColor(
+                        ctx,
+                        R.color.app_color5
+                    )
                 )
-            )
-            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
-        }
-        Glide.with(imvImage)
-            .load(item.nav)
-            .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-            .override(256)
-            .dontAnimate()
-            .listener(object : RequestListener<Drawable> {
-                override fun onLoadFailed(
-                    e: GlideException?, model: Any?,
-                    target: Target<Drawable>?, isFirstResource: Boolean
-                ): Boolean {
-                    sflShimmer.stopShimmer()
-                    sflShimmer.gone()
-                    return false
-                }
+                cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
+            } else {
+                focus.invisible()
+                cardLayer.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        ctx,
+                        R.color.app_color8
+                    )
+                )
+                cardLayerImg.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        ctx,
+                        R.color.app_color9
+                    )
+                )
+                cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
+            }
+            Glide.with(imvImage)
+                .load(item.nav)
+                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                .override(256)
+                .dontAnimate()
+                .listener(object : RequestListener<Drawable> {
+                    override fun onLoadFailed(
+                        e: GlideException?, model: Any?,
+                        target: Target<Drawable>?, isFirstResource: Boolean
+                    ): Boolean {
+                        sflShimmer.stopShimmer()
+                        sflShimmer.gone()
+                        return false
+                    }
 
-                override fun onResourceReady(
-                    resource: Drawable?, model: Any?,
-                    target: Target<Drawable>?, dataSource: DataSource?,
-                    isFirstResource: Boolean
-                ): Boolean {
-                    sflShimmer.stopShimmer()
-                    sflShimmer.gone()
-                    return false
-                }
-            })
-            .into(imvImage)
+                    override fun onResourceReady(
+                        resource: Drawable?, model: Any?,
+                        target: Target<Drawable>?, dataSource: DataSource?,
+                        isFirstResource: Boolean
+                    ): Boolean {
+                        sflShimmer.stopShimmer()
+                        sflShimmer.gone()
+                        return false
+                    }
+                })
+                .into(imvImage)
 
-        root.setOnClickListener { onClick?.invoke(position) }
-    }}
+            root.setOnClickListener { onClick?.invoke(position) }
+        }}
 }
 
 // ── COLOR ADAPTER ─────────────────────────────────────────────────────────────
@@ -154,86 +153,86 @@ class PartAdapter : BaseAdapter<String, ItemLayerBinding>(ItemLayerBinding::infl
         binding.apply {
             val ctx = root.context
 
-        if (posPath == position) {
-            focus.visible()
-            cardLayer.cardElevation = 8f
-            cardLayer.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color4
-                )
-            )
-            cardLayerImg.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color5
-                )
-            )
-            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
-        } else {
-            focus.invisible()
-            cardLayer.cardElevation = 0f
-            cardLayer.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color8
-                )
-            )
-            cardLayerImg.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color9
-                )
-            )
-            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
-        }
-        sflShimmer.visible()
-        sflShimmer.startShimmer()
-        val thumbPath = listThumb.getOrElse(position) { item }
-        when (item) {
-            "none" -> {
-                Glide.with(imvImage).clear(imvImage)
-                imvImage.setImageResource(R.drawable.ic_none)
-                sflShimmer.stopShimmer()
-                sflShimmer.gone()
-            }
+            if (posPath == position) {
+                focus.visible()
 
-            "dice" -> {
-                Glide.with(imvImage).clear(imvImage)
-                imvImage.setImageResource(R.drawable.ic_dice)
-                sflShimmer.stopShimmer()
-                sflShimmer.gone()
-            }
+                cardLayer.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        ctx,
+                        R.color.app_color4
+                    )
+                )
+                cardLayerImg.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        ctx,
+                        R.color.app_color5
+                    )
+                )
+                cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
+            } else {
+                focus.invisible()
 
-            else -> {
-                Glide.with(imvImage)
-                    .load(thumbPath)
-                    .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
-                    .override(256)
-                    .dontAnimate()
-                    .listener(object : RequestListener<Drawable> {
-                        override fun onLoadFailed(
-                            e: GlideException?, model: Any?,
-                            target: Target<Drawable>?, isFirstResource: Boolean
-                        ): Boolean {
-                            sflShimmer.stopShimmer()
-                            sflShimmer.gone()
-                            return false
-                        }
-
-                        override fun onResourceReady(
-                            resource: Drawable?, model: Any?,
-                            target: Target<Drawable>?, dataSource: DataSource?,
-                            isFirstResource: Boolean
-                        ): Boolean {
-                            sflShimmer.stopShimmer()
-                            sflShimmer.gone()
-                            return false
-                        }
-                    })
-                    .into(imvImage)
+                cardLayer.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        ctx,
+                        R.color.app_color8
+                    )
+                )
+                cardLayerImg.setCardBackgroundColor(
+                    ContextCompat.getColor(
+                        ctx,
+                        R.color.app_color9
+                    )
+                )
+                cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
             }
-        }
-        root.setOnClickListener { onClick?.invoke(position, item) }
-    }}
+            sflShimmer.visible()
+            sflShimmer.startShimmer()
+            val thumbPath = listThumb.getOrElse(position) { item }
+            when (item) {
+                "none" -> {
+                    Glide.with(imvImage).clear(imvImage)
+                    imvImage.setImageResource(R.drawable.ic_none)
+                    sflShimmer.stopShimmer()
+                    sflShimmer.gone()
+                }
+
+                "dice" -> {
+                    Glide.with(imvImage).clear(imvImage)
+                    imvImage.setImageResource(R.drawable.ic_dice)
+                    sflShimmer.stopShimmer()
+                    sflShimmer.gone()
+                }
+
+                else -> {
+                    Glide.with(imvImage)
+                        .load(thumbPath)
+                        .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                        .override(256)
+                        .dontAnimate()
+                        .listener(object : RequestListener<Drawable> {
+                            override fun onLoadFailed(
+                                e: GlideException?, model: Any?,
+                                target: Target<Drawable>?, isFirstResource: Boolean
+                            ): Boolean {
+                                sflShimmer.stopShimmer()
+                                sflShimmer.gone()
+                                return false
+                            }
+
+                            override fun onResourceReady(
+                                resource: Drawable?, model: Any?,
+                                target: Target<Drawable>?, dataSource: DataSource?,
+                                isFirstResource: Boolean
+                            ): Boolean {
+                                sflShimmer.stopShimmer()
+                                sflShimmer.gone()
+                                return false
+                            }
+                        })
+                        .into(imvImage)
+                }
+            }
+            root.setOnClickListener { onClick?.invoke(position, item) }
+        }}
 }

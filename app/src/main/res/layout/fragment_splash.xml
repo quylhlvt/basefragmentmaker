@@ -92,5 +92,17 @@
             android:scaleType="fitXY"/>
 
     </FrameLayout>
-
+    <com.example.basefragment.core.extention.OuterStrokeShadownTextView
+        android:id="@+id/appCompatTextView2"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="30dp"
+        android:fontFamily="@font/baloo2_bold"
+        android:gravity="center"
+        android:text="@string/this_action_may_contain_advertising"
+        android:textColor="@color/white"
+        android:textSize="15sp"
+        app:outerStrokeColor="@color/app_color"
+        app:outerStrokeWidth="1dp"
+        app:layout_constraintBottom_toBottomOf="parent" />
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -3,30 +3,40 @@ package com.example.basefragment.ui.main.myPony
 import android.app.AlertDialog
 import android.content.ActivityNotFoundException
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContentProviderCompat
 import androidx.core.view.isVisible
+import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.dialog.CreateNameDialog
 import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
+import com.example.basefragment.core.extention.InternetExtension.isNetworkConnected
+import com.example.basefragment.core.extention.checkPermissions
+import com.example.basefragment.core.extention.goToSettings
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.invisible
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.setTextActionBar
+import com.example.basefragment.core.extention.toCleanSelections
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.data.model.mypony.MyAlbumModel
 import com.example.basefragment.databinding.FragmentMyPonyBinding
 import com.example.basefragment.ui.main.customize.CustomizeFragment
 import com.example.basefragment.ui.main.myPony.adapter.MyAvatarAdapter
 import com.example.basefragment.ui.main.myPony.adapter.MyDesignAdapter
+import com.example.basefragment.ui.onboarding.permission.PermissionViewModel
 import com.example.basefragment.utils.share.whatsapp.StickerPack
 import com.example.basefragment.utils.share.whatsapp.WhatsappSharingFragment
 import com.example.basefragment.utils.share.whatsapp.WhitelistCheck
@@ -34,6 +44,9 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.launch
 import java.io.File
+import kotlin.compareTo
+import kotlin.getValue
+import kotlin.text.toInt
 
 @AndroidEntryPoint
 class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyViewModel>(
@@ -43,6 +56,8 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     private lateinit var myAvatarAdapter: MyAvatarAdapter
     private lateinit var myDesignAdapter: MyDesignAdapter
+    private var pendingDownloadPaths: ArrayList<String> = arrayListOf()
+    private val permissionViewModel: PermissionViewModel by activityViewModels()
 
     private val isAvatarTab = MutableStateFlow(true)
 
@@ -52,6 +67,10 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         private const val MAX_STICKERS_WHATSAPP = 30
     }
 
+    private fun performBatchDownload() {
+        viewModel.downloadFiles(requireContext(), pendingDownloadPaths)
+        resetSelection()
+    }
     // ── INIT ──────────────────────────────────────────────────────────────────
 
     override fun initView() {
@@ -72,11 +91,11 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     private fun setupActionBar() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
-            setTextActionBar(tvCenter, getString(R.string.my_creation))
-            setImageActionBar(btnActionBarNextToRight, R.drawable.ic_delete_all)
-            setImageActionBar(btnActionBarRight, R.drawable.ic_select_all)
-            btnActionBarNextToRight.invisible()
-            btnActionBarRight.invisible()
+            setTextActionBar(tvCenter, getString(R.string.my_creation1))
+            setImageActionBar(btnActionBarNextToRight1, R.drawable.ic_delete_all)
+            setImageActionBar(btnActionBarRight1, R.drawable.ic_select_all)
+            btnActionBarNextToRight1.invisible()
+            btnActionBarRight1.invisible()
         }
     }
 
@@ -87,26 +106,26 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     private fun switchTab(isAvatar: Boolean) {
         isAvatarTab.value = isAvatar
+        applyTabUI(isAvatar)
+        resetSelection()
+    }
+
+    private fun applyTabUI(isAvatar: Boolean) {
         binding.apply {
             if (isAvatar) {
                 imvFocusMyDesign.setImageResource(R.drawable.bg_btn_type_unselected)
                 imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_selected)
                 recycleAvatar.visible()
                 recycleDesign.gone()
-//                tvMyAvatar.setTextColor(requireContext().getColor(R.color.white))
-//                tvMyDesign.setTextColor(requireContext().getColor(R.color.app_color3))
-                loadAvatarData()
+                // ❌ Bỏ loadAvatarData() — dùng StateFlow
             } else {
                 imvFocusMyDesign.setImageResource(R.drawable.bg_btn_type_selected)
                 imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_unselected)
                 recycleAvatar.gone()
                 recycleDesign.visible()
-//                tvMyAvatar.setTextColor(requireContext().getColor(R.color.app_color3))
-//                tvMyDesign.setTextColor(requireContext().getColor(R.color.white))
-                loadDesignData()
+                loadDesignData() // Design vẫn load thủ công vì không có StateFlow
             }
         }
-        resetSelection()
     }
 
     private fun setupRecyclerViews() {
@@ -142,8 +161,8 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             btnTelegram.onClick { handleTelegramShare() }
             btnDownload.onClick { handleDownload() }
             btnShare.onClick { handleShare() }
-            actionBar.btnActionBarRight.onClick { handleSelectAll() }
-            actionBar.btnActionBarNextToRight.onClick { handleDeleteSelected() }  // ✅ thêm
+            actionBar.btnActionBarRight1.onClick { handleSelectAll() }
+            actionBar.btnActionBarNextToRight1.onClick { handleDeleteSelected() }  // ✅ thêm
 
         }
     }
@@ -202,14 +221,15 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
     }
 
     // ── OBSERVE ───────────────────────────────────────────────────────────────
-// MyPonyFragment.kt — observeData()
     override fun observeData() {
-        // ✅ Avatar: collect từ viewModelActivity (source of truth)
+        // ✅ Chỉ dùng 1 nguồn duy nhất cho avatar
         viewLifecycleOwner.lifecycleScope.launch {
             viewModelActivity.customizedCharacters.collect { customized ->
                 val list = customized
-                    .filter { it.imageSave.isNotEmpty() && File(it.imageSave).exists() }
-//                    .sortedByDescending { it.updatedAt }
+                    .filter {
+                        it.imageSave.isNotEmpty() && File(it.imageSave).exists()
+                    }
+                    .sortedByDescending { it.createdAt } // ← dùng createdAt đã fix
                     .map { MyAlbumModel(path = it.imageSave, idEdit = it.id, type = 1) }
 
                 myAvatarAdapter.submitList(list)
@@ -218,7 +238,7 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             }
         }
 
-        // ✅ Design: giữ nguyên collect từ viewModel.myDesignList
+        // Design giữ nguyên
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.myDesignList.collect { list ->
                 myDesignAdapter.submitList(list)
@@ -230,14 +250,10 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         viewLifecycleOwner.lifecycleScope.launch {
             viewModel.downloadState.collect { state ->
                 when (state) {
-                    MyPonyViewModel.DownloadState.SUCCESS -> showToast(
-                        getString(
-                            R.string.download_success,
-                            getString(R.string.app_name)
-                        )
-                    )
-
-                    MyPonyViewModel.DownloadState.ERROR -> showToast(R.string.download_failed_please_try_again_later)
+                    MyPonyViewModel.DownloadState.SUCCESS ->
+                        showToast(getString(R.string.download_success, getString(R.string.app_name)))
+                    MyPonyViewModel.DownloadState.ERROR ->
+                        showToast(R.string.download_failed_please_try_again_later)
                     else -> {}
                 }
             }
@@ -258,15 +274,15 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
         binding.actionBar.apply {
             if (hasSelection) {
-                btnActionBarNextToRight.visible()
-                btnActionBarRight.visible()
+                btnActionBarNextToRight1.visible()
+                btnActionBarRight1.visible()
 
-                btnActionBarRight.setImageResource(
+                btnActionBarRight1.setImageResource(
                     if (allSelected) R.drawable.ic_select_all else R.drawable.ic_not_select_all
                 )
             } else {
-                btnActionBarNextToRight.invisible()
-                btnActionBarRight.invisible()
+                btnActionBarNextToRight1.invisible()
+                btnActionBarRight1.invisible()
 
             }
         }
@@ -406,21 +422,26 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
         val templateIndex = viewModelActivity.getTemplateIndexForCustomized(idEdit)
             .takeIf { it >= 0 }
-            ?: run { showToast("Template not found"); return }
+            ?: run { showUnstableNetworkDialog(); return }
 
-        // ✅ Chỉ check internet nếu template là online
         val template = viewModelActivity.templates.value.getOrNull(templateIndex)
-        if (template?.id?.startsWith("online_") == true && !isInternetAvailable(requireContext())) {
-            showNoInternetDialog()
-            return
+
+        // ✅ Thêm check: online template + mất mạng hoặc data chưa đủ
+        if (template?.id?.startsWith("online_") == true) {
+            val onlineTemplateCount = viewModelActivity.templates.value
+                .count { it.id.startsWith("online_") }
+            if (!isNetworkConnected(requireContext()) || onlineTemplateCount < 2) {
+                showUnstableNetworkDialog()
+                return
+            }
         }
 
         val args = CustomizeFragment.newArgs(
-            templateIndex = templateIndex,
-            isEdit = true,
-            customizedId = idEdit,
-            savedSelections = customized.selections,
-            isFlipped = customized.isFlipped
+            templateIndex   = templateIndex,
+            isEdit          = true,
+            customizedId    = idEdit,
+            savedSelections = customized.selections.toCleanSelections(),
+            isFlipped       = customized.isFlipped
         )
         findNavController().navigate(R.id.action_mypony_to_custom, args)
     }
@@ -442,13 +463,31 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     private fun handleDownload() {
         val selected = getSelectedItems()
-        if (selected.isEmpty()) {
-            showToast(R.string.please_select_an_image); return
+        if (selected.isEmpty()) { showToast(R.string.please_select_an_image); return }
+        pendingDownloadPaths = ArrayList(selected.map { it.path })
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { performBatchDownload(); return }
+
+        val permission = android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        when {
+          requireContext().checkPermissions(arrayOf(permission)) -> performBatchDownload()
+            permissionViewModel.shouldGoToSettings(isStorage = true) -> activity?.goToSettings()
+            else -> downloadPermissionLauncher.launch(arrayOf(permission))
         }
-        viewModel.downloadFiles(requireContext(), ArrayList(selected.map { it.path }))
-        resetSelection()
     }
 
+    private val downloadPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val allGranted = permissions.entries.all { it.value }
+            if (allGranted) {
+                permissionViewModel.onStorageGranted()
+                performBatchDownload()
+            } else {
+                permissionViewModel.onStorageDenied()
+                // ✅ Chỉ toast, KHÔNG check goToSettings ở đây
+                showToast(R.string.download_failed_please_try_again_later)
+            }
+        }
     // ── SHARE: chỉ dùng imageSave (ảnh render) ───────────────────────────────
 
     /**
@@ -468,39 +507,30 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
             paths.isEmpty() -> {
                 showToast(R.string.please_select_an_image); return
             }
-
             paths.size < MIN_STICKERS_WHATSAPP -> {
                 showToast(R.string.limit_3_items); return
             }
-
             paths.size > MAX_STICKERS_WHATSAPP -> {
                 showToast(R.string.limit_30_items); return
             }
         }
-        showPackNameDialog { packName ->
+        // ✅ Dùng CreateNameDialog thay AlertDialog
+        val dialog = CreateNameDialog(requireActivity())
+        dialog.show()
+        dialog.onYesClick = { packName ->
+            dialog.dismiss()
             viewModel.addToWhatsapp(requireContext(), packName, ArrayList(paths)) { pack ->
                 if (pack != null) {
-                    addToWhatsapp(pack); resetSelection()
+                    addToWhatsapp(pack)
+                    resetSelection()
                 } else showToast("Failed to create sticker pack")
             }
         }
+        dialog.onNoClick = { dialog.dismiss() }
+        dialog.onDismissClick = { dialog.dismiss() }
     }
 
-    private fun showPackNameDialog(onConfirm: (String) -> Unit) {
-        val editText = android.widget.EditText(requireContext()).apply {
-            hint = "Enter sticker pack name"
-            setText("My Ponies ${System.currentTimeMillis() % 1000}")
-        }
-        AlertDialog.Builder(requireContext())
-            .setTitle("Create Sticker Pack")
-            .setView(editText)
-            .setPositiveButton("Create") { _, _ ->
-                val name = editText.text.toString().trim()
-                if (name.isNotEmpty()) onConfirm(name) else showToast("Please enter a pack name")
-            }
-            .setNegativeButton("Cancel") { d, _ -> d.dismiss() }
-            .show()
-    }
+
 
 
     @Deprecated("Deprecated in Java")
@@ -563,6 +593,12 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     override fun onResume() {
         super.onResume()
-        if (isAvatarTab.value) loadAvatarData() else loadDesignData()
+        if (isAvatarTab.value) {
+            // Avatar tự cập nhật qua StateFlow, không cần load thủ công
+            updateEmptyState(myAvatarAdapter.items.isEmpty())
+        } else {
+            loadDesignData()
+        }
+        applyTabUI(isAvatarTab.value)
     }
 }

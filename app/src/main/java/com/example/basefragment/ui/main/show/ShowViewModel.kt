@@ -17,12 +17,16 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.compareTo
 import kotlin.math.roundToInt
+import kotlin.text.compareTo
+import kotlin.text.set
 
 @HiltViewModel
 class ShowViewModel @Inject constructor(
     private val appDataManager: AppDataManager
-) : ViewModel() {
+) :
+    ViewModel() {
 
     private val _state = MutableStateFlow(ShowState())
     val state: StateFlow<ShowState> = _state.asStateFlow()

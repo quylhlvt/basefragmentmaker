@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- values-id/strings.xml -->
 <resources>
-    <string name="app_name">baseFragment</string>
+    <string name="app_name">Cat Avatar: Cat Maker</string>
     <string name="next">Lanjut</string>
     <string name="language">Bahasa</string>
     <string name="title_1">Buat berbagai gaya sesuai keinginanmu</string>
     <string name="title_2">Buat avatar sempurnamu</string>
     <string name="title_3">Koleksi berbagai item</string>
     <string name="not_select_lang">Silakan pilih bahasa</string>
-    <string name="pony_maker">Pembuat Poni</string>
+    <string name="pony_maker">Pembuat Kucing</string>
     <string name="trending_custom">Kustom Populer</string>
     <string name="my_work">Karya Saya</string>
 
@@ -90,6 +90,7 @@
     <string name="cat_random">Kucing Acak</string>
     <string name="random">Acak</string>
     <string name="my_creation">Kreasi Saya</string>
+    <string name="my_creation1">Kreasi saya</string>
     <string name="category">Kategori</string>
     <string name="image">Gambar</string>
     <string name="color">Warna</string>
@@ -102,4 +103,8 @@
     <string name="unstable_connection_please_check_your_network_connection">Koneksi tidak stabil, periksa koneksi jaringan kamu</string>
     <string name="ok">Oke</string>
     <string name="please_wait_a_few_seconds_for_data_to_load">Harap tunggu beberapa detik untuk memuat data.</string>
+    <string name="create_package_name">Buat nama paket</string>
+    <string name="enter_your_package_name">Masukkan nama paket</string>
+    <string name="please_enter_your_package_name">Masukkan nama paket!</string>
+    <string name="this_action_may_contain_advertising">Tindakan ini mungkin mengandung iklan</string>
 </resources>

@@ -35,6 +35,9 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.compareTo
+import kotlin.text.toFloat
+import kotlin.times
 
 @AndroidEntryPoint
 class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
@@ -112,6 +115,9 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
                     mainViewModel.templates.first { list ->
                         list.any { it.id.startsWith("online_") }
                     }
+                },
+                waitForImages = {
+                    mainViewModel.imagesReady.first { it }  // ✅ chờ true
                 }
             )
         }

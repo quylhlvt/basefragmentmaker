@@ -40,6 +40,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import java.io.File
 import java.lang.System.exit
+
 @AndroidEntryPoint
 class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     FragmentHomeBinding::inflate, HomeViewModel::class.java
@@ -71,32 +72,16 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
     override fun viewListener() {
         binding.apply {
             btnCreate.onClick {
-                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
-                    showLoadingDataDialog()
-                } else {
-                    findNavController().navigate(R.id.action_home_to_createPony)
-                }
+                findNavController().navigate(R.id.action_home_to_createPony)
             }
             btnMyAlbum.onClick {
-                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
-                    showLoadingDataDialog()
-                } else {
-                    findNavController().navigate(R.id.action_home_to_myPony)
-                }
+                findNavController().navigate(R.id.action_home_to_myPony)
             }
-            btnRandom.onClick(800) {
-                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
-                    showLoadingDataDialog()
-                } else {
-                    findNavController().navigate(R.id.action_home_to_random)
-                }
+            btnRandom.onClick(1000) {
+                findNavController().navigate(R.id.action_home_to_random)
             }
-            btnCosPlay.onClick(800) {
-                if (isInternetAvailable(requireContext()) && mainViewModel.templates.value.size <= 1) {
-                    showLoadingDataDialog()
-                } else {
-                    findNavController().navigate(R.id.action_home_to_cosplay)
-                }
+            btnCosPlay.onClick(1000) {
+                findNavController().navigate(R.id.action_home_to_cosplay)
             }
             actionBar.btnActionBarRight.onClick { toSettingFromHome() }
         }

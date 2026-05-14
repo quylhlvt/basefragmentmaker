@@ -8,9 +8,9 @@ import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.databinding.DialogColorPickerBinding
 
 
-class ChooseColorDialog(context: Context) : BaseDialog<DialogColorPickerBinding>(context,maxWidth = true, maxHeight = true) {
+class ChooseColorDialog(context: Context) : BaseDialog<DialogColorPickerBinding>(context,maxWidth = true, maxHeight = false) {
     override val layoutId: Int = R.layout.dialog_color_picker
-    override val isCancelOnTouchOutside: Boolean =false
+    override val isCancelOnTouchOutside: Boolean =true
     override val isCancelableByBack: Boolean = false
 
     var onDoneEvent: ((Int) -> Unit) = {}

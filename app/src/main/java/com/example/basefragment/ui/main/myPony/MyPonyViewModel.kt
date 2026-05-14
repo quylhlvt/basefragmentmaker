@@ -30,6 +30,8 @@ import kotlinx.coroutines.withContext
 import java.io.File
 import java.io.FileOutputStream
 import javax.inject.Inject
+import kotlin.collections.removeAll
+
 
 @HiltViewModel
 class MyPonyViewModel @Inject constructor(

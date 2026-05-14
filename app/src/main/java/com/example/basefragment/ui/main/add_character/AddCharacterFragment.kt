@@ -10,6 +10,8 @@ import android.text.TextWatcher
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.view.ViewTreeObserver
+import android.view.WindowManager
 import android.view.inputmethod.EditorInfo
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
@@ -63,6 +65,12 @@ import kotlinx.coroutines.withContext
 import java.text.SimpleDateFormat
 import java.util.Locale
 import javax.inject.Inject
+import kotlin.collections.get
+import kotlin.isInitialized
+import kotlin.text.compareTo
+import kotlin.text.format
+import kotlin.text.toFloat
+import kotlin.toString
 
 @AndroidEntryPoint
 class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharacterViewModel>(
@@ -74,6 +82,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     lateinit var imageManager: CharacterImageManager
 
     private val permissionViewModel: PermissionViewModel by viewModels()
+    private var keyboardLayoutListener: ViewTreeObserver.OnGlobalLayoutListener? = null
 
     // ── Keyboard state ──────────────────────────────────────────────────────
     // Source of truth duy nhất: layout change listener đo thực tế
@@ -118,15 +127,6 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             }
         }
 
-    private val permissionLauncher =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
-            if (permissions.entries.all { it.value }) {
-                permissionViewModel.updateStorageGranted(sharedPreferences, true)
-                launchImagePicker()
-            } else {
-                permissionViewModel.updateStorageGranted(sharedPreferences, false)
-            }
-        }
 
 //    private fun launchImagePicker() {
 //        val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
@@ -265,7 +265,6 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
         initRcv()
         initDrawView()
-        hideLoadingSafe()
 
         if (!viewModel.isInitialized) {
             initData()
@@ -290,17 +289,37 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
      *     → Luôn reset margin = 0, bất kể tab nào
      */
     private fun setupKeyboardListener() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
-            val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
-            val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+        // Android 10+ dùng WindowInsets
+        if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.Q) {
+            ViewCompat.setOnApplyWindowInsetsListener(binding.root) { _, insets ->
+                val imeVisible = insets.isVisible(WindowInsetsCompat.Type.ime())
+                val imeHeight = insets.getInsets(WindowInsetsCompat.Type.ime()).bottom
+                if (imeVisible && imeHeight > 0) onKeyboardOpen()
+                else onKeyboardClose()
+                insets
+            }
+        } else {
+            // Android 9 trở xuống: dùng GlobalLayout
+            setupKeyboardListenerLegacy()
+        }
+    }
 
-            if (imeVisible && imeHeight > 0) {
+    private fun setupKeyboardListenerLegacy() {
+        val threshold = 150.dp(requireContext())
+
+        keyboardLayoutListener = ViewTreeObserver.OnGlobalLayoutListener {
+            val rect = android.graphics.Rect()
+            binding.root.getWindowVisibleDisplayFrame(rect)
+            val screenHeight = binding.root.rootView.height
+            val keypadHeight = screenHeight - rect.bottom
+            if (keypadHeight > threshold) {
                 onKeyboardOpen()
             } else {
                 onKeyboardClose()
             }
-            insets
         }
+
+        binding.root.viewTreeObserver.addOnGlobalLayoutListener(keyboardLayoutListener)
     }
 
     private fun onKeyboardOpen() {
@@ -309,12 +328,22 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
             binding.flFunction.translationY = (-170).dp(requireContext()).toFloat()
         }
     }
-
+    override fun onDestroyView() {
+        super.onDestroyView()
+        keyboardLayoutListener?.let {
+            binding.root.viewTreeObserver.removeOnGlobalLayoutListener(it)
+        }
+        keyboardLayoutListener = null
+    }
     private fun onKeyboardClose() {
+        // ✅ Android 9-: ignore nếu speech dialog đang mở
+        // vì GlobalLayoutListener fire false-close khi dialog transition
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q
+            && viewModel.isSpeechDialogOpen) return
+
         isKeyboardOpen = false
         binding.flFunction.translationY = 0f
     }
-
     // ĐỔI TÊN + ĐỔI bottomMargin → topMargin
     private fun setFlFunctionTopMargin(margin: Int) {
         (binding.flFunction.layoutParams as ViewGroup.MarginLayoutParams).topMargin = margin
@@ -332,7 +361,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     }
     private fun clearFocus( check: Boolean =false) {
         if (!check)
-        binding.drawView.hideSelect()
+            binding.drawView.hideSelect()
         hideSoftKeyboard()
         setFlFunctionTopMargin(0)
         lifecycleScope.launch {
@@ -390,7 +419,9 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                     viewModel.loadDrawableEmoji(customizeBitmap, isCharacter = true)
                 )
                 viewModelActivity.customizeBitmap = null // clear sau khi dùng
-                hideLoadingSafe()
+                binding.drawView.post {
+                    hideLoadingSafe()
+                }
             } else if (imagepath.isNotEmpty()) {
                 addDrawable(imagepath, isCharacter = true) {
                     hideLoadingSafe()
@@ -496,10 +527,12 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                 ) {
                     binding.drawView.addDraw(viewModel.loadDrawableEmoji(resource, isCharacter))
                     requireActivity().hideNavigation(true)
+                    onDone?.invoke()
                 }
                 override fun onLoadCleared(placeholder: android.graphics.drawable.Drawable?) {}
                 override fun onLoadFailed(errorDrawable: android.graphics.drawable.Drawable?) {
                     showToast("Don't Download sticker")
+                    onDone?.invoke()
                 }
             })
     }
@@ -564,6 +597,8 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                     viewModelActivity.speechs.value
                 )
                 viewModel.resetDraw()
+                viewModel.setBackgroundImage(null)
+                viewModel.savedBackgroundColor = null
                 binding.drawView.removeAllDraw()
                 binding.imvBackground.setImageBitmap(null)
                 binding.imvBackground.setBackgroundColor(requireContext().getColor(R.color.transparent))
@@ -614,14 +649,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         }
     }
 
-    private fun checkStoragePermission() {
-        val perms = permissionViewModel.getStoragePermissions()
-        when {
-            requireContext().checkPermissions(perms) -> launchImagePicker()
-            permissionViewModel.needGoToSettings(sharedPreferences, true) -> requireActivity().goToSettings()
-            else -> permissionLauncher.launch(perms)
-        }
-    }
+
     private fun launchImagePicker() {
         val intent = Intent(Intent.ACTION_OPEN_DOCUMENT).apply {
             addCategory(Intent.CATEGORY_OPENABLE)
@@ -650,25 +678,33 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
      * Layout change listener sẽ check flag này và bỏ qua keyboard event.
      */
     private fun handleSpeech(path: String) {
-        // ✅ Set flag ĐỒNG BỘ trước khi dialog show — không dùng postDelayed
         viewModel.isSpeechDialogOpen = true
-
-        // Đóng keyboard của fragment trước (nếu đang mở)
-        collapseKeyboard()
+        binding.lnlText.edtText.clearFocus()
+        hideSoftKeyboard()
 
         val dialog = DialogSpeech(requireContext(), path)
+
+        // ✅ Android 9-: SOFT_INPUT_STATE_VISIBLE để keyboard tự hiện
+        // BaseDialog đã set ADJUST_RESIZE, chỉ cần OR thêm state
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.Q) {
+            dialog.window?.setSoftInputMode(
+                WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE or
+                        WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE
+            )
+        }
+
         dialog.show()
 
         dialog.onDoneClick = { bitmap ->
             dialog.dismiss()
+            requireActivity().hideNavigation(true)
             if (bitmap != null) addDrawable("", bitmapText = bitmap)
         }
 
         dialog.setOnDismissListener {
-            // ✅ Reset flag khi dialog đóng
             viewModel.isSpeechDialogOpen = false
-            // Đảm bảo view về đúng vị trí
             setFlFunctionTopMargin(0)
+            requireActivity().hideNavigation(true)
         }
     }
 

@@ -8,6 +8,8 @@ import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.setFont
 import com.example.basefragment.data.model.addcharacter.SelectedAddModel
 import com.example.basefragment.databinding.ItemFontBinding
+import kotlin.collections.addAll
+import kotlin.text.clear
 
 
 class TextFontAdapter(val context: Context) : BaseAdapter<SelectedAddModel, ItemFontBinding>(ItemFontBinding::inflate) {

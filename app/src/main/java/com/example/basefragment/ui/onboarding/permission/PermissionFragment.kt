@@ -26,6 +26,7 @@ import com.example.basefragment.core.extention.goToSettings
 import com.example.basefragment.core.extention.requestPermission
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.setTextActionBar
+import com.example.basefragment.core.helper.PermissionHelper
 import com.example.basefragment.databinding.FragmentSettingBinding
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -33,24 +34,20 @@ import kotlinx.coroutines.launch
 @AndroidEntryPoint
 class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionViewModel>(
     FragmentPermissionBinding::inflate, PermissionViewModel::class.java
-), BackPressHandler  {
+), BackPressHandler {
+
+
     override fun viewListener() {
         binding.swPermission.onClick(1500) { handlePermissionRequest(isStorage = true) }
         binding.swNotification.onClick(1500) { handlePermissionRequest(isStorage = false) }
         binding.tvContinue.onClick(1000) { handleContinue() }
     }
-
-
     override fun inflateBinding(
         inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?
     ): FragmentPermissionBinding = FragmentPermissionBinding.inflate(inflater, container, false)
 
     override fun initView() {
-
-        binding.apply {
-        setupActionBar()
-        }
-
+        binding.setupActionBar()
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
             binding.btnStorage.visible()
             binding.btnNotification.gone()
@@ -58,46 +55,51 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
             binding.btnNotification.visible()
             binding.btnStorage.gone()
         }
-
-
-//        binding.textView.text = "Home Fragment"
-//        binding.btnTest.setOnClickListener {
-//            showSnackbar("Xin chào từ Home!")
-//        }
+        // cập nhật UI switch khi vào màn
+        updatePermissionUI(requireContext().checkPermissions(PermissionHelper.storagePermission), true)
+        updatePermissionUI(requireContext().checkPermissions(PermissionHelper.notificationPermission), false)
     }
+
     private fun FragmentPermissionBinding.setupActionBar() {
         actionBar.apply {
             tvStart.select()
-            setTextActionBar(
-                tvStart,
-                getString(R.string.permission)
-            )
-        }
-    }
-    override fun onStart() {
-        super.onStart()
-        viewModel.updateStorageGranted(
-            sharedPreferences, requireContext().checkPermissions(viewModel.getStoragePermissions())
-        )
-        viewModel.updateNotificationGranted(
-            sharedPreferences, requireContext().checkPermissions(viewModel.getNotificationPermissions())
-        )
-    }
-    private fun handlePermissionRequest(isStorage: Boolean) {
-        val perms = if (isStorage) viewModel.getStoragePermissions() else viewModel.getNotificationPermissions()
-        if (requireContext().checkPermissions(perms)) {
-            showToast(if (isStorage) R.string.granted_storage else R.string.granted_notification)
-        } else if (viewModel.needGoToSettings(sharedPreferences, isStorage)) {
-            activity?.goToSettings()
-        } else {
-            val requestCode = if (isStorage) RequestKey.STORAGE_PERMISSION_CODE else RequestKey.NOTIFICATION_PERMISSION_CODE
-           requestPermission(perms, requestCode)
+            setTextActionBar(tvStart, getString(R.string.permission))
         }
     }
 
-    private fun updatePermissionUI(granted: Boolean, isStorage: Boolean) {
-        val imageView = if (isStorage) binding.swPermission else binding.swNotification
-        imageView.setImageResource(if (granted) R.drawable.switch_on else R.drawable.switch_off)
+// ❌ Xóa 2 dòng này
+// private var storageDenyCount = 0
+// private var notificationDenyCount = 0
+
+    private fun handlePermissionRequest(isStorage: Boolean) {
+        val perms = if (isStorage) PermissionHelper.storagePermission
+        else PermissionHelper.notificationPermission
+
+        when {
+            requireContext().checkPermissions(perms) ->
+                showToast(if (isStorage) R.string.granted_storage else R.string.granted_notification)
+
+            // ✅ Dùng ViewModel thay vì local count
+            viewModel.shouldGoToSettings(isStorage) -> activity?.goToSettings()
+
+            else -> requestPermission(
+                perms,
+                if (isStorage) RequestKey.STORAGE_PERMISSION_CODE
+                else RequestKey.NOTIFICATION_PERMISSION_CODE
+            )
+        }
+    }
+    override fun onResume() {
+        super.onResume()
+        // ✅ Cập nhật lại UI khi quay về từ Settings hoặc sau khi grant
+        updatePermissionUI(
+            requireContext().checkPermissions(PermissionHelper.storagePermission),
+            true
+        )
+        updatePermissionUI(
+            requireContext().checkPermissions(PermissionHelper.notificationPermission),
+            false
+        )
     }
     @Deprecated("Deprecated in Java")
     override fun onRequestPermissionsResult(
@@ -108,37 +110,39 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
         val granted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
 
         when (requestCode) {
-            RequestKey.STORAGE_PERMISSION_CODE -> viewModel.updateStorageGranted(sharedPreferences, granted)
-
-            RequestKey.NOTIFICATION_PERMISSION_CODE -> viewModel.updateNotificationGranted(sharedPreferences, granted)
-        }
-        if (granted) {
-            showToast(if (requestCode == RequestKey.STORAGE_PERMISSION_CODE) R.string.granted_storage else R.string.granted_notification)
-        }
-    }
-    override fun observeData() {
-        lifecycleScope.launch {
-            repeatOnLifecycle(Lifecycle.State.STARTED) {
-                launch {
-                    viewModel.storageGranted.collect { granted ->
-                        updatePermissionUI(granted, true)
-                    }
+            RequestKey.STORAGE_PERMISSION_CODE -> {
+                if (granted) {
+                    viewModel.onStorageGranted()
+                } else {
+                    viewModel.onStorageDenied()
                 }
-
-                launch {
-                    viewModel.notificationGranted.collect { granted ->
-                        updatePermissionUI(granted, false)
-                    }
+                // ✅ Luôn update UI dù granted hay denied
+                updatePermissionUI(granted, true)
+            }
+            RequestKey.NOTIFICATION_PERMISSION_CODE -> {
+                if (granted) {
+                    viewModel.onNotificationGranted()
+                } else {
+                    viewModel.onNotificationDenied()
                 }
+                // ✅ Luôn update UI dù granted hay denied
+                updatePermissionUI(granted, false)
             }
         }
     }
 
+    private fun updatePermissionUI(granted: Boolean, isStorage: Boolean) {
+        val imageView = if (isStorage) binding.swPermission else binding.swNotification
+        imageView.setImageResource(if (granted) R.drawable.switch_on else R.drawable.switch_off)
+    }
+
+
+    override fun observeData() {}
+
     override fun initText() {
         binding.actionBar.tvCenter.select()
-        val textRes =
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) R.string.to_access_13 else R.string.to_access
-
+        val textRes = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
+            R.string.to_access_13 else R.string.to_access
         binding.txtPermission.text = TextUtils.concat(
             createColoredText(R.string.allow, R.color.app_color),
             " ",
@@ -153,8 +157,7 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
         toHomeFromPermission()
     }
 
-    override fun bindViewModel() {
-    }
+    override fun bindViewModel() {}
 
     private fun createColoredText(
         @androidx.annotation.StringRes textRes: Int,
@@ -166,5 +169,4 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
         requireActivity().finish()
         return true
     }
-
 }

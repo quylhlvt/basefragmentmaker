@@ -19,10 +19,17 @@ import com.example.basefragment.core.extention.InternetExtension.isNetworkConnec
 import com.example.basefragment.core.extention.safeNavigate
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.setTextActionBar
+import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.databinding.FragmentChoosePonyBinding
+import com.example.basefragment.ui.main.customize.CustomizeFragment.Companion.ARG_TEMPLATE_ID
 import com.example.basefragment.ui.main.customize.CustomizeFragment.Companion.ARG_TEMPLATE_INDEX
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.collections.get
+import kotlin.compareTo
+import kotlin.text.category
 
 @AndroidEntryPoint
 class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyViewModel>(
@@ -47,15 +54,25 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
         )
 
         adapter = ChoosePonyAdapter { character, position ->
-            // ✅ Chỉ check network với online item
-            if (character.id.startsWith("online_") && !isInternetAvailable(requireContext())) {
-                showNoInternetDialog()
-                return@ChoosePonyAdapter
+            if (character.id.startsWith("online_")) {
+                if (!isInternetAvailable(requireContext())) {
+                    showUnstableNetworkDialog(); return@ChoosePonyAdapter
+                }
+                viewLifecycleOwner.lifecycleScope.launch {
+                    val hasInternet = withContext(Dispatchers.IO) {
+                        isNetworkConnected(requireContext())
+                    }
+                    if (!hasInternet) showUnstableNetworkDialog()
+                    else navigateToCustomize(character, position)
+                }
+            } else {
+                // ✅ Offline item — verify data tồn tại trước khi navigate
+                val safeIndex = mainViewModel.templates.value.indexOfFirst { it.id == character.id }
+                if (safeIndex < 0) {
+                    showToast(getString(R.string.download_failed_please_try_again_later)); return@ChoosePonyAdapter
+                }
+                navigateToCustomize(character, safeIndex)
             }
-            findNavController().safeNavigate(
-                R.id.action_createPony_to_custom,
-                bundleOf(ARG_TEMPLATE_INDEX to position)
-            )
         }
 
         binding.recycleChoose.apply {
@@ -64,7 +81,31 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
             itemAnimator  = null
         }
     }
-
+    private fun navigateToCustomize(character: CustomModel, index: Int) {
+        val templates = mainViewModel.templates.value
+        if (index < 0 || index >= templates.size) {
+            showToast(getString(R.string.download_failed_please_try_again_later))
+            return
+        }
+        // Verify khớp
+        val correctIndex = if (templates[index].id == character.id) {
+            index
+        } else {
+            templates.indexOfFirst { it.id == character.id }
+                .takeIf { it >= 0 }
+                ?: run {
+                    showToast(getString(R.string.download_failed_please_try_again_later))
+                    return
+                }
+        }
+        findNavController().safeNavigate(
+            R.id.action_createPony_to_custom,
+            bundleOf(
+                ARG_TEMPLATE_INDEX to correctIndex,
+                ARG_TEMPLATE_ID to character.id  // ✅ Pass thêm id để verify
+            )
+        )
+    }
     override fun viewListener() {
         binding.actionBar.btnActionBarLeft.setOnClickListener { findNavController().navigateUp() }
     }
@@ -72,26 +113,72 @@ class ChoosePonyFragment : BaseFragment<FragmentChoosePonyBinding, ChoosePonyVie
     override fun observeData() {
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
-                // Avatar đã được preload trong GetCatalogueUseCase trước khi vào đây
-                // → submitList xong là hiện ngay, không cần preload thêm
+
                 launch {
                     kotlinx.coroutines.flow.combine(
                         mainViewModel.templates,
                         mainViewModel.isFetchingOnlineFlow
                     ) { templates, isFetching -> Pair(templates, isFetching) }
                         .collect { (templates, isFetching) ->
-                            adapter.submitList(templates)
+                            // ✅ Lọc theo trạng thái mạng
+                            val hasInternet = withContext(Dispatchers.IO) {
+                                isInternetAvailable(requireContext())
+                            }
+                            val filteredTemplates = if (hasInternet) {
+                                templates // có mạng → show tất cả
+                            } else {
+                                templates.filter { !it.id.startsWith("online_") } // mất mạng → chỉ offline
+                            }
+
+                            adapter.submitList(filteredTemplates)
+
                             if (isFirstLoad && !isFetching) {
                                 isFirstLoad = false
-                                if (templates.size <= 1) showLoadingDataDialog()
-                            }
+                                if (filteredTemplates.size <= 1) showLoadingDataDialog()
                             }
                         }
+                }
+
+                launch {
+                    mainViewModel.templates.collect { templates ->
+                        val hasOnline = templates.any { it.id.startsWith("online_") }
+                        if (!hasOnline && !mainViewModel.isFetchingOnlineFlow.value) {
+                            val hasInternet = withContext(Dispatchers.IO) {
+                                isInternetAvailable(requireContext())
+                            }
+                            if (hasInternet) mainViewModel.fetchOnlineTemplates()
+                        }
+                    }
+                }
 
                 launch {
                     mainViewModel.error.collect { error ->
                         error?.let { showSnackbar(it) }
                     }
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        viewLifecycleOwner.lifecycleScope.launch {
+            val hasInternet = withContext(Dispatchers.IO) {
+                isInternetAvailable(requireContext())
+            }
+            val templates = mainViewModel.templates.value
+            val filtered = if (hasInternet) {
+                templates
+            } else {
+                templates.filter { !it.id.startsWith("online_") }
+            }
+            adapter.submitList(filtered)
+
+            // Fetch online nếu có mạng mà chưa có data online
+            if (hasInternet) {
+                val hasOnline = templates.any { it.id.startsWith("online_") }
+                if (!hasOnline && !mainViewModel.isFetchingOnlineFlow.value) {
+                    mainViewModel.fetchOnlineTemplates()
                 }
             }
         }

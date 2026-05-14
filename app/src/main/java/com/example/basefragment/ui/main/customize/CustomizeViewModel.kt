@@ -14,8 +14,10 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import javax.inject.Inject
+import kotlin.compareTo
 
 // ── UI STATE ──────────────────────────────────────────────────────────────────
+
 
 data class CustomizeState(
     val template:       CustomModel?        = null,

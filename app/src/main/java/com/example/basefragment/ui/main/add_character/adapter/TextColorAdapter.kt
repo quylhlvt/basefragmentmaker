@@ -11,6 +11,8 @@ import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.data.model.addcharacter.SelectedAddModel
 import com.example.basefragment.databinding.ItemTextColorBinding
+import kotlin.collections.addAll
+import kotlin.text.clear
 
 class TextColorAdapter :
     BaseAdapter<SelectedAddModel, ItemTextColorBinding>(ItemTextColorBinding::inflate) {
@@ -46,23 +48,23 @@ class TextColorAdapter :
         }
     }
 
-        fun submitItem(position: Int, list: ArrayList<SelectedAddModel>) {
-            if (position != currentSelected) {
-                items.clear()
-                items.addAll(list)
-
-                notifyItemChanged(currentSelected)
-                notifyItemChanged(position)
-
-                currentSelected = position
-            }
-        }
-
-        @SuppressLint("NotifyDataSetChanged")
-        fun submitListReset(list: ArrayList<SelectedAddModel>) {
+    fun submitItem(position: Int, list: ArrayList<SelectedAddModel>) {
+        if (position != currentSelected) {
             items.clear()
             items.addAll(list)
-            currentSelected = 1
-            notifyDataSetChanged()
+
+            notifyItemChanged(currentSelected)
+            notifyItemChanged(position)
+
+            currentSelected = position
         }
     }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun submitListReset(list: ArrayList<SelectedAddModel>) {
+        items.clear()
+        items.addAll(list)
+        currentSelected = 1
+        notifyDataSetChanged()
+    }
+}

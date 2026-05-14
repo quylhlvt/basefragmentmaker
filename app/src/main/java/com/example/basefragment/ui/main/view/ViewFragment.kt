@@ -1,31 +1,44 @@
 package com.example.basefragment.ui.main.view
 
 import android.content.Intent
+import android.os.Build
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.FileProvider
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BaseFragment
 import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
+import com.example.basefragment.core.extention.checkPermissions
+import com.example.basefragment.core.extention.goToSettings
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.safeNavigate
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.setTextActionBar
+import com.example.basefragment.core.extention.toCleanSelections
 import com.example.basefragment.core.extention.visible
 import com.example.basefragment.databinding.FragmentViewBinding
 import com.example.basefragment.ui.main.customize.CustomizeFragment
+import com.example.basefragment.ui.onboarding.permission.PermissionViewModel
 import dagger.hilt.android.AndroidEntryPoint
 import java.io.File
+import kotlin.compareTo
+import kotlin.getValue
 
 @AndroidEntryPoint
 class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
     FragmentViewBinding::inflate,
     ViewViewModel::class.java
 ) {
+
+    private val permissionViewModel:
+            PermissionViewModel by activityViewModels()
+
     private var currentImagePath: String = ""
     private val imagePath: String by lazy { arguments?.getString("imagePath") ?: "" }
     private val imageType: Int    by lazy { arguments?.getInt("imageType", 0) ?: 0 }
@@ -56,7 +69,7 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                     setImageActionBar(actionBar.btnActionBarNextToRight, R.drawable.ic_share)
                     setImageActionBar(actionBar.btnActionBarRight, R.drawable.ic_home)
                     // ✅ Show 2 nút bottom
-                    txtLeft.apply  { visible(); text = getString(R.string.my_creation) }
+                    txtLeft.apply  { visible(); text = getString(R.string.my_creation1) }
                     txtRight.apply { visible(); text = getString(R.string.download) }
                 }
                 // ── Type 1: Avatar từ MyPony ──────────────────────────────────
@@ -92,6 +105,9 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                                 .setPopUpTo(R.id.homeFragment, true)
                                 .build()
                         )
+                    }
+                    actionBar.btnActionBarNextToRight.onClick {
+                        shareImage()
                     }
                     // ✅ MyPony button
                     btnBottomLeft.onClick {
@@ -138,9 +154,33 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
         }
         startActivity(android.content.Intent.createChooser(intent, getString(R.string.share)))
     }
+// ViewFragment.kt
 
+    // Thêm vào ViewFragment
     private fun downloadImage() {
-        if (imagePath.isEmpty()) return
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) { performDownload(); return }
+        val permission = android.Manifest.permission.WRITE_EXTERNAL_STORAGE
+        when {
+            requireContext().checkPermissions(arrayOf(permission)) -> performDownload()
+            permissionViewModel.shouldGoToSettings(isStorage = true) -> activity?.goToSettings()
+            else -> downloadPermissionLauncher.launch(arrayOf(permission))
+        }
+    }
+
+    private val downloadPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            val allGranted = permissions.entries.all { it.value }
+            if (allGranted) {
+                permissionViewModel.onStorageGranted()
+                performDownload()
+            } else {
+                permissionViewModel.onStorageDenied()
+                // ✅ Chỉ toast, KHÔNG check goToSettings ở đây
+                // goToSettings sẽ được check ở downloadImage() lần nhấn tiếp theo
+                showToast(getString(R.string.download_failed_please_try_again_later))
+            }
+        }
+    private fun performDownload() {
         viewModel.downloadFile(requireContext(), imagePath) { success ->
             showToast(
                 if (success) getString(R.string.download_success, getString(R.string.app_name))
@@ -175,20 +215,25 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
 
         val templateIndex = viewModelActivity.getTemplateIndexForCustomized(idEdit)
             .takeIf { it >= 0 }
-            ?: run { showToast("Template not found"); return }
+            ?: run { showUnstableNetworkDialog(); return }  // ✅ không tìm thấy template → có thể do chưa load online
 
-        // ✅ Chỉ check internet nếu template là online
         val template = viewModelActivity.templates.value.getOrNull(templateIndex)
-        if (template?.id?.startsWith("online_") == true && !isInternetAvailable(requireContext())) {
-            showNoInternetDialog()
-            return
+
+        // ✅ Thêm check: online template + mất mạng + online templates < 2
+        if (template?.id?.startsWith("online_") == true) {
+            val onlineTemplateCount = viewModelActivity.templates.value
+                .count { it.id.startsWith("online_") }
+            if (!isInternetAvailable(requireContext()) || onlineTemplateCount < 2) {
+                showUnstableNetworkDialog()
+                return
+            }
         }
 
         val args = CustomizeFragment.newArgs(
             templateIndex   = templateIndex,
             isEdit          = true,
             customizedId    = idEdit,
-            savedSelections = customized.selections,
+            savedSelections = customized.selections.toCleanSelections(),
             isFlipped       = customized.isFlipped
         )
         findNavController().safeNavigate(R.id.action_view_to_customize, args)

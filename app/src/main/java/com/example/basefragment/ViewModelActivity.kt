@@ -31,7 +31,8 @@ class ViewModelActivity @Inject constructor(
     val appDataManager: AppDataManager,
     private val networkFlow: Flow<Boolean>,
     @ApplicationContext private val context: Context
-) : ViewModel() {
+) :
+    ViewModel() {
 
     // ── EXPOSED FLOWS ─────────────────────────────────────────────────────────
 
@@ -60,7 +61,12 @@ class ViewModelActivity @Inject constructor(
     // Guard chống gọi fetch trùng từ nhiều fragment
     private val _isFetchingOnline = MutableStateFlow(false)
     val isFetchingOnlineFlow: StateFlow<Boolean> = _isFetchingOnline.asStateFlow()
+    private val _imagesReady = MutableStateFlow(false)
+    val imagesReady: StateFlow<Boolean> = _imagesReady.asStateFlow()
 
+    fun notifyImagesReady() {
+        _imagesReady.value = true
+    }
     // ── INIT ──────────────────────────────────────────────────────────────────
 
     init {
@@ -71,12 +77,21 @@ class ViewModelActivity @Inject constructor(
     private fun loadInitialData() {
         viewModelScope.launch {
             try {
-                appDataManager.loadQuickData()
-                val hasCache = appDataManager.templates.value.isNotEmpty()
+                // ✅ Bước 1: Load local data trước (templates + customized)
+                val hasCache = appDataManager.loadQuickData()
+
                 if (!hasCache) {
+                    // Chưa có cache → load từ assets
                     appDataManager.loadInitialData()
                 }
+
+                // ✅ Bước 2: Log để verify customized đã load
+                Log.d("ViewModelActivity", "📦 After quick load — customized: ${appDataManager.customizedCharacters.value.size}")
+
+                // ✅ Bước 3: Fetch online SAU KHI local data đã ổn định
                 fetchOnlineTemplatesInternal()
+
+                Log.d("ViewModelActivity", "📦 After online fetch — customized: ${appDataManager.customizedCharacters.value.size}")
             } catch (e: Exception) {
                 Log.e("ViewModelActivity", "❌ Init error: ${e.message}", e)
             }
@@ -160,11 +175,20 @@ class ViewModelActivity @Inject constructor(
     fun getTemplateIndexForCustomized(customizedId: String): Int {
         val customized = customizedCharacters.value.firstOrNull { it.id == customizedId }
             ?: return -1
+
+        // ✅ Ưu tiên templateId
         val byTemplateId = customized.templateId?.let { tplId ->
             templates.value.indexOfFirst { it.id == tplId }.takeIf { it >= 0 }
         }
         if (byTemplateId != null) return byTemplateId
-        return templates.value.indexOfFirst { it.avatar == customized.avatar }
+
+        // ✅ Fallback avatar
+        val byAvatar = templates.value.indexOfFirst { it.avatar == customized.avatar }
+            .takeIf { it >= 0 }
+        if (byAvatar != null) return byAvatar
+
+        Log.w("ViewModelActivity", "⚠️ Template not found for customizedId=$customizedId, templateId=${customized.templateId}")
+        return -1
     }
 
     // ── CRUD ──────────────────────────────────────────────────────────────────
@@ -183,7 +207,9 @@ class ViewModelActivity @Inject constructor(
                     selections = ArrayList(selections),
                     imageSave  = imageSave,
                     isFlipped  = isFlipped,
+                    createdAt  = System.currentTimeMillis(),
                     updatedAt  = System.currentTimeMillis()
+                    // ✅ KHÔNG set listPath — giữ nguyên từ template
                 )
             } else {
                 character.copy(
@@ -191,8 +217,10 @@ class ViewModelActivity @Inject constructor(
                     imageSave  = imageSave,
                     isFlipped  = isFlipped,
                     updatedAt  = System.currentTimeMillis()
+                    // ✅ KHÔNG set listPath
                 )
             }
+            Log.d("ViewModelActivity", "💾 Saving: id=${toSave.id}, templateId=${toSave.templateId}, imageSave=${toSave.imageSave}")
             appDataManager.updateCustomizedCharacter(toSave)
         }
     }

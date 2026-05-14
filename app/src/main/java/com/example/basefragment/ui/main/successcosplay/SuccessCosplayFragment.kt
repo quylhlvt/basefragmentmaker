@@ -27,6 +27,10 @@ import com.example.basefragment.ui.main.cosplay.CosplayViewModel
 import com.example.basefragment.ui.main.setting.SettingViewModel
 import com.example.basefragment.ui.main.show.ShowViewModel
 import com.example.basefragment.utils.state.RateState
+import kotlin.collections.get
+import kotlin.div
+import kotlin.text.toFloat
+import kotlin.times
 
 class SuccessCosplayFragment : BaseFragment<FragmentSuccessCosplayBinding, SuccessCosplayViewModel>( FragmentSuccessCosplayBinding::inflate, SuccessCosplayViewModel::class.java) {
 
@@ -64,7 +68,7 @@ class SuccessCosplayFragment : BaseFragment<FragmentSuccessCosplayBinding, Succe
             // imvImage3 = ảnh cosplay gốc
             val cosplayBitmap = viewModelActivity.cosplayBitmap
             if (cosplayBitmap != null && !cosplayBitmap.isRecycled) {
-              imvImage3.setImageBitmap(cosplayBitmap)
+                imvImage3.setImageBitmap(cosplayBitmap)
             }
 
             val percent = viewModelActivity.cosplayPercent

@@ -19,6 +19,7 @@ import com.example.basefragment.core.extention.loadImage
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.helper.BitmapHelper
 import com.example.basefragment.databinding.DialogSpeechBinding
+import kotlin.toString
 
 class DialogSpeech(val mcontext: Context, val path: String) : BaseDialog<DialogSpeechBinding>(mcontext, maxWidth = true, maxHeight = true) {
     override val layoutId: Int = R.layout.dialog_speech
@@ -32,10 +33,13 @@ class DialogSpeech(val mcontext: Context, val path: String) : BaseDialog<DialogS
             edtSpeech.isFocusable = true
             edtSpeech.postDelayed({
                 edtSpeech.requestFocus()
-            }, 30)
+                // ✅ Thêm dòng này
+                val imm = mcontext.getSystemService(Context.INPUT_METHOD_SERVICE)
+                        as android.view.inputmethod.InputMethodManager
+                imm.showSoftInput(edtSpeech, android.view.inputmethod.InputMethodManager.SHOW_FORCED)
+            }, 100) // ✅ Tăng delay từ 30 lên 100 để dialog attach xong
             loadImage(mcontext, path, imvBubble)
         }
-
     }
 
     override fun initAction() {

@@ -72,7 +72,7 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>( 
             )
         }
     }
- private fun FragmentSettingBinding.setupActionTiltleBar() {
+    private fun FragmentSettingBinding.setupActionTiltleBar() {
         layoutTitleBar.apply {
             layoutTitle.apply {
                 txt1.isSelected = true

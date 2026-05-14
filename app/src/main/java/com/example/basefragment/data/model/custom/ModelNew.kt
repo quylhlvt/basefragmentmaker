@@ -14,7 +14,7 @@ data class SelectionIndex(
     val bodyPartIndex: Int = 0,
     val colorIndex:    Int = 0,
     val pathIndex:     Int = 0
-) : Parcelable, java.io.Serializable
+) : Parcelable
 
 // ─────────────────────────────────────────────
 //  ColorModel
@@ -32,10 +32,10 @@ data class ColorModel(
 data class BodyPartModel(
     val nav:            String               = "",
     val listPath:       ArrayList<ColorModel> = arrayListOf(),
-val listThumbPath:  ArrayList<String>    = arrayListOf(),
-val listSinglePath: ArrayList<String>    = arrayListOf(),
-val position:       Int                  = 0,
-val zIndex:         Int                  = 0
+    val listThumbPath:  ArrayList<String>    = arrayListOf(),
+    val listSinglePath: ArrayList<String>    = arrayListOf(),
+    val position:       Int                  = 0,
+    val zIndex:         Int                  = 0
 ) : Parcelable
 
 // ─────────────────────────────────────────────
@@ -52,6 +52,7 @@ data class CustomModel(
     val selections: ArrayList<SelectionIndex>  = arrayListOf(),
     val imageSave:  String                     = "",
     val isFlipped:  Boolean                    = false,
+    val createdAt:  Long                       = 0L,
     val updatedAt:  Long                       = System.currentTimeMillis()
 ) : Parcelable {
     val bodyPartCount: Int get() = listPath.size

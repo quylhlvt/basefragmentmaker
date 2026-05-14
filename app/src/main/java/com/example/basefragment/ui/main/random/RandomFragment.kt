@@ -34,6 +34,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.collections.forEach
+import kotlin.text.get
 
 @AndroidEntryPoint
 class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
@@ -135,7 +136,7 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
         viewLifecycleOwner.lifecycleScope.launch {
             val paths = item.resolvedPaths.filterNotNull()
             if (paths.isEmpty()) return@launch
-
+            binding.imvImage.setImageDrawable(null)
             showLoadingSafe()
 
             val bitmaps = withContext(Dispatchers.IO) {
@@ -145,8 +146,8 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
                             Glide.with(requireContext())
                                 .asBitmap()
                                 .load(path)
-                                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .override(512, 512)
+                                .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
+                                .override(800)
                                 .submit()
                                 .get()
                         }.getOrNull()
@@ -169,21 +170,14 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
     }
 
     private fun showBitmap(bitmap: Bitmap) {
-        binding.material2.apply {
-            removeAllViews()
-            addView(AppCompatImageView(requireContext()).apply {
-                layoutParams = ViewGroup.LayoutParams(
-                    ViewGroup.LayoutParams.MATCH_PARENT,
-                    ViewGroup.LayoutParams.MATCH_PARENT
-                )
-                scaleType = ImageView.ScaleType.CENTER_CROP
-                setImageBitmap(bitmap)
-            })
+        binding.imvImage.apply {
+            scaleType = ImageView.ScaleType.CENTER_CROP
+            setImageBitmap(bitmap)
         }
     }
 
     private fun mergeBitmaps(bitmaps: List<Bitmap>): Bitmap {
-        val size = 512
+        val size = 800
         val merged = Bitmap.createBitmap(size, size, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(merged)
         bitmaps.forEach { bmp ->

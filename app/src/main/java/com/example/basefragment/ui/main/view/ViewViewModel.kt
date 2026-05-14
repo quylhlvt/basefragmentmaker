@@ -16,10 +16,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 import javax.inject.Inject
+import kotlin.collections.remove
 
 
-
-// ViewViewModel.kt
 @HiltViewModel
 class ViewViewModel @Inject constructor(  private val appDataManager: AppDataManager) : ViewModel() {
 

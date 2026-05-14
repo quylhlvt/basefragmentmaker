@@ -12,42 +12,23 @@ import javax.inject.Inject
 @HiltViewModel
 class PermissionViewModel @Inject constructor() : ViewModel() {
 
-    private val _storageGranted = MutableStateFlow(false)
-    val storageGranted: StateFlow<Boolean> = _storageGranted.asStateFlow()
+    // ✅ Count tập trung, share across fragments
+    private val _storageDenyCount = MutableStateFlow(0)
+    private val _notificationDenyCount = MutableStateFlow(0)
 
-    private val _notificationGranted = MutableStateFlow(false)
-    val notificationGranted: StateFlow<Boolean> = _notificationGranted.asStateFlow()
+    val storageDenyCount: StateFlow<Int> = _storageDenyCount.asStateFlow()
+    val notificationDenyCount: StateFlow<Int> = _notificationDenyCount.asStateFlow()
 
-    fun updateStorageGranted(sharePrefer: SharedPreferencesManager, granted: Boolean) {
-        // ✅ Update SharedPreferences trước
-        sharePrefer.setPermissionStorRequest(if (granted) 0 else sharePrefer.isPermissionStorRequest() + 1)
+    fun onStorageDenied()      { _storageDenyCount.value++ }
+    fun onStorageGranted()     { _storageDenyCount.value = 0 }
+    fun onNotificationDenied() { _notificationDenyCount.value++ }
+    fun onNotificationGranted(){ _notificationDenyCount.value = 0 }
 
-        // ✅ Force update bằng cách reset rồi set lại
-        if (_storageGranted.value == granted) {
-            _storageGranted.value = !granted // Toggle
-        }
-        _storageGranted.value = granted
+    fun shouldGoToSettings(isStorage: Boolean): Boolean {
+        val count = if (isStorage) _storageDenyCount.value else _notificationDenyCount.value
+        return count >= 2
     }
 
-    fun updateNotificationGranted(sharePrefer: SharedPreferencesManager, granted: Boolean) {
-        // ✅ Update SharedPreferences trước
-        sharePrefer.setPermissionNotiRequest(if (granted) 0 else sharePrefer.isPermissionNotiRequest() + 1)
-
-        // ✅ Force update bằng cách reset rồi set lại
-        if (_notificationGranted.value == granted) {
-            _notificationGranted.value = !granted // Toggle
-        }
-        _notificationGranted.value = granted
-    }
-
-    fun needGoToSettings(sharePrefer: SharedPreferencesManager, storage: Boolean): Boolean {
-        return if (storage) {
-            sharePrefer.isPermissionStorRequest() > 2 && !_storageGranted.value
-        } else {
-            sharePrefer.isPermissionNotiRequest() > 2 && !_notificationGranted.value
-        }
-    }
-
-    fun getStoragePermissions() = PermissionHelper.storagePermission
+    fun getStoragePermissions()      = PermissionHelper.storagePermission
     fun getNotificationPermissions() = PermissionHelper.notificationPermission
 }

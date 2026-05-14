@@ -28,19 +28,25 @@ class SplashViewModel @Inject constructor() : ViewModel() {
 
     fun startSplashTimer(
         hasOnlineTemplates: Boolean,
-        waitForOnline: suspend () -> Unit
+        waitForOnline: suspend () -> Unit,
+        waitForImages: suspend () -> Unit
     ) {
         if (isTimerRunning) return
         isTimerRunning = true
 
         viewModelScope.launch {
             val startTime = System.currentTimeMillis()
-
-            if (!hasOnlineTemplates) {
-                withTimeoutOrNull(8_000L) {
-                    waitForOnline()
+            val dataJob = launch {
+                if (!hasOnlineTemplates) {
+                    withTimeoutOrNull(8_000L) { waitForOnline() }
                 }
             }
+            val imagesJob = launch {
+                withTimeoutOrNull(8_000L) { waitForImages() }  // timeout tránh treo
+            }
+
+            dataJob.join()
+            imagesJob.join()
 
             val elapsed = System.currentTimeMillis() - startTime
             val remaining = 2_000L - elapsed

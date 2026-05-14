@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- values-pt/strings.xml -->
 <resources>
-    <string name="app_name">baseFragment</string>
+    <string name="app_name">Cat Avatar: Cat Maker</string>
     <string name="next">Avançar</string>
     <string name="language">Idioma</string>
     <string name="title_1">Crie diferentes estilos como quiser</string>
     <string name="title_2">Crie o seu avatar perfeito</string>
     <string name="title_3">Coleção de vários itens</string>
     <string name="not_select_lang">Por favor, selecione um idioma</string>
-    <string name="pony_maker">Criador de Pônei</string>
+    <string name="pony_maker">Criador de Gatos</string>
     <string name="trending_custom">Personalizações em alta</string>
     <string name="my_work">Meus trabalhos</string>
 
@@ -90,6 +90,7 @@
     <string name="cat_random">Gato aleatório</string>
     <string name="random">Aleatório</string>
     <string name="my_creation">Minha criação</string>
+    <string name="my_creation1">Minha criação</string>
     <string name="category">Categoria</string>
     <string name="image">Imagem</string>
     <string name="color">Cor</string>
@@ -102,4 +103,8 @@
     <string name="unstable_connection_please_check_your_network_connection">Conexão instável, verifique sua conexão de rede</string>
     <string name="ok">OK</string>
     <string name="please_wait_a_few_seconds_for_data_to_load">Aguarde alguns segundos para carregar os dados.</string>
+    <string name="create_package_name">Criar nome do pacote</string>
+    <string name="enter_your_package_name">Digite o nome do pacote</string>
+    <string name="please_enter_your_package_name">Digite o nome do pacote!</string>
+    <string name="this_action_may_contain_advertising">Esta ação pode conter anúncios</string>
 </resources>

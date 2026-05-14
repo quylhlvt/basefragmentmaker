@@ -27,6 +27,8 @@ import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.InternetExtension.isInternetAvailable
+import com.example.basefragment.core.extention.InternetExtension.isNetworkConnected
 import com.example.basefragment.core.extention.onClick
 import com.example.basefragment.core.extention.saveToFile
 import com.example.basefragment.core.extention.setImageActionBar
@@ -39,6 +41,10 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.util.concurrent.atomic.AtomicInteger
+import kotlin.collections.set
+import kotlin.compareTo
+import kotlin.div
+import kotlin.text.clear
 
 @AndroidEntryPoint
 class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewModel>(
@@ -73,7 +79,29 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     ): FragmentCustomizeBinding = FragmentCustomizeBinding.inflate(inflater, container, false)
 
     // ── INIT ──────────────────────────────────────────────────────────────────
+    private fun isOnlineTemplate(): Boolean {
+        val templateIndex = arguments?.getInt(ARG_TEMPLATE_INDEX, 0) ?: 0
+        val templateId = arguments?.getString(ARG_TEMPLATE_ID)
+        val templates = sharedViewModel.templates.value
+        val resolvedIndex = if (templateId != null) {
+            templates.indexOfFirst { it.id == templateId }.takeIf { it >= 0 } ?: templateIndex
+        } else templateIndex
+        return templates.getOrNull(resolvedIndex)?.id?.startsWith("online_") == true
+    }
 
+    /** Trả về true nếu đã show dialog → caller nên block action */
+    private fun checkOnlineNetworkOrShowDialog(): Boolean {
+        if (!isOnlineTemplate()) return false
+        return when {
+            !isInternetAvailable(requireContext()) -> {
+                showNoInternetDialog(); true
+            }
+            !isNetworkConnected(requireContext()) -> {
+                showUnstableNetworkDialog(); true
+            }
+            else -> false
+        }
+    }
     override fun initView() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
@@ -89,30 +117,45 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     // CustomizeFragment.kt - readArgsAndInit() — FIX chính ở đây
     private fun readArgsAndInit() {
         val templateIndex = arguments?.getInt(ARG_TEMPLATE_INDEX, 0) ?: 0
+        val templateId = arguments?.getString(ARG_TEMPLATE_ID) // ✅ id để verify
         val isEdit = arguments?.getBoolean(ARG_IS_EDIT, false) ?: false
         val isFlipped = arguments?.getBoolean(ARG_IS_FLIPPED, false) ?: false
         val customizedId = arguments?.getString(ARG_CUSTOMIZED_ID)
 
-        @Suppress("UNCHECKED_CAST")
-        val savedSelections =
-            arguments?.getSerializable(ARG_SELECTIONS) as? ArrayList<SelectionIndex>
+        val savedSelections: ArrayList<SelectionIndex>? =
+            arguments?.getParcelableArrayList(ARG_SELECTIONS)
+
+        val templates = sharedViewModel.templates.value
+
+        // ✅ Resolve index đúng bằng id nếu có
+        val resolvedIndex = if (templateId != null) {
+            val byId = templates.indexOfFirst { it.id == templateId }
+            if (byId >= 0) byId else templateIndex // fallback về index nếu không tìm được
+        } else {
+            templateIndex
+        }
+
+        // ✅ Guard cuối
+        if (resolvedIndex < 0 || resolvedIndex >= templates.size) {
+            showToast(getString(R.string.download_failed_please_try_again_later))
+            findNavController().navigateUp()
+            return
+        }
 
         when {
             isEdit && savedSelections != null -> {
                 viewModel.initEditWithCustomizedId(
-                    templateIndex = templateIndex,
+                    templateIndex = resolvedIndex,
                     customizedId = customizedId ?: "",
                     savedSelections = savedSelections,
                     isFlipped = isFlipped
                 )
             }
-            // ✅ Từ Quick sang: có selections, không phải edit
             savedSelections != null -> {
-                viewModel.initWithSelections(templateIndex, savedSelections)
+                viewModel.initWithSelections(resolvedIndex, savedSelections)
             }
-
             else -> {
-                viewModel.initNew(templateIndex)
+                viewModel.initNew(resolvedIndex)
             }
         }
     }
@@ -124,15 +167,20 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     }
 
     // ── ACTIONS ───────────────────────────────────────────────────────────────
-
     override fun viewListener() {
-        adapterNav.onClick = { viewModel.selectNav(it) }
-        adapterColor.onClick = { viewModel.selectColor(it) }
+        adapterNav.onClick = {
+            if (!checkOnlineNetworkOrShowDialog()) viewModel.selectNav(it)
+        }
+        adapterColor.onClick = {
+            if (!checkOnlineNetworkOrShowDialog()) viewModel.selectColor(it)
+        }
         adapterPart.onClick = { idx, type ->
-            when (type) {
-                "none" -> viewModel.selectNone()
-                "dice" -> viewModel.selectDiceCurrent()
-                else -> viewModel.selectPath(idx)
+            if (!checkOnlineNetworkOrShowDialog()) {
+                when (type) {
+                    "none" -> viewModel.selectNone()
+                    "dice" -> viewModel.selectDiceCurrent()
+                    else   -> viewModel.selectPath(idx)
+                }
             }
         }
 
@@ -153,26 +201,20 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
                 llColor.alpha = 0f
                 llColor.animate().alpha(1f).setDuration(200).start()
             }
-
-
-            imgRandom.onClick { viewModel.randomizeAll() }
+            imgRandom.onClick {
+                if (!checkOnlineNetworkOrShowDialog()) viewModel.randomizeAll()
+            }
             actionBar.btnActionBarCenter.setOnClickListener {
                 showConfirmDialog(
                     title = getString(R.string.reset),
                     message = getString(R.string.do_you_want_to_reset_all),
-                    onYes = {
-                        arrShowColor.fill(true)
-                        viewModel.resetAll()
-                    }
+                    onYes = { arrShowColor.fill(true); viewModel.resetAll() }
                 )
             }
             actionBar.btnActionBarCenter2.setOnClickListener { viewModel.toggleFlip() }
             actionBar.btnActionBarRight.setOnClickListener { if (canSave) performSave() }
-            actionBar.btnActionBarLeft.setOnClickListener {
-               confirmExit()
-            }
+            actionBar.btnActionBarLeft.setOnClickListener { confirmExit() }
         }
-
     }
 
     // ── OBSERVE ───────────────────────────────────────────────────────────────
@@ -495,7 +537,7 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     //--------------------------------Backpress
     override fun onBackPressed(): Boolean {
         confirmExit()
-       return true
+        return true
     }
     // ── COMPANION ─────────────────────────────────────────────────────────────
     private fun confirmExit() {
@@ -511,6 +553,7 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     }
     companion object {
         const val ARG_TEMPLATE_INDEX = "template_index"
+        const val ARG_TEMPLATE_ID = "template_id"
         const val ARG_IS_EDIT = "is_edit"
         const val ARG_IS_FLIPPED = "is_flipped"
         const val ARG_SELECTIONS = "selections"
@@ -518,16 +561,18 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
 
         fun newArgs(
             templateIndex: Int,
+            templateId: String? = null,
             isEdit: Boolean = false,
             customizedId: String? = null,
             savedSelections: ArrayList<SelectionIndex>? = null,
             isFlipped: Boolean = false
         ) = Bundle().apply {
             putInt(ARG_TEMPLATE_INDEX, templateIndex)
+            templateId?.let { putString(ARG_TEMPLATE_ID, it) }
             putBoolean(ARG_IS_EDIT, isEdit)
             putBoolean(ARG_IS_FLIPPED, isFlipped)
             customizedId?.let { putString(ARG_CUSTOMIZED_ID, it) }
-            savedSelections?.let { putSerializable(ARG_SELECTIONS, it) }
+            savedSelections?.let { putParcelableArrayList(ARG_SELECTIONS, it) }
         }
     }
 }
