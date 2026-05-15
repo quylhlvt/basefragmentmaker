@@ -1,6 +1,8 @@
 package com.oc.catemoji.catoc.ui.main.myPony.adapter
 
 import android.content.Context
+import androidx.core.content.ContextCompat
+import androidx.core.view.isVisible
 import com.oc.catemoji.catoc.R
 import com.oc.catemoji.catoc.core.base.BaseAdapter
 import com.oc.catemoji.catoc.core.extention.gone
@@ -8,11 +10,11 @@ import com.oc.catemoji.catoc.core.extention.loadImage
 import com.oc.catemoji.catoc.core.extention.onClick
 import com.oc.catemoji.catoc.core.extention.visible
 import com.oc.catemoji.catoc.data.model.mypony.MyAlbumModel
-import com.oc.catemoji.catoc.databinding.ItemMyAlbumBinding
+import com.oc.catemoji.catoc.databinding.ItemMyAvatarBinding
 
 
 class MyAvatarAdapter(val context: Context) :
-    BaseAdapter<MyAlbumModel, ItemMyAlbumBinding>(ItemMyAlbumBinding::inflate) {
+    BaseAdapter<MyAlbumModel, ItemMyAvatarBinding>(ItemMyAvatarBinding::inflate) {
     var onItemClick: ((MyAlbumModel) -> Unit) = {}
     var onLongClick: ((Int) -> Unit) = {}
     var onItemTick: ((Int) -> Unit) = {}
@@ -20,7 +22,7 @@ class MyAvatarAdapter(val context: Context) :
     var onEditClick: ((String) -> Unit) = {}
     var onDeleteClick: ((String) -> Unit) = {}
 
-    override fun onBind(binding: ItemMyAlbumBinding, item: MyAlbumModel, position: Int) {
+    override fun onBind(binding: ItemMyAvatarBinding, item: MyAlbumModel, position: Int) {
         binding.apply {
             loadImage(root, item.path, imvImage)
 
@@ -37,6 +39,8 @@ class MyAvatarAdapter(val context: Context) :
             btnSelect.setImageResource(
                 if (item.isSelected) R.drawable.ic_selected else R.drawable.ic_not_select
             )
+            shadownForcus.isVisible = item.isSelected
+
 
             // Click luôn navigate, không check selection mode
             root.onClick { onItemClick.invoke(item) }

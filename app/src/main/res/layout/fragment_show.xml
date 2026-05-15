@@ -6,7 +6,27 @@
 
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.show.ShowFragment">
+    <!-- chạy chữ vòng cung-->
+<!--    <com.oc.catemoji.catoc.core.extention.CurvedTextView-->
+<!--        android:id="@+id/tv1"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="match_parent"-->
 
+<!--        android:fontFamily="@font/baloo2_extrabold"-->
+<!--        android:marqueeRepeatLimit="marquee_forever"-->
+<!--        android:singleLine="true"-->
+<!--        android:ellipsize="marquee"-->
+<!--        android:text="@string/pony_maker"-->
+<!--        android:textColor="@color/app_color2"-->
+<!--        android:textSize="28sp"-->
+<!--        android:shadowColor="@color/app_color"-->
+<!--        android:shadowDx="5"-->
+<!--        android:shadowDy="-5"-->
+<!--        android:shadowRadius="5"-->
+<!--        app:curveDepth="0.13"-->
+<!--        app:arc_centerAngle2="-90"-->
+<!--        app:arc_strokeWidth="2dp"-->
+<!--        app:arc_strokeColor="@color/app_color" />-->
     <ImageView
         android:id="@+id/imageView2"
         android:layout_width="match_parent"

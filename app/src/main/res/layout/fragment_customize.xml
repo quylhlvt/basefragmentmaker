@@ -3,10 +3,12 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:background="@drawable/img_bg_lang"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".ui.main.customize.CustomizeFragment">
 
     <ImageView
+        android:visibility="gone"
         android:id="@+id/imageView2"
         android:layout_width="match_parent"
         android:layout_height="0dp"
@@ -54,10 +56,9 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/frame_rando_all"
             android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:background="@color/app_color6"
+            android:layout_height="40dp"
+            android:layout_marginBottom="13dp"
             app:layout_constraintBottom_toTopOf="@+id/frameLayer"
-            app:layout_constraintDimensionRatio="3.6:0.8"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent">
 
@@ -66,8 +67,7 @@
                 android:id="@+id/imgChangColor"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginVertical="12dp"
-                android:layout_marginStart="20dp"
+                android:layout_marginStart="15dp"
                 android:src="@drawable/ic_color_show"
                 android:clickable="true"
                 android:focusable="true"
@@ -79,13 +79,11 @@
             <!-- Icon random -->
             <ImageView
                 android:id="@+id/imgRandom"
-                android:layout_width="0dp"
+                android:layout_width="40dp"
                 android:layout_height="0dp"
                 android:layout_marginEnd="20dp"
-                android:layout_marginVertical="12dp"
                 android:src="@drawable/ic_ramdom_cus"
                 app:layout_constraintDimensionRatio="1:1"
-                app:layout_constraintTop_toTopOf="parent"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent" />
 
@@ -95,29 +93,22 @@
                 android:id="@+id/llColor"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-                android:layout_marginHorizontal="10dp"
-                app:layout_constraintBottom_toBottomOf="@+id/imgChangColor"
+                android:layout_marginEnd="10dp"
+                app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toStartOf="@+id/imgRandom"
                 app:layout_constraintStart_toEndOf="@+id/imgChangColor"
-                app:layout_constraintTop_toTopOf="@+id/imgChangColor">
+                app:layout_constraintTop_toTopOf="parent">
                 <com.google.android.material.card.MaterialCardView
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    app:strokeWidth="1.2dp"
-                    app:strokeColor="@color/app_color"
-                    app:cardCornerRadius="16dp"
-                    app:cardBackgroundColor="@color/app_color4"
+                    app:strokeWidth="2dp"
+                    app:strokeColor="@color/stroker_blue"
+                    app:cardCornerRadius="8dp"
+                    app:cardBackgroundColor="@color/app_color3"
                     app:layout_constraintStart_toStartOf="@+id/cardColor"
                     app:layout_constraintTop_toTopOf="@+id/cardColor"
                     app:layout_constraintBottom_toBottomOf="@+id/cardColor"
                     app:layout_constraintEnd_toEndOf="@+id/cardColor">
-                    <com.google.android.material.card.MaterialCardView
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:layout_marginBottom="4dp"
-                        app:cardBackgroundColor="@color/app_color5"
-                        app:cardCornerRadius="16dp"
-                        app:strokeWidth="0dp"/>
 
 
 
@@ -136,7 +127,7 @@
                     <RelativeLayout
                         android:layout_width="wrap_content"
                         android:layout_height="match_parent"
-                        android:layout_marginEnd="30dp"
+                        android:layout_marginEnd="0dp"
                         android:layout_marginVertical="8dp">
 
                         <androidx.recyclerview.widget.RecyclerView
@@ -154,6 +145,7 @@
 
                     <!-- imvEndColor — đóng llColor -->
                     <ImageView
+                        android:visibility="gone"
                         android:id="@+id/end"
                         android:layout_width="20dp"
                         android:layout_height="20dp"

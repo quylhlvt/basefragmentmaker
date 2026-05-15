@@ -12,48 +12,54 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeoutOrNull
 import javax.inject.Inject
 @HiltViewModel
 class SplashViewModel @Inject constructor() : ViewModel() {
 
-    private val _readyToNavigate = MutableSharedFlow<Unit>(
-        replay = 1,  // Replay lại event khi collect muộn
-        extraBufferCapacity = 0
-    )
-    val readyToNavigate = _readyToNavigate.asSharedFlow()
+    private val _navigateSignal = MutableStateFlow(false)
+    val navigateSignal: StateFlow<Boolean> = _navigateSignal.asStateFlow()
 
     private var isTimerRunning = false
 
     fun startSplashTimer(
         hasOnlineTemplates: Boolean,
-        waitForOnline: suspend () -> Unit,
-        waitForImages: suspend () -> Unit
+        templatesFlow: StateFlow<List<com.oc.catemoji.catoc.data.model.custom.CustomModel>>,
+        imagesReadyFlow: StateFlow<Boolean>
     ) {
         if (isTimerRunning) return
         isTimerRunning = true
 
         viewModelScope.launch {
             val startTime = System.currentTimeMillis()
+
             val dataJob = launch {
                 if (!hasOnlineTemplates) {
-                    withTimeoutOrNull(8_000L) { waitForOnline() }
+                    withTimeoutOrNull(8_000L) {
+                        templatesFlow.first { list ->
+                            list.any { it.id.startsWith("online_") }
+                        }
+                    }
                 }
             }
+
             val imagesJob = launch {
-                withTimeoutOrNull(8_000L) { waitForImages() }  // timeout tránh treo
+                withTimeoutOrNull(8_000L) {
+                    imagesReadyFlow.first { it }
+                }
             }
 
             dataJob.join()
             imagesJob.join()
 
             val elapsed = System.currentTimeMillis() - startTime
-            val remaining = 2_000L - elapsed
+            val remaining = 3_000L - elapsed  // ✅ khớp với MIN_SPLASH_MS = 3_000L
             if (remaining > 0) delay(remaining)
 
             isTimerRunning = false
-            _readyToNavigate.emit(Unit)  // Emit event
+            _navigateSignal.value = true
         }
     }
 }

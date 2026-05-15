@@ -12,7 +12,7 @@
 
     <string name="permission">Permission</string>
     <string name="storage">Storage</string>
-    <string name="continue_per">Continue</string>
+    <string name="continue_per">\u00A0Continue\u00A0</string>
     <string name="notification">Notification</string>
     <string name="granted_notification">Notification permission granted</string>
     <string name="granted_storage">Storage permission granted</string>
@@ -84,7 +84,7 @@
     <string name="refresh">Refesh</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="cosplay">Cosplay</string>
+    <string name="cosplay">Cosplay Chibi</string>
     <string name="permission_camera_denied">Cần quyền camera để sử dụng tính năng này</string>
     <string name="cat_random">Cat Random</string>
     <string name="random">Random</string>
@@ -106,4 +106,5 @@
     <string name="enter_your_package_name">Enter your package name</string>
     <string name="please_enter_your_package_name">Please enter your package name!</string>
     <string name="this_action_may_contain_advertising">This action can contain ads</string>
+    <string name="random_chibi">Chibi Random</string>
 </resources>

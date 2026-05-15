@@ -106,21 +106,29 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     private fun applyTabUI(isAvatar: Boolean) {
         binding.apply {
+            val activeColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.app_color)
+            val inactiveColor = androidx.core.content.ContextCompat.getColor(requireContext(), R.color.app_color2)
+
             if (isAvatar) {
-                imvFocusMyDesign.setImageResource(R.drawable.bg_btn_type_unselected)
-                imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_selected)
+                imgMyponyFor2.setImageResource(R.drawable.bg_btn_type_unselected)
+                imgMyponyFor.setImageResource(R.drawable.bg_btn_type_selected)
+                tvMyAvatar.setOuterStrokeColor(activeColor)
+                tvMyDesign.setOuterStrokeColor(inactiveColor)
                 recycleAvatar.visible()
                 recycleDesign.gone()
                 updateEmptyState(myAvatarAdapter.items.isEmpty())
                 // ❌ Bỏ loadAvatarData() — dùng StateFlow
             } else {
-                imvFocusMyDesign.setImageResource(R.drawable.bg_btn_type_selected)
-                imvFocusMyAvatar.setImageResource(R.drawable.bg_btn_type_unselected)
+                imgMyponyFor2.setImageResource(R.drawable.bg_btn_type_selected)
+                imgMyponyFor.setImageResource(R.drawable.bg_btn_type_unselected)
+                tvMyAvatar.setOuterStrokeColor(inactiveColor)
+                tvMyDesign.setOuterStrokeColor(activeColor)
                 recycleAvatar.gone()
                 recycleDesign.visible()
                 updateEmptyState(myDesignAdapter.items.isEmpty())
                 loadDesignData() // Design vẫn load thủ công vì không có StateFlow
             }
+            updateSelectionUI()
         }
     }
 
@@ -153,10 +161,10 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
     private fun setupBottomButtons() {
         binding.apply {
-            btnWhatsapp.onClick { handleWhatsAppShare() }
-            btnTelegram.onClick { handleTelegramShare() }
-            btnDownload.onClick { handleDownload() }
-            btnShare.onClick { handleShare() }
+            btnWhatsapp.onClick(1000){ handleWhatsAppShare() }
+            btnTelegram.onClick(1000) { handleTelegramShare() }
+            btnDownload.onClick(1000) { handleDownload() }
+            btnShare.onClick(1000) { handleShare() }
             actionBar.btnActionBarRight1.onClick { handleSelectAll() }
             actionBar.btnActionBarNextToRight1.onClick { handleDeleteSelected() }  // ✅ thêm
 
@@ -282,20 +290,40 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
 
             }
         }
-
-        if (hasSelection) {
-            binding.lnlBottom.visible()
-            if (isAvatarTab.value) {
-                binding.lnlBottomTop.visible()   // WhatsApp + Telegram
-                binding.llBottom.gone()
-            } else {
-                binding.lnlBottomTop.gone()       // Ẩn WhatsApp + Telegram cho Design tab
-                binding.llBottom.visible()
-
-            }
-        } else {
+        val avatarList = myAvatarAdapter.items
+        val designList = myDesignAdapter.items
+        val hasAvatar = avatarList.isNotEmpty()
+        val hasDesign = designList.isNotEmpty()
+        if (isAvatarTab.value && !hasAvatar) {
             binding.lnlBottom.gone()
+            return
         }
+        if (!isAvatarTab.value && !hasDesign) {
+            binding.lnlBottom.gone()
+            return
+        }
+
+        binding.lnlBottom.visible()
+        if (isAvatarTab.value) {
+            binding.lnlBottomTop.visible()   // WhatsApp + Telegram
+            binding.llBottom.gone()
+        } else {
+            binding.lnlBottomTop.gone()
+            binding.llBottom.visible()       // Share + Download
+        }
+//        if (hasSelection) {
+//            binding.lnlBottom.visible()
+//            if (isAvatarTab.value) {
+//                binding.lnlBottomTop.visible()   // WhatsApp + Telegram
+//                binding.llBottom.gone()
+//            } else {
+//                binding.lnlBottomTop.gone()       // Ẩn WhatsApp + Telegram cho Design tab
+//                binding.llBottom.visible()
+//
+//            }
+//        } else {
+//            binding.lnlBottom.gone()
+//        }
     }
 
     // ── DATA LOADING ──────────────────────────────────────────────────────────
@@ -389,10 +417,12 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         updateSelectionUI()
     }
 
-    private fun getSelectedItems(): List<MyAlbumModel> =
-        if (isAvatarTab.value) myAvatarAdapter.items.filter { it.isSelected }
-        else myDesignAdapter.items.filter { it.isSelected }
-
+    private fun getSelectedItems(): List<MyAlbumModel> {
+        val currentList = if (isAvatarTab.value) myAvatarAdapter.items else myDesignAdapter.items
+        val selected = currentList.filter { it.isSelected }
+        // ✅ Nếu không chọn gì → trả về toàn bộ list
+        return if (selected.isEmpty()) currentList else selected
+    }
     // ── NAVIGATION ────────────────────────────────────────────────────────────
 
     private fun navigateToView(path: String, type: Int, idEdit: String) {
@@ -551,6 +581,13 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         if (paths.isEmpty()) {
             showToast(R.string.please_select_an_image); return
         }
+
+        // ✅ Debug: kiểm tra file có tồn tại và đúng định dạng không
+        paths.forEach { path ->
+            val file = File(path)
+            Log.d("TelegramDebug", "path=$path | exists=${file.exists()} | size=${file.length()} | ext=${file.extension}")
+        }
+
         viewModel.addToTelegram(requireContext(), ArrayList(paths))
         resetSelection()
     }

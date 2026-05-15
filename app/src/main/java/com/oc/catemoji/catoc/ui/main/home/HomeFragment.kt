@@ -91,7 +91,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
         binding.root.post {
             Log.d("PERF2", "HomeFragment first frame: ${System.currentTimeMillis()}")
             if (!isAdded || isDetached) return@post
-            binding.tv1.isSelected = true
+            binding.tv.isSelected = true
             binding.tv2.isSelected = true
             binding.tv3.isSelected = true
             binding.tv4.isSelected = true

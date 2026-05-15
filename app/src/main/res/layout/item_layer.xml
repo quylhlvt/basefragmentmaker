@@ -51,15 +51,7 @@
             app:cardElevation="0dp"
             app:cardBackgroundColor="@color/app_color8"
             app:strokeColor="@color/app_color7">
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardLayerImg"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeWidth="0dp"
-                app:cardBackgroundColor="@color/app_color9"
-                android:layout_marginBottom="4dp">
+
                 <ImageView
                     android:id="@+id/imvImage"
                     android:layout_width="match_parent"
@@ -67,7 +59,7 @@
                     android:scaleType="centerInside"
                     android:adjustViewBounds="true"
                     android:src="@drawable/img_permission" />
-            </com.google.android.material.card.MaterialCardView>
+
 
             <!--            imvImage-->
 

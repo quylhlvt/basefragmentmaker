@@ -72,19 +72,21 @@ class SettingFragment : BaseFragment<FragmentSettingBinding, SettingViewModel>( 
         }
     }
  private fun FragmentSettingBinding.setupActionTiltleBar() {
-        layoutTitleBar.apply {
-            layoutTitle.apply {
+
+
+            binding.apply {
                 txt1.isSelected = true
                 txt2.isSelected = true
                 txt3.isSelected = true
                 txt4.isSelected = true
+
                 setTextActionBar(
-                    txtLang,
+                    actionBar.tvCenter,
                     getString(R.string.settings)
                 )
-                txtLang.isSelected =true
+                actionBar.tvCenter.isSelected =true
             }
-        }
+
     }
 
 

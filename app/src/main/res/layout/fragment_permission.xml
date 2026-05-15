@@ -69,14 +69,30 @@
             android:orientation="vertical">
 
             <!-- btnStorage-->
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/btnStorage"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
-                android:layout_margin="1dp"
-                android:background="@drawable/bg_frame_permission">
+                android:layout_margin="1dp">
+                <ImageView
+                    android:id="@+id/imgLangBg"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/frame_bg_lang"
+                    android:scaleType="fitXY" />
 
-                <TextView
+                <ImageView
+                    android:id="@+id/imgLangFor"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/frame_select_language" />
+
+                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_centerVertical="true"
@@ -87,7 +103,12 @@
                     style="@style/single_marquee"
                     android:text="@string/storage"
                     android:textColor="@color/app_color"
-                    android:fontFamily="@font/baloo2_bold"
+                    app:outerStrokeColor="@color/white"
+                    app:outerStrokeWidth="1dp"
+                    android:fontFamily="@font/atma_bold"
+                    app:layout_constraintTop_toTopOf="@+id/imgLangFor"
+                    app:layout_constraintBottom_toBottomOf="@+id/imgLangFor"
+                    app:layout_constraintStart_toStartOf="@+id/imgLangFor"
                     android:textSize="20sp" />
 
                 <ImageView
@@ -96,21 +117,38 @@
                     android:layout_height="32dp"
                     android:layout_alignParentEnd="true"
                     android:layout_centerVertical="true"
-                    android:layout_marginTop="8.5dp"
-                    android:layout_marginBottom="11.5dp"
+                    android:src="@drawable/switch_off"
                     android:layout_marginEnd="16dp"
-                    android:src="@drawable/switch_off" />
-            </RelativeLayout>
+                    app:layout_constraintTop_toTopOf="@+id/imgLangFor"
+                    app:layout_constraintBottom_toBottomOf="@+id/imgLangFor"
+                    app:layout_constraintEnd_toEndOf="@+id/imgLangFor" />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
             <!-- btnNotification-->
-            <RelativeLayout
+            <androidx.constraintlayout.widget.ConstraintLayout
                 android:id="@+id/btnNotification"
                 android:layout_width="match_parent"
                 android:layout_height="56dp"
                 android:layout_marginTop="16dp"
                 android:background="@drawable/bg_frame_permission">
+                <ImageView
+                    android:id="@+id/imgLangBg1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/frame_bg_lang"
+                    android:scaleType="fitXY" />
 
-                <TextView
+                <ImageView
+                    android:id="@+id/imgLangFor1"
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/frame_select_language" />
+                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_centerVertical="true"
@@ -119,9 +157,14 @@
                     android:layout_marginBottom="10dp"
                     android:gravity="center_vertical"
                     style="@style/single_marquee"
-                    android:fontFamily="@font/baloo2_bold"
+                    android:fontFamily="@font/atma_bold"
                     android:text="@string/notification"
                     android:textColor="@color/app_color"
+                    app:outerStrokeColor="@color/white"
+                    app:outerStrokeWidth="1dp"
+                    app:layout_constraintTop_toTopOf="@+id/imgLangFor1"
+                    app:layout_constraintBottom_toBottomOf="@+id/imgLangFor1"
+                    app:layout_constraintStart_toStartOf="@+id/imgLangFor1"
                     android:textSize="20sp" />
 
                 <ImageView
@@ -132,24 +175,29 @@
                     android:layout_centerVertical="true"
                     android:layout_marginTop="8.5dp"
                     android:layout_marginBottom="11.5dp"
+                    android:src="@drawable/switch_off"
                     android:layout_marginEnd="16dp"
-                    android:src="@drawable/switch_off" />
-            </RelativeLayout>
+                    app:layout_constraintTop_toTopOf="@+id/imgLangFor1"
+                    app:layout_constraintBottom_toBottomOf="@+id/imgLangFor1"
+                    app:layout_constraintEnd_toEndOf="@+id/imgLangFor1"
+                    />
+            </androidx.constraintlayout.widget.ConstraintLayout>
 
         </LinearLayout>
 
     </ScrollView>
-    <TextView
+    <com.oc.catemoji.catoc.core.extention.ShadowTextView
         android:id="@+id/tvContinue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="12dp"
         android:layout_marginBottom="270dp"
         android:gravity="center"
-        android:fontFamily="@font/baloo2_bold"
+        android:fontFamily="@font/atma_bold"
         android:text="@string/continue_per"
         android:textColor="@color/app_color"
-        android:textSize="16sp"
+        android:shadowColor="@color/white"
+        android:textSize="20sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent" />

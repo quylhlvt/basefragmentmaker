@@ -1,5 +1,6 @@
 package com.oc.catemoji.catoc.ui.main.myPony.adapter
 
+import androidx.core.view.isVisible
 import com.oc.catemoji.catoc.R
 import com.oc.catemoji.catoc.core.base.BaseAdapter
 import com.oc.catemoji.catoc.core.extention.gone
@@ -31,7 +32,7 @@ class MyDesignAdapter() : BaseAdapter<MyAlbumModel, ItemMyDesignBinding>(ItemMyD
             btnSelect.setImageResource(
                 if (item.isSelected) R.drawable.ic_selected else R.drawable.ic_not_select
             )
-
+            shadownForcus.isVisible = item.isSelected
             // Click luôn navigate
             root.onClick { onItemClick.invoke(item.path) }
 

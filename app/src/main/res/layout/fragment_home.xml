@@ -12,7 +12,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/img_bg_home" />
+        android:src="@drawable/img_bg_lang" />
 
     <!--    layoutActionBar-->
     <FrameLayout
@@ -30,10 +30,8 @@
         android:id="@+id/title_home"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_marginHorizontal="37dp"
-        android:scaleType="centerCrop"
         android:src="@drawable/img_title_home"
-        app:layout_constraintDimensionRatio="2.84:1.69"
+        app:layout_constraintDimensionRatio="3.6:1.45"
         app:layout_constraintTop_toBottomOf="@+id/layoutActionBar"
         tools:layout_editor_absoluteX="37dp" />
 
@@ -59,167 +57,218 @@
                 android:id="@+id/btnCreate"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintDimensionRatio="3.21:1.16"
+                app:layout_constraintDimensionRatio="3.28:1.08"
                 app:layout_constraintTop_toTopOf="parent">
 
+
                 <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:src="@drawable/img_bg_home1"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="2.96:1.16"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
-                <FrameLayout
-                    android:id="@+id/frame1"
+                    android:id="@+id/imageView"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="2.1:0.86"
-                    android:background="@drawable/img_bg_tv1"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginEnd="14dp"
-                    android:layout_marginBottom="16dp"
+                    app:layout_constraintDimensionRatio="3.28:0.96"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent">
-                    <com.oc.catemoji.catoc.core.extention.CurvedTextView
-                        android:id="@+id/tv1"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-
-                        android:fontFamily="@font/baloo2_extrabold"
-                        android:marqueeRepeatLimit="marquee_forever"
-                        android:singleLine="true"
-                        android:ellipsize="marquee"
-                        android:text="@string/pony_maker"
-                        android:textColor="@color/app_color2"
-                        android:textSize="28sp"
-                        android:shadowColor="@color/app_color"
-                        android:shadowDx="5"
-                        android:shadowDy="-5"
-                        android:shadowRadius="5"
-                        app:curveDepth="0.13"
-                        app:arc_centerAngle2="-90"
-                        app:arc_strokeWidth="2dp"
-                        app:arc_strokeColor="@color/app_color" />
-
-                </FrameLayout>
-
-                <ImageView
-                    android:layout_width="0dp"
-                    android:layout_height="0dp"
-                    android:src="@drawable/img_avatar1"
-                    app:layout_constraintDimensionRatio="0.96:1.1"
-                    app:layout_constraintEnd_toStartOf="@+id/frame1"
                     app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/frame_bg_lang"
+                    android:scaleType="fitXY"
+                    />
+
+
+                <ImageView
+                    android:id="@+id/imgLangFor"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="3.28:0.96"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/img_bg_home1" />
+
+
+                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                    android:id="@+id/tv"
+                    style="@style/single_marquee"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:rotation="-15"
+                    android:fontFamily="@font/atma_bold"
+                    android:gravity="center"
+                    android:paddingHorizontal="1dp"
+                    android:shadowColor="@color/shadown_black"
+                    android:shadowDx="5"
+                    android:shadowDy="5"
+                    android:shadowRadius="5"
+                    android:text="@string/pony_maker"
+                    android:textColor="@color/white"
+                    android:textSize="32sp"
+
+                    app:layout_constraintDimensionRatio="2.1:0.86"
+                    app:layout_constraintEnd_toStartOf="@+id/imageView2"
+                    app:layout_constraintBottom_toBottomOf="@+id/imgLangFor"
+                    app:layout_constraintStart_toStartOf="@+id/imgLangFor"
+                    app:layout_constraintTop_toTopOf="@+id/imgLangFor"
+                    app:outerStrokeColor="@color/app_color"
+                    app:outerStrokeWidth="3dp" />
+
+                <ImageView
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:id="@+id/imageView2"
+                    android:src="@drawable/img_avatar1"
+                    android:layout_marginEnd="30dp"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1.06:1.06"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintWidth_percent="0.34" />
             </androidx.constraintlayout.widget.ConstraintLayout>
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_marginTop="16dp"
                 android:id="@+id/btnCosPlay"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintDimensionRatio="3.21:1.16"
+
+                app:layout_constraintDimensionRatio="3.28:1.08"
                 app:layout_constraintTop_toBottomOf="@+id/btnCreate">
 
                 <ImageView
+                    android:id="@+id/imageView4"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:src="@drawable/img_bg_home1"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="2.96:1.16"
+                    app:layout_constraintDimensionRatio="3.28:0.96"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/frame_bg_lang"
+                    android:scaleType="fitXY"
+                    />
+
+
+                <ImageView
+                    android:id="@+id/imgLangFor2"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="3.28:0.96"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/img_bg_home2" />
+
 
                 <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tv2"
                     style="@style/single_marquee"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginEnd="14dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/img_bg_tv1"
-                    android:fontFamily="@font/baloo2_extrabold"
+                    android:rotation="-15"
+                    android:fontFamily="@font/atma_bold"
                     android:gravity="center"
-                    android:paddingHorizontal="5dp"
-                    android:shadowColor="@color/app_color"
+                    android:paddingHorizontal="1dp"
+                    android:shadowColor="@color/shadown_black"
                     android:shadowDx="5"
-                    android:shadowDy="-5"
+                    android:shadowDy="5"
                     android:shadowRadius="5"
                     android:text="@string/cosplay"
-                    android:textColor="@color/app_color2"
-                    android:textSize="28dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
+                    android:textColor="@color/white"
+                    android:textSize="32sp"
+
                     app:layout_constraintDimensionRatio="2.1:0.86"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:outerStrokeColor="@color/app_color"
-                    app:outerStrokeWidth="1dp" />
+                    app:layout_constraintEnd_toStartOf="@+id/imageView5"
+                    app:layout_constraintBottom_toBottomOf="@+id/imgLangFor2"
+                    app:layout_constraintStart_toStartOf="@+id/imgLangFor2"
+                    app:layout_constraintTop_toTopOf="@+id/imgLangFor2"
+                    app:outerStrokeColor="@color/shadown_green"
+                    app:outerStrokeWidth="3dp" />
 
                 <ImageView
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:id="@+id/imageView5"
                     android:src="@drawable/img_avatar2"
-                    app:layout_constraintDimensionRatio="0.96:1.1"
-                    app:layout_constraintEnd_toStartOf="@+id/tv2"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1.06:1.06"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintWidth_percent="0.34" />
             </androidx.constraintlayout.widget.ConstraintLayout>
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_marginTop="16dp"
                 android:id="@+id/btnRandom"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
-                app:layout_constraintDimensionRatio="3.21:1.16"
+                app:layout_constraintDimensionRatio="3.28:1.08"
                 app:layout_constraintTop_toBottomOf="@+id/btnCosPlay">
-
                 <ImageView
+                    android:id="@+id/imageView6"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:src="@drawable/img_bg_home1"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="2.96:1.16"
+                    app:layout_constraintDimensionRatio="3.28:0.96"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/frame_bg_lang"
+                    android:scaleType="fitXY"
+                    />
+
+
+                <ImageView
+                    android:id="@+id/imgLangFor3"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="3.28:0.96"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/img_bg_home3" />
+
 
                 <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tv3"
                     style="@style/single_marquee"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginEnd="14dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/img_bg_tv1"
-                    android:fontFamily="@font/baloo2_extrabold"
+
+                    android:rotation="-15"
+                    android:fontFamily="@font/atma_bold"
                     android:gravity="center"
-                    android:paddingHorizontal="5dp"
-                    android:shadowColor="@color/app_color"
+                    android:paddingHorizontal="1dp"
+                    android:shadowColor="@color/shadown_black"
                     android:shadowDx="5"
-                    android:shadowDy="-5"
+                    android:shadowDy="5"
                     android:shadowRadius="5"
-                    android:text="@string/cat_random"
-                    android:textColor="@color/app_color2"
-                    android:textSize="28dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="2.1:0.86"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:outerStrokeColor="@color/app_color"
-                    app:outerStrokeWidth="1dp" />
+                    android:text="@string/random_chibi"
+                    android:textColor="@color/white"
+                    android:textSize="32sp"
+                    app:layout_constraintEnd_toStartOf="@+id/imageView7"
+                    app:layout_constraintBottom_toBottomOf="@+id/imgLangFor3"
+                    app:layout_constraintStart_toStartOf="@+id/imgLangFor3"
+                    app:layout_constraintTop_toTopOf="@+id/imgLangFor3"
+                    app:outerStrokeColor="@color/shadown_yellow"
+                    app:outerStrokeWidth="3dp" />
 
                 <ImageView
+                    android:id="@+id/imageView7"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:layout_marginEnd="-20dp"
                     android:src="@drawable/img_avatar3"
-                    app:layout_constraintDimensionRatio="0.96:1.1"
-                    app:layout_constraintEnd_toStartOf="@+id/tv3"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1.06:1.06"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintWidth_percent="0.34" />
             </androidx.constraintlayout.widget.ConstraintLayout>
             <androidx.constraintlayout.widget.ConstraintLayout
-                android:layout_marginTop="16dp"
                 android:id="@+id/btnMyAlbum"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
@@ -227,48 +276,68 @@
                 app:layout_constraintTop_toBottomOf="@+id/btnRandom">
 
                 <ImageView
+                    android:id="@+id/imageView8"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:src="@drawable/img_bg_home1"
                     app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="2.96:1.16"
+                    app:layout_constraintDimensionRatio="3.28:0.96"
                     app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_marginStart="4dp"
+                    android:layout_marginTop="4dp"
+                    android:background="@drawable/frame_bg_lang"
+                    android:scaleType="fitXY"
+                    />
+
+
+                <ImageView
+                    android:id="@+id/imgLangFor4"
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="3.28:0.96"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintStart_toStartOf="parent"
+                    android:layout_width="0dp"
+                    android:layout_height="0dp"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="4dp"
+                    android:scaleType="fitXY"
+                    android:src="@drawable/img_bg_home4" />
+
 
                 <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tv4"
                     style="@style/single_marquee"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
-                    android:layout_marginTop="14dp"
-                    android:layout_marginEnd="14dp"
-                    android:layout_marginBottom="16dp"
-                    android:background="@drawable/img_bg_tv1"
-                    android:fontFamily="@font/baloo2_extrabold"
+
+                    android:fontFamily="@font/atma_bold"
                     android:gravity="center"
-                    android:paddingHorizontal="5dp"
-                    android:shadowColor="@color/app_color"
+                    android:paddingHorizontal="1dp"
+                    android:rotation="-15"
+                    android:shadowColor="@color/shadown_black"
                     android:shadowDx="5"
-                    android:shadowDy="-5"
+                    android:shadowDy="5"
                     android:shadowRadius="5"
-                    android:text="@string/my_creation"
-                    android:textColor="@color/app_color2"
-                    android:textSize="28dp"
-                    app:layout_constraintBottom_toBottomOf="parent"
-                    app:layout_constraintDimensionRatio="2.1:0.86"
-                    app:layout_constraintEnd_toEndOf="parent"
-                    app:layout_constraintTop_toTopOf="parent"
-                    app:outerStrokeColor="@color/app_color"
-                    app:outerStrokeWidth="1dp" />
+                    android:text="@string/random_chibi"
+                    android:textColor="@color/white"
+                    android:textSize="32sp"
+                    app:layout_constraintEnd_toStartOf="@+id/imageView9"
+                    app:layout_constraintBottom_toBottomOf="@+id/imgLangFor4"
+                    app:layout_constraintStart_toStartOf="@+id/imgLangFor4"
+                    app:layout_constraintTop_toTopOf="@+id/imgLangFor4"
+                    app:outerStrokeColor="@color/shadown_blue"
+                    app:outerStrokeWidth="3dp" />
 
                 <ImageView
+                    android:id="@+id/imageView9"
                     android:layout_width="0dp"
                     android:layout_height="0dp"
+                    android:layout_marginEnd="18dp"
                     android:src="@drawable/img_avatar4"
-                    app:layout_constraintDimensionRatio="0.96:1.1"
-                    app:layout_constraintEnd_toStartOf="@+id/tv4"
-                    app:layout_constraintStart_toStartOf="parent"
-                    app:layout_constraintTop_toTopOf="parent" />
+                    app:layout_constraintBottom_toBottomOf="parent"
+                    app:layout_constraintDimensionRatio="1.06:1.06"
+                    app:layout_constraintEnd_toEndOf="parent"
+                    app:layout_constraintWidth_percent="0.34" />
             </androidx.constraintlayout.widget.ConstraintLayout>
             </androidx.constraintlayout.widget.ConstraintLayout>
     </ScrollView>

@@ -32,6 +32,7 @@ import com.oc.catemoji.catoc.core.helper.SharedPreferencesManager.isLanuageScree
 import com.oc.catemoji.catoc.databinding.FragmentSplashBinding
 import com.tencent.mmkv.MMKV
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -43,6 +44,8 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     SplashViewModel::class.java
 ) , BackPressHandler {
     private val mainViewModel: ViewModelActivity by activityViewModels()
+    private var pendingNavigate = false
+    private var navigateJob: Job? = null
 
     private var progressAnimator: ValueAnimator? = null
     private var currentOverlayFraction = 1f
@@ -85,35 +88,20 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
             // ✅ Set lại version SAU khi clear
             sharedPreferences.setVersionCode(currentVersion)
 
-            viewLifecycleOwner.lifecycleScope.launch {
+            lifecycleScope.launch {  // ✅ đổi từ viewLifecycleOwner.lifecycleScope
                 mainViewModel.forceReloadAll()
             }
         }
     }
     override fun viewListener() {}
 
+    // Trong Fragment, observeData():
     override fun observeData() {
-        viewLifecycleOwner.lifecycleScope.launch {
-            val startTime = System.currentTimeMillis()
-
-            if (isNetworkAvailable()) {
-                // Có mạng: đợi imagesReady (set sau khi fetch + prefetch xong)
-                withTimeoutOrNull(API_TIMEOUT_MS) {
-                    mainViewModel.imagesReady.first { it }
-                } ?: Log.e("Splash", "⏰ timeout, dùng local data")
-            } else {
-                // Không mạng: chỉ đợi local templates
-                withTimeoutOrNull(5_000L) {
-                    mainViewModel.templates.first { it.isNotEmpty() }
-                } ?: Log.e("Splash", "⏰ local timeout")
-            }
-
-            val elapsed = System.currentTimeMillis() - startTime
-            val remaining = MIN_SPLASH_MS - elapsed
-            if (remaining > 0) delay(remaining)
-
-            goToHome()
-        }
+        viewModel.startSplashTimer(
+            hasOnlineTemplates = mainViewModel.templates.value.any { it.id.startsWith("online_") },
+            templatesFlow = mainViewModel.templates,
+            imagesReadyFlow = mainViewModel.imagesReady
+        )
     }
 
     override fun bindViewModel() {}
@@ -130,13 +118,18 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
 
     private fun goToHome() {
         if (hasNavigated) return
-        if (!isAdded || isDetached || isRemoving) return
-        hasNavigated = true
+        hasNavigated = true  // ✅ set trước
 
+        if (!isAdded || isDetached || isRemoving || activity == null) {
+            pendingNavigate = true  // ✅ defer sang onResume
+            return
+        }
+        doNavigate()
+    }
+    private fun doNavigate() {
         if (!isLanuageScreen()) { toLanguage(); return }
         toIntro()
     }
-
     // ── NETWORK ───────────────────────────────────────────────────────────────
 
     private fun isNetworkAvailable(): Boolean = try {
@@ -154,15 +147,30 @@ class SplashFragment : BaseFragment<FragmentSplashBinding, SplashViewModel>(
     // ── LIFECYCLE ─────────────────────────────────────────────────────────────
     override fun onPause() {
         super.onPause()
-        // Dừng animator, giữ nguyên currentOverlayFraction
         progressAnimator?.pause()
+        navigateJob?.cancel()  // ✅ Cancel khi pause, onResume sẽ tạo lại
     }
 
     override fun onResume() {
         super.onResume()
-        // Chạy tiếp từ chỗ dừng
         progressAnimator?.resume()
+
+        if (hasNavigated) return
+
+        // ✅ Check ngay nếu đã ready
+        if (viewModel.navigateSignal.value) {
+            goToHome()
+            return
+        }
+
+        // ✅ Cancel job cũ trước khi tạo mới, tránh chồng chéo
+        navigateJob?.cancel()
+        navigateJob = lifecycleScope.launch {
+            viewModel.navigateSignal.first { it }
+            goToHome()
+        }
     }
+
     override fun onDestroyView() {
         super.onDestroyView()
         progressAnimator?.cancel()
