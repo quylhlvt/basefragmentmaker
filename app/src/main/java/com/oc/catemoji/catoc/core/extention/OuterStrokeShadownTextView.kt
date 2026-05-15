@@ -50,7 +50,8 @@ class OuterStrokeShadownTextView : AppCompatTextView {
             extraPadding = 0
         }
         if (outerStrokeWidth > 0f) {
-            post { setLayerType(LAYER_TYPE_SOFTWARE, null) }
+            // ✅ Bỏ post{} để set ngay lập tức
+            setLayerType(LAYER_TYPE_SOFTWARE, null)
         }
     }
 

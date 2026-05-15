@@ -4,9 +4,9 @@
     <string name="app_name">Cat Avatar: Cat Maker</string>
     <string name="next">आगे</string>
     <string name="language">भाषा</string>
-    <string name="title_1">अपनी पसंद के अनुसार अलग-अलग स्टाइल बनाएं</string>
-    <string name="title_2">अपना परफेक्ट अवतार बनाएं</string>
-    <string name="title_3">विभिन्न आइटम्स का संग्रह</string>
+    <string name="title_1">\u00A0अपना प्यारा चिबी पर्सोना बनाएं\u00A0</string>
+    <string name="title_2">\u00A0पेस्टल आउटफिट्स\u00A0\n\u00A0और एक्सेसरीज़ मिलाएं और मैच करें\u00A0</string>
+    <string name="title_3">\u00A0अपनी छोटी ड्रीम एस्थेटिक डिज़ाइन करें\u00A0</string>
     <string name="not_select_lang">कृपया एक भाषा चुनें</string>
     <string name="pony_maker">कैट मेकर</string>
     <string name="trending_custom">ट्रेंडिंग कस्टम</string>
@@ -18,9 +18,9 @@
     <string name="notification">सूचना</string>
     <string name="granted_notification">सूचना की अनुमति दी गई</string>
     <string name="granted_storage">स्टोरेज की अनुमति दी गई</string>
-    <string name="allow">अनुमति दें</string>
-    <string name="to_access">आपके डिवाइस की फ़ोटो तक पहुँचने के लिए</string>
-    <string name="to_access_13">आपके डिवाइस की सूचनाओं तक पहुँचने के लिए</string>
+    <string name="allow">\u00A0अनुमति दें</string>
+    <string name="to_access">आपके डिवाइस की फ़ोटो तक पहुँचने के लिए\u00A0</string>
+    <string name="to_access_13">आपके डिवाइस की सूचनाओं तक पहुँचने के लिए\u00A0</string>
     <string name="go_to_setting_message">ऐप को इस अनुमति की आवश्यकता है</string>
     <string name="settings">सेटिंग्स</string>
     <string name="cancel">रद्द करें</string>

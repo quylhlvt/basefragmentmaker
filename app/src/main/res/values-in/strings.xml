@@ -4,9 +4,9 @@
     <string name="app_name">Cat Avatar: Cat Maker</string>
     <string name="next">Lanjut</string>
     <string name="language">Bahasa</string>
-    <string name="title_1">Buat berbagai gaya sesuai keinginanmu</string>
-    <string name="title_2">Buat avatar sempurnamu</string>
-    <string name="title_3">Koleksi berbagai item</string>
+    <string name="title_1">\u00A0Buat persona chibi lucumu\u00A0</string>
+    <string name="title_2">\u00A0Padukan outfit pastel\u00A0\n\u00A0dan aksesori\u00A0</string>
+    <string name="title_3">\u00A0Rancang estetika impian kecilmu\u00A0</string>
     <string name="not_select_lang">Silakan pilih bahasa</string>
     <string name="pony_maker">Pembuat Kucing</string>
     <string name="trending_custom">Kustom Populer</string>
@@ -18,9 +18,9 @@
     <string name="notification">Notifikasi</string>
     <string name="granted_notification">Izin notifikasi diberikan</string>
     <string name="granted_storage">Izin penyimpanan diberikan</string>
-    <string name="allow">Izinkan</string>
-    <string name="to_access">untuk mengakses foto di perangkat Anda</string>
-    <string name="to_access_13">untuk mengakses notifikasi di perangkat Anda</string>
+    <string name="allow">\u00A0Izinkan</string>
+    <string name="to_access">untuk mengakses foto di perangkat Anda\u00A0</string>
+    <string name="to_access_13">untuk mengakses notifikasi di perangkat Anda\u00A0</string>
     <string name="go_to_setting_message">Aplikasi memerlukan izin ini</string>
     <string name="settings">Pengaturan</string>
     <string name="cancel">Batal</string>

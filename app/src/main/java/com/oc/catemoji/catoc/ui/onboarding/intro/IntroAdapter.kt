@@ -42,7 +42,7 @@ class PagerIntroViewHolder(
 ) : RecyclerView.ViewHolder(binding.root) {
     fun bind(pager: IntroModel) {
         binding.run {
-            if (adapterPosition == 0) {
+            if (adapterPosition == 1) {
                 // Page 0 — hiện 2 dòng, không marquee
                 tvContent.maxLines = 2
                 tvContent.ellipsize = null
@@ -57,6 +57,7 @@ class PagerIntroViewHolder(
             }
             tvContent.text = root.context.strings(pager.content)
             loadImage(root, pager.image, imvImage, false)
+            loadImage(root, pager.imageBottom, imvImageBottom, false)
         }
     }
 }

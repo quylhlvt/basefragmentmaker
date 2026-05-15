@@ -144,13 +144,14 @@ class PermissionFragment : BaseFragment<FragmentPermissionBinding, PermissionVie
         binding.actionBar.tvCenter.select()
         val textRes = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
             R.string.to_access_13 else R.string.to_access
-        binding.txtPermission.text = TextUtils.concat(
-            createColoredText(R.string.allow, R.color.app_color),
-            " ",
-            createColoredText(R.string.app_name, R.color.app_color),
-            " ",
-            createColoredText(textRes, R.color.app_color)
-        )
+
+        binding.txtPermission.text = buildString {
+            append(getString(R.string.allow))
+            append(" ")
+            append(getString(R.string.app_name))
+            append(" ")
+            append(getString(textRes))
+        }
     }
 
     private fun handleContinue() {

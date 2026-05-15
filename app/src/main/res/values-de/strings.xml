@@ -4,9 +4,9 @@
     <string name="app_name">Cat Avatar: Cat Maker</string>
     <string name="next">Weiter</string>
     <string name="language">Sprache</string>
-    <string name="title_1">Erstelle verschiedene Stile, wie du möchtest</string>
-    <string name="title_2">Erstelle deinen perfekten Avatar</string>
-    <string name="title_3">Sammlung vielfältiger Elemente</string>
+    <string name="title_1">\u00A0Erstelle deine niedliche Chibi-Persona\u00A0</string>
+    <string name="title_2">\u00A0Kombiniere Pastell\u00A0\n\u00A0Outfits und Accessoires\u00A0</string>
+    <string name="title_3">\u00A0Gestalte deine kleine Traumästhetik\u00A0</string>
     <string name="not_select_lang">Bitte wählen Sie eine Sprache</string>
     <string name="pony_maker">Katzen-Editor</string>
     <string name="trending_custom">Beliebte Anpassungen</string>
@@ -18,9 +18,9 @@
     <string name="notification">Benachrichtigung</string>
     <string name="granted_notification">Benachrichtigungsberechtigung erteilt</string>
     <string name="granted_storage">Speicherberechtigung erteilt</string>
-    <string name="allow">Erlauben</string>
-    <string name="to_access">um auf Fotos auf Ihrem Gerät zuzugreifen</string>
-    <string name="to_access_13">um auf Benachrichtigungen auf Ihrem Gerät zuzugreifen</string>
+    <string name="allow">\u00A0Erlauben</string>
+    <string name="to_access">um auf Fotos auf Ihrem Gerät zuzugreifen\u00A0</string>
+    <string name="to_access_13">um auf Benachrichtigungen auf Ihrem Gerät zuzugreifen\u00A0</string>
     <string name="go_to_setting_message">Die App benötigt diese Berechtigung</string>
     <string name="settings">Einstellungen</string>
     <string name="cancel">Abbrechen</string>

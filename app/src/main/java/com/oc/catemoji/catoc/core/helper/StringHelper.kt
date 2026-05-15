@@ -1,8 +1,13 @@
 package com.oc.catemoji.catoc.core.helper
 
 import android.content.Context
+import android.graphics.Color
 import android.text.SpannableString
+import android.text.TextPaint
+import android.text.style.CharacterStyle
 import android.text.style.ForegroundColorSpan
+import android.view.View
+import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 
 object StringHelper {
@@ -26,4 +31,5 @@ object StringHelper {
         )
         return spannableString
     }
+
 }
