@@ -33,6 +33,7 @@ class ViewModelActivity @Inject constructor(
     @ApplicationContext private val context: Context
 ) :
     ViewModel() {
+
     // ── EXPOSED FLOWS ─────────────────────────────────────────────────────────
     val characters:           StateFlow<List<CustomModel>> = appDataManager.characters
     val templates:            StateFlow<List<CustomModel>> = appDataManager.templates

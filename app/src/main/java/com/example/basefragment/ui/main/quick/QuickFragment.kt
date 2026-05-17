@@ -81,7 +81,7 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
                 }
                 launch {
                     viewModel.readyKey.collect { key ->
-                        if (key != null) adapter.notifyKeyReady(key)
+                        adapter.notifyKeyReady(key)
                     }
                 }
                 launch {

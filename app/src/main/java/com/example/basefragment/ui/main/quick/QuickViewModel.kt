@@ -3,6 +3,7 @@ package com.example.basefragment.ui.main.quick
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.bumptech.glide.Glide
@@ -16,9 +17,15 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.BufferOverflow
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -28,7 +35,8 @@ import javax.inject.Inject
 @HiltViewModel
 class QuickViewModel @Inject constructor(
     private val appDataManager: AppDataManager,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val networkFlow: Flow<Boolean>
 ) : ViewModel() {
 
     private val _items     = MutableStateFlow<List<QuickMixItem>>(emptyList())
@@ -39,9 +47,11 @@ class QuickViewModel @Inject constructor(
 
     val bitmapCache = ConcurrentHashMap<String, Bitmap>()
 
-    private val _readyKey = MutableStateFlow<String?>(null)
-    val readyKey: StateFlow<String?> = _readyKey.asStateFlow()
-
+    private val _readyKey = MutableSharedFlow<String>(
+        extraBufferCapacity = 64,
+        onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val readyKey: SharedFlow<String> = _readyKey.asSharedFlow()
     // ── MỚI: khai báo đủ ──────────────────────────────────────────────────
     private val mergeDispatcher = Dispatchers.IO.limitedParallelism(12)
     private var backgroundJob: kotlinx.coroutines.Job? = null
@@ -49,29 +59,43 @@ class QuickViewModel @Inject constructor(
     private val _visibleRange = MutableStateFlow(0..5)
 
     companion object {
-        const val PER_TEMPLATE = 10       // giảm từ 10 → 4
+        const val TOTAL_ITEMS = 20
         const val PAGE_SIZE    = 6
-        const val MERGE_SIZE   = 192     // giảm từ 256 → 192
+        const val MERGE_SIZE   = 256     // giảm từ 256 → 192
     }
 
     fun itemKey(item: QuickMixItem) =
-        "${item.templateIndex}_${item.selections.hashCode()}"
+        "${item.templateIndex}_${item.position}"  // dùng position thay hashCode
 
     // ── GENERATE ──────────────────────────────────────────────────────────
     fun generate() {
         if (_items.value.isNotEmpty()) return
         viewModelScope.launch(Dispatchers.Default) {
             _isLoading.value = true
+
+            val isOnline = withContext(Dispatchers.Main) { networkFlow.first() }
+
             val templates = appDataManager.templates.value
             if (templates.isEmpty()) { _isLoading.value = false; return@launch }
 
+            val available = if (isOnline) {
+                templates
+            } else {
+                templates.filter { !it.id.startsWith("online_") }
+            }
+
+            if (available.isEmpty()) { _isLoading.value = false; return@launch }
+
+            // ── Sinh đủ 20 items bằng cách random nhiều lần từ các template ──
             val all = mutableListOf<QuickMixItem>()
-            templates.forEachIndexed { idx, template ->
-                repeat(PER_TEMPLATE) {
-                    val sel      = randomSelections(template)
-                    val resolved = resolvePaths(template, sel)
-                    all.add(QuickMixItem(idx, template, sel, resolved))
-                }
+            var count = 0
+            while (all.size < TOTAL_ITEMS) {
+                val template = available[count % available.size]
+                val idx      = templates.indexOf(template)
+                val sel      = randomSelections(template)
+                val resolved = resolvePaths(template, sel)
+                all.add(QuickMixItem(idx, template, sel, resolved, position = count))  // ← gán position
+                count++
             }
             all.shuffle()
             all.forEachIndexed { i, item -> keyToPosition[itemKey(item)] = i }
@@ -82,6 +106,7 @@ class QuickViewModel @Inject constructor(
             mergeAll(all)
         }
     }
+
 
     // ── MERGE ALL (windowed) ───────────────────────────────────────────────
     private fun mergeAll(all: List<QuickMixItem>) {
@@ -110,14 +135,19 @@ class QuickViewModel @Inject constructor(
     private suspend fun mergeAndCache(item: QuickMixItem) {
         val key = itemKey(item)
         if (bitmapCache.containsKey(key)) {
-            withContext(Dispatchers.Main) { _readyKey.value = key }
+            _readyKey.emit(key)  // SharedFlow emit trực tiếp, không cần withContext
             return
         }
         val merged = mergeItem(item) ?: return
         bitmapCache[key] = merged
-        withContext(Dispatchers.Main) { _readyKey.value = key }
+        _readyKey.emit(key)
     }
-
+    fun requestMergeIfMissing(item: QuickMixItem) {
+        if (bitmapCache.containsKey(itemKey(item))) return
+        viewModelScope.launch(mergeDispatcher) {
+            mergeAndCache(item)
+        }
+    }
     // ── VISIBLE RANGE (scroll) ────────────────────────────────────────────
     fun updateVisibleRange(first: Int, last: Int) {
         val newRange = first..last
@@ -162,7 +192,6 @@ class QuickViewModel @Inject constructor(
         bitmapCache.clear()
         keyToPosition.clear()
         _items.value    = emptyList()
-        _readyKey.value = null
         generate()
     }
 
@@ -232,7 +261,8 @@ class QuickViewModel @Inject constructor(
             val colorIdx = (0 until colorCount).random()
             val color    = bp.listPath[colorIdx]
             val paths    = color.listPath
-            val limit    = if (paths.size > 6) paths.size / 2 else paths.size
+//            val limit    = if (paths.size > 6) paths.size / 2 else paths.size
+            val limit    = paths.size
             val limited  = paths.subList(0, limit)
             val validIdx = limited.indices.filter { limited[it] != "none" && limited[it] != "dice" }
             val pathIdx  = if (validIdx.isNotEmpty()) validIdx.random() else (0 until limit).random()

@@ -1,10 +1,13 @@
 package com.example.basefragment.ui.main.home
 
+import android.Manifest
+import android.content.pm.PackageManager
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
@@ -14,11 +17,18 @@ import com.example.basefragment.R
 import com.example.basefragment.ViewModelActivity
 import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.checkPermissions
+import com.example.basefragment.core.extention.goToSettings
 import com.example.basefragment.core.extention.onClick
+import com.example.basefragment.core.extention.requestPermission
 import com.example.basefragment.core.extention.setImageActionBar
 import com.example.basefragment.core.extention.toSettingFromHome
+import com.example.basefragment.core.helper.PermissionHelper
 import com.example.basefragment.core.helper.RateHelper.showRateDialog
 import com.example.basefragment.databinding.FragmentHomeBinding
+import com.example.basefragment.ui.main.quick.QuickViewModel
+import com.example.basefragment.ui.onboarding.permission.PermissionViewModel
+import com.example.basefragment.utils.key.RequestKey
 import com.example.basefragment.utils.state.RateState
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.launch
@@ -30,6 +40,7 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
 ), BackPressHandler {
 
     private val mainViewModel: ViewModelActivity by activityViewModels()
+    private val permissionsViewModel: PermissionViewModel by activityViewModels()
     private var countRate = 0
 
     override fun inflateBinding(
@@ -51,6 +62,55 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
         super.onResume()
         Log.d("PERF2", "HomeFragment onResume: ${System.currentTimeMillis()}")
     }
+    private val cameraPermissionLauncher = registerForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { isGranted ->
+        if (isGranted) {
+            findNavController().navigate(R.id.action_home_to_web)
+        } else {
+            showToast(R.string.granted_camera) // hoặc thông báo lỗi
+        }
+    }
+    private fun checkCameraAndNavigate() {
+        when {
+            // ✅ Đã có quyền → navigate
+            requireContext().checkPermissions(PermissionHelper.cameraPermission) -> {
+                findNavController().navigate(R.id.action_home_to_web)
+            }
+
+            // ✅ Từ chối 2 lần → mở Settings
+            permissionsViewModel.shouldCameraGoToSettings() -> {
+                activity?.goToSettings()
+            }
+
+            // ✅ Chưa có → xin quyền
+            else -> {
+                requestPermission(
+                    PermissionHelper.cameraPermission,
+                    RequestKey.CAMERA_PERMISSION_CODE
+                )
+            }
+        }
+    }
+
+    @Deprecated("Deprecated in Java")
+    override fun onRequestPermissionsResult(
+        requestCode: Int, permissions: Array<String>, grantResults: IntArray
+    ) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+        val granted = grantResults.isNotEmpty() && grantResults.all { it == PackageManager.PERMISSION_GRANTED }
+
+        when (requestCode) {
+            RequestKey.CAMERA_PERMISSION_CODE -> {
+                if (granted) {
+                    viewModel.onCameraGranted()
+                    findNavController().navigate(R.id.action_home_to_web)
+                } else {
+                    permissionsViewModel.onCameraDenied()
+                }
+            }
+        }
+    }
 
     override fun viewListener() {
         binding.apply {
@@ -64,10 +124,10 @@ class HomeFragment : BaseFragment<FragmentHomeBinding, HomeViewModel>(
                 findNavController().navigate(R.id.action_home_to_random)
             }
             btnQuick.onClick(1000) {
-                findNavController().navigate(R.id.action_home_to_random)
+                findNavController().navigate(R.id.action_home_to_quick)
             }
             btnWeb.onClick(1000) {
-                findNavController().navigate(R.id.action_home_to_random)
+                checkCameraAndNavigate()
             }
             btnCosPlay.onClick(1000) {
                 findNavController().navigate(R.id.action_home_to_cosplay)

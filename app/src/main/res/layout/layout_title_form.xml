@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:background="@drawable/img_bg_title"
-        app:layout_constraintDimensionRatio="3.2:0.68"
+        app:layout_constraintDimensionRatio="3.2:0.48"
         app:layout_constraintEnd_toEndOf="@+id/buttomTilte"
         app:layout_constraintStart_toStartOf="@+id/buttomTilte"
         app:layout_constraintTop_toTopOf="parent">
@@ -33,17 +33,24 @@
             android:textColor="@color/app_color2"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.constraintlayout.widget.ConstraintLayout
+    <com.google.android.material.card.MaterialCardView
         android:id="@+id/buttomTilte"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_marginTop="-4dp"
         app:layout_constraintDimensionRatio="3.2:0.73"
         app:layout_constraintTop_toBottomOf="@+id/title"
-        android:background="@drawable/img_bg_bottom_title"
-     >
+        app:strokeWidth="0dp"
+        app:cardElevation="0dp"
+        app:cardPreventCornerOverlap="false"
+        app:shapeAppearance="@style/ShapeAppearance.App.TopRounded">
 
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:src="@drawable/img_bg_bottom_title"
+            android:scaleType="centerCrop" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+    </com.google.android.material.card.MaterialCardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>

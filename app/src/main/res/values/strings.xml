@@ -6,7 +6,7 @@
     <string name="title_2">Make Your Perfect Avatar</string>
     <string name="title_3">Collection of variety items</string>
     <string name="not_select_lang">Please select a language</string>
-    <string name="pony_maker">Cat Maker</string>
+    <string name="pony_maker">Animal Maker</string>
     <string name="trending_custom">Trending Custom</string>
     <string name="my_work">My Work</string>
 
@@ -106,4 +106,7 @@
     <string name="enter_your_package_name">Enter your package name</string>
     <string name="please_enter_your_package_name">Please enter your package name!</string>
     <string name="this_action_may_contain_advertising">This action can contain ads</string>
+    <string name="quick">Quick</string>
+    <string name="fluffy_cat_chill">Fluffy cat chill</string>
+    <string name="granted_camera">Camera permission denied</string>
 </resources>

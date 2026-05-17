@@ -33,7 +33,9 @@
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
-
+<!--        B6C62C-->
+<!--        B0C30E-->
+<!--        3D420C-->
         <com.example.basefragment.core.extention.OuterStrokeShadownTextView
             android:id="@+id/tvLang"
             style="@style/single_marquee"
@@ -44,24 +46,24 @@
             android:gravity="start"
             android:text="language"
             android:textColor="@color/white"
-            android:textSize="18dp"
+            android:textSize="20sp"
             app:layout_constraintBottom_toBottomOf="@+id/imvFlag"
             app:layout_constraintEnd_toStartOf="@+id/btnRadio"
             app:layout_constraintStart_toEndOf="@+id/imvFlag"
             app:layout_constraintTop_toTopOf="@+id/imvFlag"
-            app:outerStrokeColor="@color/app_color"
-            app:outerStrokeWidth="1.3dp" />
+            app:outerStrokeColor="#747E20"
+            app:outerStrokeWidth="2dp" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
     <!-- Focus overlay — đặt trên cùng bằng FrameLayout -->
-    <com.google.android.material.card.MaterialCardView
-        android:id="@+id/flFocus"
-        android:layout_width="match_parent"
-        android:layout_height="34dp"
-        android:elevation="1dp"
-        app:cardBackgroundColor="#40000000"
-        app:cardCornerRadius="16dp"
-        app:strokeWidth="0dp" />
+<!--    <com.google.android.material.card.MaterialCardView-->
+<!--        android:id="@+id/flFocus"-->
+<!--        android:layout_width="match_parent"-->
+<!--        android:layout_height="34dp"-->
+<!--        android:elevation="1dp"-->
+<!--        app:cardBackgroundColor="#40000000"-->
+<!--        app:cardCornerRadius="16dp"-->
+<!--        app:strokeWidth="0dp" />-->
 
 </FrameLayout>

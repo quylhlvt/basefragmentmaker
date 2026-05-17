@@ -55,23 +55,23 @@
                 android:scaleType="centerCrop"
                 android:src="@drawable/img_permission" />
 
-            <!--        sflShimmer-->
-<!--            <com.facebook.shimmer.ShimmerFrameLayout-->
-<!--                android:id="@+id/sflShimmer"-->
-<!--                android:layout_width="match_parent"-->
-<!--                android:layout_height="match_parent"-->
-<!--                app:shimmer_auto_start="true"-->
-<!--                app:shimmer_base_alpha="0.7"-->
-<!--                app:shimmer_direction="left_to_right"-->
-<!--                app:shimmer_duration="1800"-->
-<!--                app:shimmer_highlight_alpha="0.6"-->
-<!--                app:shimmer_shape="linear">-->
-<!--                &lt;!&ndash; View nền để shimmer quét qua &ndash;&gt;-->
-<!--                <View-->
-<!--                    android:layout_width="match_parent"-->
-<!--                    android:layout_height="match_parent"-->
-<!--                    android:background="#818181" />-->
-<!--            </com.facebook.shimmer.ShimmerFrameLayout>-->
+                    sflShimmer
+            <com.facebook.shimmer.ShimmerFrameLayout
+                android:id="@+id/sflShimmer"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                app:shimmer_auto_start="true"
+                app:shimmer_base_alpha="0.7"
+                app:shimmer_direction="left_to_right"
+                app:shimmer_duration="1800"
+                app:shimmer_highlight_alpha="0.6"
+                app:shimmer_shape="linear">
+                <!-- View nền để shimmer quét qua -->
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:background="#818181" />
+            </com.facebook.shimmer.ShimmerFrameLayout>
         </com.google.android.material.card.MaterialCardView>
 
     </FrameLayout>

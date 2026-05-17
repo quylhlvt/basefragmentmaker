@@ -15,20 +15,22 @@ class PermissionViewModel @Inject constructor() : ViewModel() {
     // ✅ Count tập trung, share across fragments
     private val _storageDenyCount = MutableStateFlow(0)
     private val _notificationDenyCount = MutableStateFlow(0)
-
+    private val _cameraDenyCount = MutableStateFlow(0)
     val storageDenyCount: StateFlow<Int> = _storageDenyCount.asStateFlow()
     val notificationDenyCount: StateFlow<Int> = _notificationDenyCount.asStateFlow()
-
+    val cameraDenyCount: StateFlow<Int> = _cameraDenyCount.asStateFlow()
     fun onStorageDenied()      { _storageDenyCount.value++ }
     fun onStorageGranted()     { _storageDenyCount.value = 0 }
     fun onNotificationDenied() { _notificationDenyCount.value++ }
     fun onNotificationGranted(){ _notificationDenyCount.value = 0 }
-
+    fun onCameraDenied()       { _cameraDenyCount.value++ }
+    fun onCameraGranted()      { _cameraDenyCount.value = 0 }
     fun shouldGoToSettings(isStorage: Boolean): Boolean {
         val count = if (isStorage) _storageDenyCount.value else _notificationDenyCount.value
         return count >= 2
     }
 
+    fun shouldCameraGoToSettings(): Boolean = _cameraDenyCount.value >= 2
     fun getStoragePermissions()      = PermissionHelper.storagePermission
     fun getNotificationPermissions() = PermissionHelper.notificationPermission
 }

@@ -2,6 +2,7 @@ package com.example.basefragment.data.datalocal.manager
 
 import android.content.Context
 import android.util.Log
+import com.example.basefragment.core.extention.withCleanListPath
 import com.example.basefragment.data.model.custom.*
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken

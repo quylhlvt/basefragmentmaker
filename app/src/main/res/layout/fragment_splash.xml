@@ -9,17 +9,18 @@
         android:id="@+id/appCompatImageView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        android:scaleType="centerCrop"
+        android:scaleType="fitXY"
         android:src="@drawable/img_bg_splash" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/appCompatImageView4"
         android:layout_width="0dp"
+        android:visibility="gone"
         android:layout_height="wrap_content"
         android:layout_marginHorizontal="20dp"
         android:layout_marginTop="60dp"
         android:adjustViewBounds="true"
-        android:src="@drawable/img_title_splash"
+        android:src="@drawable/img_title_home"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
@@ -28,14 +29,13 @@
         android:id="@+id/progressWrapper"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:clipChildren="true"
-        app:layout_constraintDimensionRatio="3.2:0.28"
         android:layout_marginHorizontal="20dp"
-        android:layout_marginTop="30dp"
         android:background="@drawable/bg_progress_track_splash"
+        android:clipChildren="true"
+        app:layout_constraintBottom_toTopOf="@+id/appCompatTextView2"
+        app:layout_constraintDimensionRatio="3.2:0.28"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/appCompatImageView4">
+        app:layout_constraintStart_toStartOf="parent">
 
         <!-- Fill xanh đầy 100% -->
         <View
@@ -57,9 +57,10 @@
             <com.google.android.material.card.MaterialCardView
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                app:cardCornerRadius="20dp"
                 app:cardBackgroundColor="@color/transparent"
+                app:cardCornerRadius="20dp"
                 app:strokeWidth="0dp">
+
                 <View
                     android:id="@+id/progressOverlay"
                     android:layout_width="match_parent"
@@ -89,14 +90,14 @@
             android:layout_gravity="end|center_vertical"
             android:layout_marginVertical="3dp"
             android:layout_marginEnd="3dp"
-            android:scaleType="fitXY"/>
+            android:scaleType="fitXY" />
 
     </FrameLayout>
     <com.example.basefragment.core.extention.OuterStrokeShadownTextView
         android:id="@+id/appCompatTextView2"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="30dp"
+        android:layout_marginBottom="10dp"
         android:fontFamily="@font/baloo2_bold"
         android:gravity="center"
         android:text="@string/this_action_may_contain_advertising"

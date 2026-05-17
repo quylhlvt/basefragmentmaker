@@ -30,7 +30,7 @@ class LanguageAdapter (val context: Context) : BaseAdapter<LanguageModel, ItemLa
             }
             loadImage(root, ratio, btnRadio, false)
 
-           if (item.activate) flFocus.visible() else flFocus.invisible()
+//           if (item.activate) flFocus.visible() else flFocus.invisible()
 
 
             root.onClick {

@@ -5,6 +5,8 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
+import com.example.basefragment.core.extention.gone
+import com.example.basefragment.core.extention.visible
 import com.example.basefragment.data.model.custom.QuickMixItem
 import com.example.basefragment.databinding.ItemQuickMixBinding
 
@@ -21,15 +23,20 @@ class QuickMixAdapter(
         fun bind(item: QuickMixItem) {
             val key = viewModel.itemKey(item)
             binding.imgPreview.tag = key
+
             binding.root.setOnClickListener { onItemClick?.invoke(item) }
 
+            // Check cache mỗi lần bind — kể cả khi scroll lại
             val cached = viewModel.bitmapCache[key]
             if (cached != null && !cached.isRecycled) {
-                binding.progressLoading.visibility = android.view.View.GONE
+                binding.progressLoading.gone()
                 binding.imgPreview.setImageBitmap(cached)
             } else {
-                binding.progressLoading.visibility = android.view.View.VISIBLE
+                binding.progressLoading.visible()
                 binding.imgPreview.setImageBitmap(null)
+
+                // ← Chủ động request merge nếu item này chưa có bitmap
+                viewModel.requestMergeIfMissing(item)
             }
         }
     }

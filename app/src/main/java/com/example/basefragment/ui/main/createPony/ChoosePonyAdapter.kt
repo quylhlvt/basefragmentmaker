@@ -11,7 +11,6 @@ import com.bumptech.glide.request.target.Target
 import com.example.basefragment.core.base.BaseAdapter
 import com.example.basefragment.data.model.custom.CustomModel
 import com.example.basefragment.databinding.ItemChooseBinding
-import kotlin.io.root
 
 class ChoosePonyAdapter(
     private val onClick: (character: CustomModel, position: Int) -> Unit

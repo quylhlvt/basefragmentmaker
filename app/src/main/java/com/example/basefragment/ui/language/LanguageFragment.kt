@@ -16,6 +16,7 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy
 import com.example.basefragment.R
 import com.example.basefragment.core.base.BackPressHandler
 import com.example.basefragment.core.base.BaseFragment
+import com.example.basefragment.core.extention.dp
 import com.example.basefragment.core.extention.gone
 import com.example.basefragment.core.extention.invisible
 import com.example.basefragment.core.extention.onClick
@@ -33,6 +34,8 @@ import com.example.basefragment.databinding.FragmentLanguageBinding
 import com.example.basefragment.utils.DataLocal
 import com.example.basefragment.utils.LanguageManager.updateLanguage
 import com.example.basefragment.utils.key.IntentKey
+import com.google.android.material.shape.CornerFamily
+import com.google.android.material.shape.ShapeAppearanceModel
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -45,7 +48,6 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
 ), BackPressHandler {
     private val languageAdapter by lazy { LanguageAdapter(requireContext()) }
     private var isFromSetting = false
-
     override fun onBackPressed(): Boolean {
 
         when {
@@ -73,7 +75,6 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
         binding.recycleLanguage.apply {
             adapter = languageAdapter
             itemAnimator = null
-            background = ContextCompat.getDrawable(requireContext(), R.drawable.img_bg_rcy_lang)
         }
 
         val currentLang = SharedPreferencesManager.isLanguageKey()
@@ -117,6 +118,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
 
     override fun initView() {
         isFromSetting = findNavController().previousBackStackEntry?.destination?.id == R.id.setting
+
 
         binding.actionBar.apply {
             btnActionBarRight.gone()
@@ -165,7 +167,7 @@ class LanguageFragment : BaseFragment<FragmentLanguageBinding, LanguageViewModel
             adapter = languageAdapter
             itemAnimator = null
             post {
-                background = ContextCompat.getDrawable(requireContext(), R.drawable.img_bg_rcy_lang)
+                background = ContextCompat.getDrawable(requireContext(), R.drawable.bg_recycle_lang)
             }
         }
     }
