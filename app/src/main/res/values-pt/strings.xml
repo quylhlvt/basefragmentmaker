@@ -85,7 +85,8 @@
     <string name="have_rated">Obrigado por avaliar nosso app</string>
     <string name="refresh">Atualizar</string>
     <string name="hello_blank_fragment">Olá fragmento vazio</string>
-    <string name="cosplay">Fantasia Chibi</string>
+    <string name="cosplay_chibi">Fantasia Chibi</string>
+    <string name="cosplay">Fantasia</string>
     <string name="permission_camera_denied">Permissão de câmera necessária para usar este recurso</string>
     <string name="cat_random">Gato aleatório</string>
     <string name="random">Aleatório</string>
@@ -107,4 +108,14 @@
     <string name="enter_your_package_name">Digite o nome do pacote</string>
     <string name="please_enter_your_package_name">Digite o nome do pacote!</string>
     <string name="this_action_may_contain_advertising">Esta ação pode conter anúncios</string>
+    <string name="random_chibi">Chibi Aleatório</string>
+    <string name="instruction">Instruções</string>
+    <string name="tvCosplay1">No modo Cosplay,</string>
+    <string name="tvCosplay2">os jogadores recebem aleatoriamente</string>
+    <string name="tvCosplay3">uma imagem de referência</string>
+    <string name="tvCosplay4">para seguir. Sua tarefa é recriar esse personagem com a maior precisão possível escolhendo os</string>
+    <string name="tvCosplay5">penteados, roupas, cores e acessórios corretos.</string>
+    <string name="tvCosplay6">Cada combinação correta aumenta sua</string>
+    <string name="tvCosplay7">porcentagem (%).</string>
+    <string name="tvCosplay8">Quanto mais o seu personagem se parecer com a imagem aleatória, maior será sua pontuação final. Preste atenção aos pequenos detalhes para obter o melhor resultado de cosplay.</string>
 </resources>

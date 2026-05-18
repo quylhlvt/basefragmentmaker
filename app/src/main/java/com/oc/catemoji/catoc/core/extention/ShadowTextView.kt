@@ -21,14 +21,14 @@ class ShadowTextView @JvmOverloads constructor(
         // Lớp shadow lan rộng
         repeat(10) {
             paint.color = Color.WHITE
-            paint.setShadowLayer(30f, 0f, 0f, Color.WHITE)
+            paint.setShadowLayer(20f, 0f, 0f, Color.WHITE)
             super.onDraw(canvas)
         }
 
         // Lớp shadow trung bình
         repeat(10) {
             paint.color = Color.WHITE
-            paint.setShadowLayer(20f, 0f, 0f, Color.WHITE)
+            paint.setShadowLayer(10f, 0f, 0f, Color.WHITE)
             super.onDraw(canvas)
         }
 

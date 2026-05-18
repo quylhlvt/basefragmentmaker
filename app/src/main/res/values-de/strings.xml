@@ -85,6 +85,7 @@
     <string name="have_rated">Vielen Dank für Ihre Bewertung</string>
     <string name="refresh">Aktualisieren</string>
     <string name="hello_blank_fragment">Hallo leeres Fragment</string>
+    <string name="cosplay_chibi">Chibi-Kostüm</string>
     <string name="cosplay">Chibi-Kostüm</string>
     <string name="permission_camera_denied">Kameraberechtigung ist erforderlich, um diese Funktion zu nutzen</string>
     <string name="cat_random">Zufällige Katze</string>
@@ -107,4 +108,14 @@
     <string name="enter_your_package_name">Paketnamen eingeben</string>
     <string name="please_enter_your_package_name">Bitte gib deinen Paketnamen ein!</string>
     <string name="this_action_may_contain_advertising">Diese Aktion kann Werbung enthalten</string>
+    <string name="random_chibi">Zufälliges Chibi</string>
+    <string name="instruction">Anleitung</string>
+    <string name="tvCosplay1">Im Cosplay-Modus</string>
+    <string name="tvCosplay2">erhalten Spieler zufällig</string>
+    <string name="tvCosplay3">ein Referenzbild,</string>
+    <string name="tvCosplay4">dem sie folgen sollen. Deine Aufgabe ist es, diesen Charakter so genau wie möglich nachzustellen, indem du die richtigen</string>
+    <string name="tvCosplay5">Frisuren, Outfits, Farben und Accessoires auswählst.</string>
+    <string name="tvCosplay6">Jede richtige Übereinstimmung erhöht deinen</string>
+    <string name="tvCosplay7">Prozentsatz (%).</string>
+    <string name="tvCosplay8">Je ähnlicher dein Charakter dem Zufallsbild sieht, desto höher wird deine Endpunktzahl sein. Achte auf kleine Details, um das beste Cosplay-Ergebnis zu erzielen.</string>
 </resources>

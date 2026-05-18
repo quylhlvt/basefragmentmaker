@@ -56,8 +56,10 @@ class PagerIntroViewHolder(
                 tvContent.isSelected = true
             }
             tvContent.text = root.context.strings(pager.content)
-            loadImage(root, pager.image, imvImage, false)
-            loadImage(root, pager.imageBottom, imvImageBottom, false)
+            imvImage.setImageResource(pager.image)
+            imvImageBottom.setImageResource(pager.imageBottom)
+//            loadImage(root, pager.image, imvImage, false)
+//            loadImage(root, pager.imageBottom, imvImageBottom, false)
         }
     }
 }

@@ -6,41 +6,48 @@
 
     android:layout_height="match_parent">
 
-    <FrameLayout
+    <com.google.android.material.card.MaterialCardView
+        android:visibility="gone"
+        android:id="@+id/frameShadown"
         android:layout_width="0dp"
         android:layout_height="0dp"
+        app:strokeWidth="0dp"
+        app:strokeColor="@color/app_color"
+        app:cardCornerRadius="100dp"
+        app:cardBackgroundColor="@color/shadown_item_cate"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintDimensionRatio="1:1"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+    <com.google.android.material.card.MaterialCardView
+        android:layout_marginBottom="3dp"
+        android:id="@+id/frame"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        app:strokeWidth="1.4dp"
+        app:cardBackgroundColor="@color/white"
+        app:strokeColor="@color/app_color7"
+        app:cardCornerRadius="100dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintDimensionRatio="1:1"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent">
 
-        <androidx.cardview.widget.CardView
-            android:id="@+id/cvMain"
-            android:layout_margin="3dp"
+
+
+        <TextView
+            android:id="@+id/tvFont"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            app:cardBackgroundColor="@color/transparent"
-            app:cardCornerRadius="1000dp"
+            android:gravity="center"
+            android:text="Aa"
+            android:textColor="@color/black1"
+            android:textSize="18sp" />
 
-            app:cardElevation="3dp">
-            <!--        vFocus-->
 
-  <View
-                android:id="@+id/vFocus"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:background="@drawable/bg_100_stroker_appcolor" />
 
-            <!--        tvFont-->
-            <TextView
-                android:id="@+id/tvFont"
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:gravity="center"
-                android:text="Aa"
-                android:textSize="18sp" />
-        </androidx.cardview.widget.CardView>
 
-    </FrameLayout>
+    </com.google.android.material.card.MaterialCardView>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -6,6 +6,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.oc.catemoji.catoc.R
 import com.oc.catemoji.catoc.core.base.BaseAdapter
+import com.oc.catemoji.catoc.core.extention.dp
 import com.oc.catemoji.catoc.core.extention.gone
 import com.oc.catemoji.catoc.core.extention.onClick
 import com.oc.catemoji.catoc.core.extention.visible
@@ -38,10 +39,16 @@ class TextColorAdapter :
             // ── Sau đó mới apply selected state ────────────────
             if (item.isSelected) {
                 frameShadown.visible()
-                frame.strokeColor = ContextCompat.getColor(context, R.color.app_color)
+                frame.apply {
+                    strokeColor = ContextCompat.getColor(context, R.color.app_color2)
+                    strokeWidth = (2).dp(context)
+                }
             } else {
                 frameShadown.gone()
-                frame.strokeColor = ContextCompat.getColor(context, R.color.transparent)
+                frame.apply {
+                    strokeColor = ContextCompat.getColor(context, R.color.app_color7)
+                    strokeWidth = (1.4).dp(context)
+                }
             }
         }
     }

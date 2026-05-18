@@ -85,6 +85,7 @@
     <string name="have_rated">हमारे ऐप को रेट करने के लिए धन्यवाद</string>
     <string name="refresh">रीफ़्रेश</string>
     <string name="hello_blank_fragment">नमस्ते खाली फ्रैगमेंट</string>
+    <string name="cosplay_chibi">चिबी कॉसप्ले</string>
     <string name="cosplay">चिबी कॉसप्ले</string>
     <string name="permission_camera_denied">इस सुविधा के लिए कैमरा अनुमति आवश्यक है</string>
     <string name="cat_random">रैंडम बिल्ली</string>
@@ -107,4 +108,14 @@
     <string name="enter_your_package_name">अपना पैकेज नाम दर्ज करें</string>
     <string name="please_enter_your_package_name">कृपया अपना पैकेज नाम दर्ज करें!</string>
     <string name="this_action_may_contain_advertising">इस क्रिया में विज्ञापन हो सकते हैं</string>
+    <string name="random_chibi">चिबी रैंडम</string>
+    <string name="instruction">निर्देश</string>
+    <string name="tvCosplay1">कॉसप्ले मोड में,</string>
+    <string name="tvCosplay2">खिलाड़ियों को रैंडम तरीके से</string>
+    <string name="tvCosplay3">एक रेफरेंस इमेज दी जाती है</string>
+    <string name="tvCosplay4">जिसका पालन करना होता है। आपका काम सही</string>
+    <string name="tvCosplay5">हेयरस्टाइल, कपड़े, रंग और एक्सेसरीज़ चुनकर उस कैरेक्टर को जितना संभव हो उतना सटीक बनाना है।</string>
+    <string name="tvCosplay6">हर सही मैच आपके</string>
+    <string name="tvCosplay7">प्रतिशत स्कोर (%) को बढ़ाता है।</string>
+    <string name="tvCosplay8">आपका कैरेक्टर जितना अधिक रैंडम इमेज जैसा दिखेगा, आपका अंतिम स्कोर उतना ही अधिक होगा। सबसे अच्छा कॉसप्ले परिणाम पाने के लिए छोटी-छोटी बातों पर ध्यान दें।</string>
 </resources>

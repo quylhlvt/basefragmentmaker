@@ -24,6 +24,8 @@ import com.bumptech.glide.request.RequestListener
 import com.bumptech.glide.request.target.Target
 import android.graphics.drawable.Drawable
 import com.bumptech.glide.load.DataSource
+import com.oc.catemoji.catoc.core.extention.dp
+import com.oc.catemoji.catoc.core.extention.dpToPx
 import com.oc.catemoji.catoc.core.extention.gone
 import com.oc.catemoji.catoc.core.extention.invisible
 import com.oc.catemoji.catoc.databinding.ItemBottomCustomBinding
@@ -45,37 +47,16 @@ class NavAdapter :
     override fun onBind(binding: ItemBottomCustomBinding, item: BodyPartModel, position: Int) {
         binding.apply {
             val ctx = root.context
-        if (posNav == position) {
-            focus.visible()
-            cardLayer.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color4
-                )
-            )
-            cardLayerImg.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color5
-                )
-            )
-            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
-        } else {
-            focus.invisible()
-            cardLayer.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color8
-                )
-            )
-                cardLayerImg.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color9
-                )
-            )
-            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
-        }
+            if (posNav == position) {
+
+                cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color2)
+                cardLayer.strokeWidth = (3).dp(ctx) // 👈 Thêm dòng này (đơn vị dp, tuỳ chỉnh số)
+
+            } else {
+
+                cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
+                cardLayer.strokeWidth =  (1.4).dp(ctx)  // 👈 Reset về 0 khi không được chọn
+            }
         Glide.with(imvImage)
             .load(item.nav)
             .diskCacheStrategy(DiskCacheStrategy.RESOURCE)
@@ -153,39 +134,16 @@ class PartAdapter : BaseAdapter<String, ItemLayerBinding>(ItemLayerBinding::infl
         binding.apply {
             val ctx = root.context
 
-        if (posPath == position) {
-            focus.visible()
+            if (posPath == position) {
 
-            cardLayer.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color4
-                )
-            )
-            cardLayerImg.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color5
-                )
-            )
-            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color)
-        } else {
-            focus.invisible()
+                cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color2)
+                cardLayer.strokeWidth = (3).dp(ctx) // 👈 Thêm dòng này (đơn vị dp, tuỳ chỉnh số)
 
-            cardLayer.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color8
-                )
-            )
-            cardLayerImg.setCardBackgroundColor(
-                ContextCompat.getColor(
-                    ctx,
-                    R.color.app_color9
-                )
-            )
-            cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
-        }
+            } else {
+
+                cardLayer.strokeColor = ContextCompat.getColor(ctx, R.color.app_color7)
+                cardLayer.strokeWidth =  (1.4).dp(ctx)  // 👈 Reset về 0 khi không được chọn
+            }
         val thumbPath = listThumb.getOrElse(position) { item }
         when (item) {
             "none" -> {

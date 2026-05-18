@@ -57,6 +57,7 @@ import com.oc.catemoji.catoc.ui.onboarding.permission.PermissionViewModel
 import com.oc.catemoji.catoc.utils.DataLocal
 import com.oc.catemoji.catoc.utils.key.ValueKey
 import com.oc.catemoji.catoc.data.datalocal.manager.CharacterImageManager
+import com.oc.catemoji.catoc.ui.main.add_character.adapter.SpeechAdapter
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
@@ -87,7 +88,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
     private val backgroundImageAdapter by lazy { BackgroundImageAdapter() }
     private val backgroundColorAdapter by lazy { BackgroundColorAdapter() }
     private val stickerAdapter by lazy { StickerAdapter() }
-    private val speechAdapter by lazy { StickerAdapter() }
+    private val speechAdapter by lazy { SpeechAdapter() }
     private val textFontAdapter by lazy { TextFontAdapter(requireContext()) }
     private val textColorAdapter by lazy { TextColorAdapter() }
 
@@ -368,7 +369,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
             setImageActionBar(btnActionBarCenter1, R.drawable.ic_reset_all_custom)
-            setImageActionBar(btnActionBarRight, R.drawable.next_app)
+            setImageActionBar(btnActionBarRight, R.drawable.save_background)
         }
     }
 
@@ -539,16 +540,16 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
                     requireActivity().hideNavigation(true)
                     lnlBackground.rcvBackgroundImage.visible()
                     lnlBackground.rcvBackgroundColor.gone()
-                    lnlBackground.btnBackgroundImage.setBackgroundResource(R.drawable.img_bg_image_addcharacter)
-                    lnlBackground.btnBackgroundColor.setBackgroundResource(R.drawable.img_bg_color_addcharacter)
+                    lnlBackground.imgAddFor.setImageResource(R.drawable.frame_select_add)
+                    lnlBackground.imgAddFor1.setImageResource(R.drawable.frame_unselect_add)
                     backgroundImageAdapter.submitList(viewModel.backgroundImageList)
                 }
                 ValueKey.COLOR_BACKGROUND -> {
                     requireActivity().hideNavigation(true)
                     lnlBackground.rcvBackgroundImage.gone()
                     lnlBackground.rcvBackgroundColor.visible()
-                    lnlBackground.btnBackgroundColor.setBackgroundResource(R.drawable.img_bg_image_addcharacter)
-                    lnlBackground.btnBackgroundImage.setBackgroundResource(R.drawable.img_bg_color_addcharacter)
+                    lnlBackground.imgAddFor1.setImageResource(R.drawable.frame_select_add)
+                    lnlBackground.imgAddFor.setImageResource(R.drawable.frame_unselect_add)
                     backgroundColorAdapter.submitList(viewModel.backgroundColorList)
                 }
             }
@@ -764,7 +765,7 @@ class AddCharacterFragment : BaseFragment<FragmentAddCharacterBinding, AddCharac
 
                 if (savedImagePath != null) {
                     findNavController().navigate(
-                        R.id.action_addCharacterFragment_to_viewImageFragment,
+                        R.id.action_addCharacterFragment_toSuccessFragment,
                         Bundle().apply {
                             putString("imagePath", savedImagePath)
                             putString("idEdit", "")

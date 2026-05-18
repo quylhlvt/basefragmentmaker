@@ -4,6 +4,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.oc.catemoji.catoc.R
 import com.oc.catemoji.catoc.core.base.BaseAdapter
+import com.oc.catemoji.catoc.core.extention.dp
 import com.oc.catemoji.catoc.core.extention.gone
 import com.oc.catemoji.catoc.core.extention.loadFromAsset
 import com.oc.catemoji.catoc.core.extention.loadImage
@@ -24,27 +25,18 @@ class BackgroundImageAdapter : BaseAdapter<SelectedAddModel, ItemBackgroundImage
     override fun onBind(binding: ItemBackgroundImageBinding, item: SelectedAddModel, position: Int) {
         val context = binding.root.context
         binding.apply {
+            tvAddImage.isSelected =true
             if (currentSelected == position) {
-                shadown.visible()
-                materialParent.apply {    strokeColor = ContextCompat.getColor(context, R.color.app_color)
-                    setCardBackgroundColor(
-                        ContextCompat.getColor(context, R.color.app_color4)
-                    )}
+                materialParent.strokeColor = ContextCompat.getColor(context, R.color.app_color2)
             } else {
-                shadown.gone()
-                materialParent.apply { strokeColor = ContextCompat.getColor(context, R.color.app_color7)
-                    setCardBackgroundColor(
-                        ContextCompat.getColor(context, R.color.app_color8)
-                    )
-                    // tắt elevation mặc định để dùng custom shadow
-                }
+                materialParent.strokeColor = ContextCompat.getColor(context, R.color.app_color7)
             }
             if (position == 0) {
-                imvAddItem.visible()
+                lnlAddItem.visible()
                 imvImage.gone()
-                imvAddItem.onClick { onAddImageClick() }
+                lnlAddItem.onClick { onAddImageClick() }
             } else {
-                imvAddItem.gone()
+                lnlAddItem.gone()
                 imvImage.visible()
                 if (imvImage.tag != item.path) {
                     imvImage.tag = item.path

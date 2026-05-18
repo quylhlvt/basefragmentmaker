@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:id="@+id/scvText"
@@ -8,21 +8,9 @@
     android:orientation="vertical"
     android:visibility="gone">
 
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="8dp">
-
-        <ImageView
-            android:id="@+id/btnDoneText"
-            android:layout_width="24dp"
-            android:layout_height="24dp"
-            android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="16dp"
-            android:src="@drawable/ic_done_1" />
-    </FrameLayout>
 
     <ScrollView
+        android:layout_marginTop="15dp"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scrollbars="none">
@@ -32,14 +20,18 @@
             android:layout_height="wrap_content"
             android:orientation="vertical">
 
-            <TextView
-                android:layout_width="match_parent"
+            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginHorizontal="16dp"
                 android:text="@string/text"
-                android:fontFamily="@font/baloo2_bold"
-                android:textColor="@color/app_color9"
-                android:textSize="16sp" />
+                android:layout_marginStart="16dp"
+                android:textColor="@color/app_color"
+                app:outerStrokeColor="@color/stroker_gray"
+                android:gravity="center"
+                style="@style/single_marquee"
+                android:fontFamily="@font/atma_bold"
+                android:textSize="16sp"
+                app:outerStrokeWidth="0.4dp" />
 
             <EditText
                 android:id="@+id/edtText"
@@ -59,35 +51,43 @@
                 android:textColorHint="#99868686"
                 android:textSize="14sp" />
 
-            <TextView
+            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                android:textColor="@color/app_color"
+                app:outerStrokeColor="@color/stroker_gray"
+
+                style="@style/single_marquee"
+                android:fontFamily="@font/atma_bold"
+                android:textSize="16sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:text="Font"
-                android:fontFamily="@font/baloo2_bold"
-                android:textColor="@color/app_color9"
-                android:textSize="16sp"/>
+             />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcvFont"
                 android:layout_width="match_parent"
-                android:layout_height="45dp"
+                android:layout_height="40dp"
                 android:layout_marginStart="12dp"
                 android:layout_marginTop="4dp"
                 android:orientation="horizontal"
                 app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
                 tools:listitem="@layout/item_font" />
 
-            <TextView
+            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                android:textColor="@color/app_color"
+                app:outerStrokeColor="@color/stroker_gray"
+
+                style="@style/single_marquee"
+                android:fontFamily="@font/atma_bold"
+                android:textSize="16sp"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_marginHorizontal="16dp"
-                android:layout_marginTop="12dp"
+                android:layout_marginTop="10dp"
                 android:text="@string/color"
-                android:fontFamily="@font/baloo2_bold"
-                android:textColor="@color/app_color9"
-                android:textSize="16sp" />
+          />
 
             <androidx.recyclerview.widget.RecyclerView
                 android:id="@+id/rcvTextColor"
@@ -105,4 +105,18 @@
 
         </LinearLayout>
     </ScrollView>
-</LinearLayout>
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp">
+
+        <ImageView
+            android:id="@+id/btnDoneText"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_gravity="end|center_vertical"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_done_1" />
+    </FrameLayout>
+
+</FrameLayout>

@@ -3,11 +3,17 @@ package com.oc.catemoji.catoc.core.extention
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.text.SpannableString
+import android.text.Spanned
+import android.text.style.ForegroundColorSpan
 import android.view.View
 import android.widget.ImageView
 import android.widget.TextView
+import androidx.annotation.ColorRes
 import androidx.annotation.FontRes
+import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
+import com.oc.catemoji.catoc.core.helper.CustomTypefaceSpan
 import com.oc.catemoji.catoc.utils.DataLocal.KEY_LAST_CLICK_TIME
 import java.io.File
 import java.io.FileOutputStream
@@ -19,8 +25,8 @@ import kotlin.math.roundToInt
 fun Int.dp(context: Context): Int =
     (this * context.resources.displayMetrics.density).roundToInt()
 
-fun Float.dp(context: Context): Int =
-    (this * context.resources.displayMetrics.density).roundToInt()
+fun Number.dp(context: Context): Int =
+    (this.toFloat() * context.resources.displayMetrics.density).roundToInt()
 fun dpToPx(context: Context, dp: Int): Int {
     return (dp * context.resources.displayMetrics.density).toInt()
 }
@@ -136,4 +142,34 @@ fun Bitmap.saveToFile(context: Context, prefix: String = "avatar"): String? {
     } catch (e: Exception) {
         null
     }
+}
+fun changeText(
+    context: Context,
+    text: String,
+    @ColorRes colorRes: Int,
+    @FontRes fontFamily: Int
+): SpannableString {
+
+    val spannableString = SpannableString(text)
+
+    // resolve color
+    val colorInt = ContextCompat.getColor(context, colorRes)
+    spannableString.setSpan(
+        ForegroundColorSpan(colorInt),
+        0,
+        text.length,
+        Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+    )
+
+    // font
+    ResourcesCompat.getFont(context, fontFamily)?.let { font ->
+        spannableString.setSpan(
+            CustomTypefaceSpan("", font),
+            0,
+            text.length,
+            Spanned.SPAN_EXCLUSIVE_EXCLUSIVE
+        )
+    }
+
+    return spannableString
 }

@@ -186,7 +186,7 @@
         </LinearLayout>
 
     </ScrollView>
-    <com.oc.catemoji.catoc.core.extention.ShadowTextView
+    <com.oc.catemoji.catoc.core.extention.ShadowTextView1
         android:id="@+id/tvContinue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

@@ -120,10 +120,10 @@ open class DrawView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
             )
             borderPaint.alpha = typedArray.getInteger(R.styleable.StickerView_borderAlpha, 255)
             borderPaint.style = Paint.Style.STROKE
-            borderPaint.strokeWidth = dpToPx(2)
+            borderPaint.strokeWidth = dpToPx(5)
             borderPaint.strokeJoin = Paint.Join.ROUND
             borderPaint.strokeCap = Paint.Cap.ROUND
-            borderPaint.pathEffect = DashPathEffect(floatArrayOf(40f, 40f), 0f)
+            borderPaint.pathEffect = DashPathEffect(floatArrayOf(20f, 35f), 0f)
 
             setupDefaultIcons()
         } finally {
@@ -729,7 +729,7 @@ open class DrawView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
                         DrawKey.LEFT_BOTTOM -> setupMatrix(icon, x3, y3, rotation)
                         DrawKey.RIGHT_BOTTOM -> setupMatrix(icon, x4, y4, rotation)
                     }
-                    if (icon.positionDefault == DrawKey.LEFT_BOTTOM) {
+                    if (icon.positionDefault == DrawKey.RIGHT_BOTTOM) {
                         if (handlingDraw!!.isText) {
 
                         }
@@ -750,7 +750,7 @@ open class DrawView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
         icon.y = y
         icon.getMatrix().reset()
         // Thu nhỏ icon xuống 39dp
-        val targetSizePx = dpToPx(35)
+        val targetSizePx = dpToPx(28)
         val scaleX = targetSizePx / icon.width
         val scaleY = targetSizePx / icon.height
         val scale = minOf(scaleX, scaleY) // Giữ tỷ lệ aspect ratio
@@ -1004,7 +1004,7 @@ open class DrawView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
         )
         deleteIcon.event = DeleteEvent()
         val zoomIcon = BitmapDrawIcon(
-            ContextCompat.getDrawable(context, R.drawable.ic_rotation), DrawKey.RIGHT_BOTTOM
+            ContextCompat.getDrawable(context, R.drawable.ic_rotation), DrawKey.LEFT_BOTTOM
         )
         zoomIcon.event = ZoomEvent()
         val flipIcon = BitmapDrawIcon(
@@ -1012,7 +1012,7 @@ open class DrawView(context: Context, attrs: AttributeSet?, defStyleAttr: Int) :
         )
         flipIcon.event = FlipEvent()
         val editIcon = BitmapDrawIcon(
-            ContextCompat.getDrawable(context, R.drawable.ic_close), DrawKey.LEFT_BOTTOM
+            ContextCompat.getDrawable(context, R.drawable.ic_close), DrawKey.RIGHT_BOTTOM
         )
         editIcon.event = EditEvent()
         iconList.clear()

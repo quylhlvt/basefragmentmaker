@@ -274,56 +274,56 @@ class MyPonyFragment : WhatsappSharingFragment<FragmentMyPonyBinding, MyPonyView
         val currentList = if (isAvatarTab.value) myAvatarAdapter.items else myDesignAdapter.items
         val hasSelection = currentList.any { it.isShowSelection }
         val allSelected = currentList.isNotEmpty() && currentList.all { it.isSelected }
-        val selectedCount = currentList.count { it.isSelected }
 
+        // Action bar selection buttons
         binding.actionBar.apply {
             if (hasSelection) {
                 btnActionBarNextToRight1.visible()
                 btnActionBarRight1.visible()
-
                 btnActionBarRight1.setImageResource(
                     if (allSelected) R.drawable.ic_select_all else R.drawable.ic_not_select_all
                 )
             } else {
                 btnActionBarNextToRight1.invisible()
                 btnActionBarRight1.invisible()
-
             }
         }
-        val avatarList = myAvatarAdapter.items
-        val designList = myDesignAdapter.items
-        val hasAvatar = avatarList.isNotEmpty()
-        val hasDesign = designList.isNotEmpty()
-        if (isAvatarTab.value && !hasAvatar) {
-            binding.lnlBottom.gone()
-            return
-        }
-        if (!isAvatarTab.value && !hasDesign) {
-            binding.lnlBottom.gone()
-            return
-        }
 
-        binding.lnlBottom.visible()
-        if (isAvatarTab.value) {
-            binding.lnlBottomTop.visible()   // WhatsApp + Telegram
-            binding.llBottom.gone()
-        } else {
-            binding.lnlBottomTop.gone()
-            binding.llBottom.visible()       // Share + Download
+        binding.apply {
+            if (isAvatarTab.value) {
+                val hasAvatars = myAvatarAdapter.items.isNotEmpty()
+
+                if (!hasAvatars) {
+                    // ✅ Không có item → ẩn hết
+                    lnlBottom.gone()
+                    return
+                }
+
+                lnlBottom.visible()
+
+                if (hasSelection) {
+                    // ✅ Long click: hiện cả 4 nút
+                    lnlBottomTop.visible()  // WhatsApp + Telegram
+                    llBottom.visible()      // Share + Download
+                } else {
+                    // ✅ Bình thường có item: chỉ WhatsApp + Telegram
+                    lnlBottomTop.visible()
+                    llBottom.gone()
+                }
+
+            } else {
+                // Design tab
+                if (hasSelection) {
+                    // ✅ Long click: chỉ Share + Download
+                    lnlBottom.visible()
+                    lnlBottomTop.gone()
+                    llBottom.visible()
+                } else {
+                    // ✅ Bình thường hoặc không có item: ẩn hết
+                    lnlBottom.gone()
+                }
+            }
         }
-//        if (hasSelection) {
-//            binding.lnlBottom.visible()
-//            if (isAvatarTab.value) {
-//                binding.lnlBottomTop.visible()   // WhatsApp + Telegram
-//                binding.llBottom.gone()
-//            } else {
-//                binding.lnlBottomTop.gone()       // Ẩn WhatsApp + Telegram cho Design tab
-//                binding.llBottom.visible()
-//
-//            }
-//        } else {
-//            binding.lnlBottom.gone()
-//        }
     }
 
     // ── DATA LOADING ──────────────────────────────────────────────────────────

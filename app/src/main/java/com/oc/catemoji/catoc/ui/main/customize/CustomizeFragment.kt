@@ -101,8 +101,8 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
     override fun initView() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
-            setImageActionBar(btnActionBarCenter, R.drawable.ic_reset_all_custom)
-            setImageActionBar(btnActionBarCenter2, R.drawable.ic_flip_all_custom)
+            setImageActionBar(btnActionBarCenter2, R.drawable.ic_reset_all_custom)
+            setImageActionBar(btnActionBarCenter, R.drawable.ic_flip_all_custom)
             setImageActionBar(btnActionBarRight, R.drawable.next_app)
         }
         setupAdapters()
@@ -200,14 +200,14 @@ class CustomizeFragment : BaseFragment<FragmentCustomizeBinding, CustomizeViewMo
             imgRandom.onClick {
                 if (!checkOnlineNetworkOrShowDialog()) viewModel.randomizeAll()
             }
-            actionBar.btnActionBarCenter.setOnClickListener {
+            actionBar.btnActionBarCenter2.setOnClickListener {
                 showConfirmDialog(
                     title = getString(R.string.reset),
                     message = getString(R.string.do_you_want_to_reset_all),
                     onYes = { arrShowColor.fill(true); viewModel.resetAll() }
                 )
             }
-            actionBar.btnActionBarCenter2.setOnClickListener { viewModel.toggleFlip() }
+            actionBar.btnActionBarCenter.setOnClickListener { viewModel.toggleFlip() }
             actionBar.btnActionBarRight.setOnClickListener { if (canSave) performSave() }
             actionBar.btnActionBarLeft.setOnClickListener { confirmExit() }
         }

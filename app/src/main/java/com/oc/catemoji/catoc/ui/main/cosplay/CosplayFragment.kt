@@ -3,10 +3,13 @@ package com.oc.catemoji.catoc.ui.main.cosplay
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.os.Bundle
+import android.text.SpannableString
+import android.text.TextUtils
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.OnBackPressedCallback
 import androidx.appcompat.widget.AppCompatImageView
 import androidx.lifecycle.lifecycleScope
@@ -17,6 +20,7 @@ import com.oc.catemoji.catoc.R
 import com.oc.catemoji.catoc.core.base.BaseFragment
 import com.oc.catemoji.catoc.core.extention.InternetExtension.isInternetAvailable
 import com.oc.catemoji.catoc.core.extention.InternetExtension.isNetworkConnected
+import com.oc.catemoji.catoc.core.extention.changeText
 import com.oc.catemoji.catoc.core.extention.gone
 import com.oc.catemoji.catoc.core.extention.onClick
 import com.oc.catemoji.catoc.core.extention.popBack
@@ -61,6 +65,30 @@ class CosplayFragment : BaseFragment<FragmentCosplayBinding, CosplayViewModel>(
     override fun initView() {
         binding.setupActionBar()
 
+        val space = SpannableString(" ")
+        val parts = listOf(
+            changeText(requireContext(), getString(R.string.tvCosplay1), R.color.app_color8, R.font.atma_bold),
+            space,
+            changeText(requireContext(), getString(R.string.tvCosplay2), R.color.white, R.font.atma_bold),
+            space,
+            changeText(requireContext(), getString(R.string.tvCosplay3), R.color.app_color8, R.font.atma_bold),
+            space,
+            changeText(requireContext(), getString(R.string.tvCosplay4), R.color.white, R.font.atma_bold),
+            space,
+            changeText(requireContext(), getString(R.string.tvCosplay5), R.color.app_color8, R.font.atma_bold),
+            space,
+            changeText(requireContext(), getString(R.string.tvCosplay6), R.color.white, R.font.atma_bold),
+            space,
+            changeText(requireContext(), getString(R.string.tvCosplay7), R.color.app_color8, R.font.atma_bold),
+            space,
+            changeText(requireContext(), getString(R.string.tvCosplay8), R.color.white, R.font.atma_bold),
+        )
+
+        // ✅ Dùng SpannableStringBuilder thay vì TextUtils.concat
+        val builder = android.text.SpannableStringBuilder()
+        parts.forEach { builder.append(it) }
+
+        binding.txtGuile.setText(builder, TextView.BufferType.SPANNABLE)
         // Chỉ randomize lần đầu, nếu chưa có item nào
 //        if (viewModel.randomItem.value == null) {
 //            viewModel.randomize()

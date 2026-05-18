@@ -58,29 +58,18 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
             txtLeft.isSelected = true
 
             when (imageType) {
-                // ── Type 0: Từ AddCharacter — success screen ──────────────────
-                0 -> {
-                    tvSuccess.visible()
-                    setTextActionBar(
-                        binding.actionBar.tvCenter,
-                        getString(R.string.successful)
-                    )
-                    setImageActionBar(actionBar.btnActionBarNextToRight, R.drawable.ic_share)
-                    setImageActionBar(actionBar.btnActionBarRight, R.drawable.ic_home)
-                    // ✅ Show 2 nút bottom
-                    txtLeft.apply  { visible(); text = getString(R.string.my_creation1) }
-                    txtRight.apply { visible(); text = getString(R.string.download) }
-                }
-                // ── Type 1: Avatar từ MyPony ──────────────────────────────────
                 1 -> {
                     txtLeft.text = getString(R.string.share)
                     setImageActionBar(actionBar.btnActionBarRight,       R.drawable.ic_delete)
                     setImageActionBar(actionBar.btnActionBarNextToRight, R.drawable.ic_edit1)
+                    txtRight.apply { visible(); text = getString(R.string.download) }
+                    txtLeft.visible()
                 }
-                // ── Type 2: Design từ MyPony ──────────────────────────────────
                 2 -> {
                     txtLeft.text = getString(R.string.share)
                     setImageActionBar(actionBar.btnActionBarRight, R.drawable.ic_delete)
+                    txtRight.apply { visible(); text = getString(R.string.download) }
+                    txtLeft.visible()
                 }
             }
         }
@@ -88,53 +77,19 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
 
     override fun viewListener() {
         binding.apply {
-            actionBar.btnActionBarLeft.onClick {
-                findNavController().navigateUp()
-            }
+            actionBar.btnActionBarLeft.onClick { findNavController().navigateUp() }
 
             when (imageType) {
-                // ── Type 0: Từ AddCharacter ───────────────────────────────────
-                0 -> {
-                    // Home button
-                    actionBar.btnActionBarRight.onClick {
-                        findNavController().navigate(
-                            R.id.homeFragment,
-                            null,
-                            androidx.navigation.NavOptions.Builder()
-                                .setPopUpTo(R.id.homeFragment, true)
-                                .build()
-                        )
-                    }
-                    actionBar.btnActionBarNextToRight.onClick {
-                        shareImage()
-                    }
-                    // ✅ MyPony button
-                    btnBottomLeft.onClick {
-                        findNavController().navigate(
-                            R.id.myPony,
-                            null,
-                            androidx.navigation.NavOptions.Builder()
-                                .setPopUpTo(R.id.homeFragment, false)
-                                .build()
-                        )
-                    }
-                    // ✅ Download button
-                    btnBottomRight.onClick { downloadImage() }
-                }
-
-                // ── Type 1: Avatar từ MyPony ──────────────────────────────────
                 1 -> {
                     actionBar.btnActionBarRight.onClick       { confirmDelete() }
-                    actionBar.btnActionBarNextToRight.onClick { navigateToEdit()  }
-                    btnBottomLeft.onClick                     { shareImage()}
-                    btnBottomRight.onClick                    { downloadImage() }
-                }
-
-                // ── Type 2: Design từ MyPony ──────────────────────────────────
-                2 -> {
-                    actionBar.btnActionBarRight.onClick       { confirmDelete() }
+                    actionBar.btnActionBarNextToRight.onClick { navigateToEdit() }
                     btnBottomLeft.onClick                     { shareImage() }
                     btnBottomRight.onClick                    { downloadImage() }
+                }
+                2 -> {
+                    actionBar.btnActionBarRight.onClick { confirmDelete() }
+                    btnBottomLeft.onClick               { shareImage() }
+                    btnBottomRight.onClick              { downloadImage() }
                 }
             }
         }

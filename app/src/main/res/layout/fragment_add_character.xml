@@ -40,7 +40,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:scaleType="centerCrop"
-        android:src="@drawable/img_bg_custom" />
+        android:src="@drawable/img_bg_lang" />
 
     <!--    flActionBar-->
     <FrameLayout
@@ -64,16 +64,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@id/flActionBar" />
-<ImageView
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    android:scaleType="fitXY"
-    android:adjustViewBounds="true"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    android:src="@drawable/bg_addbackground"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintBottom_toBottomOf="@+id/flSpce"/>
+
     <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/flSave"
         android:layout_width="match_parent"
@@ -101,7 +92,7 @@
         android:id="@+id/flFunction"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:background="@drawable/img_bg_layer"
+        android:background="@drawable/img_bg_add"
         android:elevation="3dp"
         android:layerType="hardware"
         android:paddingTop="10dp"
@@ -153,7 +144,7 @@
                 android:layout_marginTop="4.5dp"
                 android:paddingHorizontal="7.5dp"
                 app:layoutManager="androidx.recyclerview.widget.GridLayoutManager"
-                app:spanCount="5"
+                app:spanCount="4"
                 tools:listitem="@layout/item_sticker" />
         </LinearLayout>
 

@@ -16,19 +16,7 @@ class StickerAdapter : BaseAdapter<SelectedAddModel, ItemStickerBinding>(ItemSti
 
     override fun onBind(binding: ItemStickerBinding, item: SelectedAddModel, position: Int) {
         binding.apply {
-            if (currentSelected == position) {
-                shadown.visible()
-                materialParent.apply {
-                    strokeColor = ContextCompat.getColor(context, R.color.app_color)
-                    setCardBackgroundColor(ContextCompat.getColor(context, R.color.app_color4))
-                }
-            } else {
-                shadown.gone()
-                materialParent.apply {
-                    strokeColor = ContextCompat.getColor(context, R.color.app_color7)
-                    setCardBackgroundColor(ContextCompat.getColor(context, R.color.app_color8))
-                }
-            }
+
             loadImage(root, item.path, imageView)
             root.onClick {
                 selectItem(position)          // ← was missing entirely

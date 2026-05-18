@@ -4,6 +4,7 @@ import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import com.oc.catemoji.catoc.R
 import com.oc.catemoji.catoc.core.base.BaseAdapter
+import com.oc.catemoji.catoc.core.extention.dp
 import com.oc.catemoji.catoc.core.extention.gone
 import com.oc.catemoji.catoc.core.extention.loadFromAsset
 import com.oc.catemoji.catoc.core.extention.loadImage
@@ -24,19 +25,17 @@ class BackgroundColorAdapter : BaseAdapter<SelectedAddModel, ItemBackgroundColor
         val context = binding.root.context
 
         binding.apply {
+            materialParent.strokeWidth = (2).dp(context)
             // ← chỉ dùng currentSelected, không dùng item.isSelected
                 if (currentSelected == position) {
-                    shadown.visible()
-                    materialParent.apply {    strokeColor = ContextCompat.getColor(context, R.color.app_color)
-                    setCardBackgroundColor(
-                        ContextCompat.getColor(context, R.color.app_color4)
-                    )}
+
+                    materialParent.apply {    strokeColor = ContextCompat.getColor(context, R.color.app_color2)}
+
                 } else {
-                    shadown.gone()
-                    materialParent.apply { strokeColor = ContextCompat.getColor(context, R.color.app_color7)
-                    setCardBackgroundColor(
-                        ContextCompat.getColor(context, R.color.app_color8)
-                    )
+                    if (position == 0)materialParent.strokeWidth = (0).dp(context)
+                    else{
+
+                    materialParent.apply { strokeColor = ContextCompat.getColor(context, R.color.app_color7)}
                 // tắt elevation mặc định để dùng custom shadow
                 }
             }

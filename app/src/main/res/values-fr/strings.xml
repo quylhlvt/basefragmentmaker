@@ -85,6 +85,7 @@
     <string name="have_rated">Merci d’avoir noté notre application</string>
     <string name="refresh">Actualiser</string>
     <string name="hello_blank_fragment">Bonjour fragment vide</string>
+    <string name="cosplay_chibi">Déguisement-Chibi</string>
     <string name="cosplay">Déguisement Chibi</string>
     <string name="permission_camera_denied">L’accès à la caméra est requis pour cette fonction</string>
     <string name="cat_random">Chat aléatoire</string>
@@ -107,4 +108,14 @@
     <string name="enter_your_package_name">Saisir le nom du package</string>
     <string name="please_enter_your_package_name">Veuillez saisir votre nom de package !</string>
     <string name="this_action_may_contain_advertising">Cette action peut contenir des publicités</string>
+    <string name="random_chibi">Chibi Aléatoire</string>
+    <string name="instruction">Instructions</string>
+    <string name="tvCosplay1">En mode Cosplay,</string>
+    <string name="tvCosplay2">les joueurs reçoivent aléatoirement</string>
+    <string name="tvCosplay3">une image de référence</string>
+    <string name="tvCosplay4">à suivre. Votre tâche est de recréer ce personnage aussi fidèlement que possible en choisissant les bons</string>
+    <string name="tvCosplay5">coiffures, tenues, couleurs et accessoires.</string>
+    <string name="tvCosplay6">Chaque correspondance correcte augmente votre</string>
+    <string name="tvCosplay7">pourcentage (%).</string>
+    <string name="tvCosplay8">Plus votre personnage ressemble à l’image aléatoire, plus votre score final sera élevé. Faites attention aux petits détails pour obtenir le meilleur résultat cosplay.</string>
 </resources>

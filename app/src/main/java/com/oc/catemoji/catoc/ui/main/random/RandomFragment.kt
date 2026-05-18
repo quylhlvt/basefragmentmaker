@@ -65,6 +65,7 @@ class RandomFragment : BaseFragment<FragmentRandomBinding, RandomViewModel>(
 
     override fun initView() {
         binding.setupActionBar()
+        binding.txtShow.isSelected = true
     }
 
     private fun FragmentRandomBinding.setupActionBar() {

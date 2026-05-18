@@ -85,7 +85,8 @@
     <string name="have_rated">Terima kasih telah memberi nilai aplikasi kami</string>
     <string name="refresh">Muat Ulang</string>
     <string name="hello_blank_fragment">Halo fragmen kosong</string>
-    <string name="cosplay">Bermain Peran Chibi</string>
+    <string name="cosplay_chibi">Bermain Peran Chibi</string>
+    <string name="cosplay">Bermain Peran</string>
     <string name="permission_camera_denied">Izin kamera diperlukan untuk menggunakan fitur ini</string>
     <string name="cat_random">Kucing Acak</string>
     <string name="random">Acak</string>
@@ -107,4 +108,14 @@
     <string name="enter_your_package_name">Masukkan nama paket</string>
     <string name="please_enter_your_package_name">Masukkan nama paket!</string>
     <string name="this_action_may_contain_advertising">Tindakan ini mungkin mengandung iklan</string>
+    <string name="random_chibi">Chibi Acak</string>
+    <string name="instruction">Instruksi</string>
+    <string name="tvCosplay1">Dalam Mode Cosplay,</string>
+    <string name="tvCosplay2">pemain akan secara acak diberikan</string>
+    <string name="tvCosplay3">satu gambar referensi</string>
+    <string name="tvCosplay4">untuk diikuti. Tugasmu adalah membuat ulang karakter tersebut seakurat mungkin dengan memilih</string>
+    <string name="tvCosplay5">gaya rambut, pakaian, warna, dan aksesori yang tepat.</string>
+    <string name="tvCosplay6">Setiap kecocokan yang benar akan meningkatkan</string>
+    <string name="tvCosplay7">persentase skor (%).</string>
+    <string name="tvCosplay8">Semakin mirip karaktermu dengan gambar acak tersebut, semakin tinggi skor akhir yang akan kamu dapatkan. Perhatikan detail kecil untuk mendapatkan hasil cosplay terbaik.</string>
 </resources>
