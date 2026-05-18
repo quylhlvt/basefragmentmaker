@@ -28,22 +28,22 @@ class CurvedTextView @JvmOverloads constructor(
     private var strokeColor = Color.BLACK
     private var fontFamily: Typeface? = null
 
-    // Marquee
     private var scrollOffset = 0f
-    private var arcLength = 0f
     private var textWidth = 0f
     private var isMarqueeRunning = false
-    private val marqueeSpeed = 1.5f  // px/frame, tăng để nhanh hơn
+    private val marqueeSpeed = 1.5f
     private val handler = Handler(Looper.getMainLooper())
+
+    private var clipLeft = 0f
+    private var clipRight = 0f
+    private var hasValidSize = false  // ← THÊM FLAG NÀY
+
     private val marqueeRunnable = object : Runnable {
         override fun run() {
             if (!isMarqueeRunning) return
             scrollOffset += marqueeSpeed
-            // Reset sau khi text + gap chạy xong 1 vòng
-            val gap =  0.5f  // khoảng cách giữa 2 lần lặp
-            if (scrollOffset > textWidth + gap) {
-                scrollOffset = 0f
-            }
+            val gap = textWidth * 1.5f
+            if (scrollOffset > textWidth + gap) scrollOffset = 0f
             invalidate()
             handler.postDelayed(this, 8)
         }
@@ -53,14 +53,14 @@ class CurvedTextView @JvmOverloads constructor(
         setLayerType(LAYER_TYPE_SOFTWARE, null)
         attrs?.let {
             val a = context.obtainStyledAttributes(it, R.styleable.CurvedTextView)
-            text         = a.getString(R.styleable.CurvedTextView_android_text) ?: ""
-            textSize     = a.getDimension(R.styleable.CurvedTextView_android_textSize, textSize)
-            textColor    = a.getColor(R.styleable.CurvedTextView_android_textColor, Color.WHITE)
-            curveDepth   = a.getFloat(R.styleable.CurvedTextView_curveDepth, 0.12f)
-            centerAngle  = a.getFloat(R.styleable.CurvedTextView_arc_centerAngle2, -90f)
-            strokeWidth  = a.getDimension(R.styleable.CurvedTextView_arc_strokeWidth, 0f)
-            strokeColor  = a.getColor(R.styleable.CurvedTextView_arc_strokeColor, Color.BLACK)
-            val fontRes  = a.getResourceId(R.styleable.CurvedTextView_android_fontFamily, -1)
+            text        = a.getString(R.styleable.CurvedTextView_android_text) ?: ""
+            textSize    = a.getDimension(R.styleable.CurvedTextView_android_textSize, textSize)
+            textColor   = a.getColor(R.styleable.CurvedTextView_android_textColor, Color.WHITE)
+            curveDepth  = a.getFloat(R.styleable.CurvedTextView_curveDepth, 0.12f)
+            centerAngle = a.getFloat(R.styleable.CurvedTextView_arc_centerAngle2, -90f)
+            strokeWidth = a.getDimension(R.styleable.CurvedTextView_arc_strokeWidth, 0f)
+            strokeColor = a.getColor(R.styleable.CurvedTextView_arc_strokeColor, Color.BLACK)
+            val fontRes = a.getResourceId(R.styleable.CurvedTextView_android_fontFamily, -1)
             if (fontRes != -1) fontFamily = ResourcesCompat.getFont(context, fontRes)
             a.recycle()
         }
@@ -73,65 +73,69 @@ class CurvedTextView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
+        if (w == 0 || h == 0) return  // ← GUARD: bỏ qua nếu chưa có size thực
 
-        // Ribbon: viewport 314, dải từ x=36→283
-        // Tỉ lệ padding: left=36/314, right=(314-283)/314
-        val paddingLeftRatio  = 36f / 314f   // ~11.5%
-        val paddingRightRatio = 31f / 314f   // ~9.9%
+        hasValidSize = true
+        val paddingLeftRatio  = 41f / 314f
+        val paddingRightRatio = 41f / 314f
         clipLeft  = w * paddingLeftRatio
         clipRight = w * (1f - paddingRightRatio)
 
         buildArcPath(w.toFloat(), h.toFloat())
+
+        // Luôn restart check khi size thay đổi
+        handler.removeCallbacks(marqueeRunnable)
+        isMarqueeRunning = false
         checkMarquee()
     }
-
-    private var clipLeft  = 0f
-    private var clipRight = 0f
 
     private fun buildArcPath(w: Float, h: Float) {
         val rise   = w * curveDepth
         val radius = (w * w) / (8f * rise) + rise / 2f
         val cx     = w / 2f
-        val arcCy  = h + radius - rise- rise - rise/2
+        val arcCy  = h + radius - rise - rise - rise / 2f
 
+        paintText.textSize = textSize  // ← ĐẢM BẢO textSize đúng trước khi measure
         textWidth = paintText.measureText(text)
+
         val circumference = (2 * Math.PI * radius).toFloat()
         val textAngle     = textWidth * 360f / circumference
-        val startAngle    = centerAngle
 
-        arcLength = w
         oval.set(cx - radius, arcCy - radius, cx + radius, arcCy + radius)
 
         textPath.reset()
-        // ✅ Sweep 4x để đủ chỗ cho 2 lần text chạy
-        textPath.addArc(oval, startAngle - textAngle * 2f, textAngle * 5f)
+        textPath.addArc(oval, centerAngle - textAngle * 2f, textAngle * 5f)
     }
 
     private fun checkMarquee() {
+        if (!hasValidSize) return  // ← GUARD: không check nếu chưa layout
+
         val ribbonWidth = clipRight - clipLeft
-        val needsMarquee = textWidth > ribbonWidth * 0.9f
+        paintText.textSize = textSize
+        textWidth = paintText.measureText(text)
+
+        val needsMarquee = text.isNotEmpty() && textWidth > ribbonWidth * 0.9f
         if (needsMarquee && !isMarqueeRunning) {
             isMarqueeRunning = true
-            scrollOffset = 0f  // ✅ bắt đầu từ vị trí giữa bình thường
+            scrollOffset = 0f
             handler.post(marqueeRunnable)
-        } else if (!needsMarquee) {
+        } else if (!needsMarquee && isMarqueeRunning) {
             isMarqueeRunning = false
             scrollOffset = 0f
             handler.removeCallbacks(marqueeRunnable)
         }
     }
+
     override fun onDraw(canvas: Canvas) {
-        if (text.isEmpty()) return
+        if (text.isEmpty() || !hasValidSize) return
 
         val fm      = paintText.fontMetrics
         val vOffset = -(fm.ascent + fm.descent) / 2f
+        val gap     = textWidth * 1.5f
 
         canvas.save()
         canvas.clipRect(clipLeft, 0f, clipRight, height.toFloat())
 
-        val gap = textWidth * 0.5f  // khoảng cách giữa 2 lần text
-
-        // Vẽ stroke
         if (strokeWidth > 0f) {
             paintText.apply {
                 style            = Paint.Style.STROKE
@@ -139,13 +143,10 @@ class CurvedTextView @JvmOverloads constructor(
                 strokeJoin       = Paint.Join.ROUND
                 color            = strokeColor
             }
-            // ✅ Vẽ text lần 1
             canvas.drawTextOnPath(text, textPath, -scrollOffset, vOffset, paintText)
-            // ✅ Vẽ text lần 2 ngay sau lần 1 (offset = textWidth + gap)
             canvas.drawTextOnPath(text, textPath, -(scrollOffset - textWidth - gap), vOffset, paintText)
         }
 
-        // Vẽ fill
         paintText.apply {
             style = Paint.Style.FILL
             color = textColor
@@ -158,7 +159,9 @@ class CurvedTextView @JvmOverloads constructor(
 
     override fun onAttachedToWindow() {
         super.onAttachedToWindow()
-        checkMarquee()
+        if (hasValidSize) {
+            post { checkMarquee() }
+        }
     }
 
     override fun onDetachedFromWindow() {
@@ -167,11 +170,32 @@ class CurvedTextView @JvmOverloads constructor(
         handler.removeCallbacks(marqueeRunnable)
     }
 
-    fun setText(text: String) {
-        this.text = text
-        paintText.textSize = textSize
+    fun startMarqueeWhenVisible() {
+        if (hasValidSize) {
+            handler.removeCallbacks(marqueeRunnable)
+            isMarqueeRunning = false
+            checkMarquee()
+        } else {
+            // View chưa measure → đợi layout xong
+            viewTreeObserver.addOnGlobalLayoutListener(object :
+                android.view.ViewTreeObserver.OnGlobalLayoutListener {
+                override fun onGlobalLayout() {
+                    viewTreeObserver.removeOnGlobalLayoutListener(this)
+                    checkMarquee()
+                }
+            })
+        }
+    }
+
+    fun setText(newText: String) {
+        this.text = newText
+        if (hasValidSize) {
+            buildArcPath(width.toFloat(), height.toFloat())
+            handler.removeCallbacks(marqueeRunnable)
+            isMarqueeRunning = false
+            checkMarquee()
+        }
         invalidate()
-        post { checkMarquee() }
     }
 
     fun setTypeface(tf: Typeface?) {

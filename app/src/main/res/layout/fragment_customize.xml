@@ -163,11 +163,6 @@
             </androidx.constraintlayout.widget.ConstraintLayout>
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-
-
-
-
-
         <FrameLayout
             android:id="@+id/frameLayer"
             android:background="@drawable/img_bg_layer"

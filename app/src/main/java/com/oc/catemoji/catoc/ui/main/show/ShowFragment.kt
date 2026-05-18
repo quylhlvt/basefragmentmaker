@@ -96,11 +96,14 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
             setImageActionBar(btnActionBarRight, R.drawable.next_app)
-            setTextActionBar( tvCenter, "05:00" )
+//            setTextActionBar( tvCenter, "05:00" )
         }
         setupAdapters()
         readArgsAndInit()
         startCountDown()
+        binding.txtNext.isSelected = true
+        binding.txtNext2.isSelected = true
+        binding.txtWin3.isSelected = true
         val bitmap = viewModelActivity.cosplayBitmap
         if (bitmap != null && !bitmap.isRecycled) {
             binding.imvImage2.setImageBitmap(bitmap)
@@ -110,24 +113,47 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
             binding.imvImage2.visibility = View.GONE
         }
     }
+    private fun updateTimerUI(minutes: Int, seconds: Int) {
+        val min1 = minutes / 10
+        val min2 = minutes % 10
+
+        val sec1 = seconds / 10
+        val sec2 = seconds % 10
+
+        binding.number1.text = min1.toString()
+        binding.number2.text = min2.toString()
+
+        binding.number4.text = sec1.toString()
+        binding.number5.text = sec2.toString()
+    }
     private fun startTimer() {
         timerJob?.cancel()
+
         var remainingSeconds = totalSeconds
+
         timerJob = viewLifecycleOwner.lifecycleScope.launch {
-            while (remainingSeconds > 0) {
+            while (remainingSeconds >= 0) {
+
                 val minutes = remainingSeconds / 60
                 val seconds = remainingSeconds % 60
-                binding.actionBar.tvCenter.text =
-                    String.format("%02d:%02d", minutes, seconds)
+
+                updateTimerUI(minutes, seconds)
+
+                if (remainingSeconds == 0) {
+                    showFailLayout()
+                    break
+                }
+
                 kotlinx.coroutines.delay(1000)
                 remainingSeconds--
             }
-            // Hết giờ → navigate
-            binding.actionBar.tvCenter.text = "00:00"
-            if (isAdded && !isDetached) {
-                navigateToSuccess()
-            }
         }
+    }
+    // Thêm hàm showFailLayout
+    private fun showFailLayout() {
+        if (!isAdded || isDetached) return
+        timerJob?.cancel()
+        binding.showFail.visibility = View.VISIBLE
     }
     private fun startCountDown() {
         binding.actionBar.btnActionBarLeft.isEnabled = false
@@ -257,9 +283,13 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
                 }.start()
             }
 
-            // ── Random ────────────────────────────────────────────────────────────
-            imgRandom.onClick {
-                if (!checkOnlineNetworkOrShowDialog()) viewModel.randomizeAll() // ← guard
+            frameTxtNext.onClick(500) {
+                navigateToSuccess()
+            }
+
+            // ← nút Next trong layoutWin
+            frameTxtNext2.onClick(500) {
+                navigateToSuccess()
             }
 
             // ── Color toggle ──────────────────────────────────────────────────────
@@ -302,8 +332,16 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
     // ShowFragment.observeData() — THÊM guard này
     // ✅ FIX — thêm flag giống CustomizeFragment
     private var hasTriggeredReInit = false
-
+    private fun showWinLayout() {
+        if (!isAdded || isDetached) return
+        timerJob?.cancel()
+        binding.layoutWin.visibility = View.VISIBLE
+        binding.tvWin.post {
+            binding.tvWin.startMarqueeWhenVisible()
+        }
+    }
     override fun observeData() {
+
         viewLifecycleOwner.lifecycleScope.launch {
             viewLifecycleOwner.repeatOnLifecycle(Lifecycle.State.STARTED) {
                 viewModel.state.collectLatest { state ->
@@ -327,7 +365,8 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
                     if (state.matchPercent >= 100) {
                         timerJob?.cancel()
                         if (isAdded && !isDetached) {
-                            navigateToSuccess()
+//                            navigateToSuccess()
+                            showWinLayout()
                         }
                     }
                 }
@@ -494,7 +533,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         // Animate progress fill (scaleY từ 0→1 theo %)
         binding.progressTrack.post {
             val trackH = binding.progressTrack.height.toFloat()
-            val marginPx = 5 * resources.displayMetrics.density
+            val marginPx = 12 * resources.displayMetrics.density
             val fillH = trackH - marginPx
             val scale = percent / 100f
 
