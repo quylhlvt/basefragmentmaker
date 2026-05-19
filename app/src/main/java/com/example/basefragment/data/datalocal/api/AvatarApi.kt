@@ -14,8 +14,8 @@ import javax.inject.Singleton
 // ── CONFIG ────────────────────────────────────────────────────────────────────
 
 object ApiConfig {
-    const val BASE_URL_1   = "https://raw.githubusercontent.com/lehongquy/ST001_AnimalMaker/refs/heads/main/"
-    const val BASE_URL_2   = "https://raw.githubusercontent.com/lehongquy/ST001_AnimalMaker/refs/heads/main/"
+    const val BASE_URL_1   = "https://raw.githubusercontent.com/lehongquy/ST001_AnimalMaker/refs/heads/mainData/"
+    const val BASE_URL_2   = "https://raw.githubusercontent.com/lehongquy/ST001_AnimalMaker/refs/heads/mainData/"
     const val BASE_CONNECT = "public/app/ST229_CatAvatarCatMaker/"
 
     // URL đang active (thay đổi khi fallback)
@@ -46,7 +46,7 @@ data class X10(
 // ── SERVICE ───────────────────────────────────────────────────────────────────
 
 interface AvatarApiService {
-    @GET("api/app/ST229_CatAvatarCatMaker")
+    @GET("ST001_AnimalMaker.json")
     suspend fun getAllData(): Map<String, List<X10>>
 }
 
@@ -58,6 +58,14 @@ object ApiTemplateMapper {
         val base = ApiConfig.BASE_URL
         val conn = ApiConfig.BASE_CONNECT
 
+        Log.d("ApiMapper1", "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━")
+        Log.d("ApiMapper1", "📦 Total keys: ${raw.size}")
+        raw.forEach { (key, list) ->
+            Log.d("ApiMapper1", "  🔑 key=$key | parts count=${list.size}")
+            list.forEach { x10 ->
+                Log.d("ApiMapper1", "    ├─ parts=${x10.parts} | qty=${x10.quantity} | level=${x10.level} | color=${x10.colorArray} | position=${x10.position}")
+            }
+        }
         return raw.entries
             .sortedBy { (_, list) -> list.firstOrNull()?.levelInt ?: Int.MAX_VALUE }
             .map { (key, list) ->
@@ -68,10 +76,19 @@ object ApiTemplateMapper {
                         val x = parts.getOrNull(0)?.toIntOrNull() ?: 0  // số TRƯỚC "-"
                         val y = parts.getOrNull(1)?.toIntOrNull() ?: 0  // số SAU "-"
 
-                        val (colors, listThumbPath) = buildColorsAndThumbs(x10, base, conn)
+                        val (colors, listThumbPath) = buildColorsAndThumbs(x10, base, conn, key)
+                        Log.d("ApiMapper1", "  🧩 key=$key | parts=${x10.parts} | x=$x | y=$y")
+                        Log.d("ApiMapper1", "    ├─ thumbs count=${listThumbPath.size}")
+                        Log.d("ApiMapper1", "    ├─ colors count=${colors.size}")
+                        colors.forEachIndexed { i, cm ->
+                            Log.d("ApiMapper1", "    │  color[$i]: color=${cm.color} | paths count=${cm.listPath.size}")
+                            cm.listPath.take(2).forEach { p ->
+                                Log.d("ApiMapper1", "    │    └─ $p")
+                            }
+                        }
                         BodyPartModel(
 //                            nav           = "${base}${conn}${x10.position}/${x10.parts}/nav.png",
-                            nav           = "${base}${x10.position}/${x10.parts}/nav.png",
+                            nav           = "${base}${key}/${x10.parts}/nav.png",
                             listPath      = colors,
                             listThumbPath = listThumbPath,
                             position      = x,
@@ -100,6 +117,8 @@ object ApiTemplateMapper {
                         }
                     }
                 }
+                Log.d("ApiMapper1", "✅ CustomModel id=online_$key | bodyParts=${bodyParts.size}")
+                Log.d("ApiMapper1", "  avatar=${base}$key/avatar.png")
 
                 CustomModel(
                     id         = "online_$key",
@@ -115,7 +134,8 @@ object ApiTemplateMapper {
     private fun buildColorsAndThumbs(
         x10: X10,
         base: String,
-        conn: String
+        conn: String,
+        key: String  // ← thêm tham số key
     ): Pair<ArrayList<ColorModel>, ArrayList<String>> {
         val colors        = arrayListOf<ColorModel>()
         val listThumbPath = arrayListOf<String>()
@@ -124,29 +144,24 @@ object ApiTemplateMapper {
 
         if (x10.colorArray.isEmpty()) {
             for (i in 1..halfQty) {
-//                listThumbPath.add("${base}${conn}${x10.position}/${x10.parts}/thumb_$i.png")
-                listThumbPath.add("${base}${x10.position}/${x10.parts}/thumb_$i.png")
+                listThumbPath.add("${base}${key}/${x10.parts}/thumb_$i.png") // ← key
             }
             val realPaths = (1..halfQty).map { i ->
-//                "${base}${conn}${x10.position}/${x10.parts}/$i.png"
-                "${base}${x10.position}/${x10.parts}/$i.png"
+                "${base}${key}/${x10.parts}/$i.png" // ← key
             }
             colors.add(ColorModel("", ArrayList(realPaths)))
         } else {
             for (i in 1..halfQty * 2 + 1) {
-//                listThumbPath.add("${base}${conn}${x10.position}/${x10.parts}/thumb_$i.png")
-                listThumbPath.add("${base}${x10.position}/${x10.parts}/thumb_$i.png")
+                listThumbPath.add("${base}${key}/${x10.parts}/thumb_$i.png") // ← key
             }
             x10.colorArray.split(",").forEach { color ->
                 val paths = (1..qty).map { i ->
-//                    "${base}${conn}${x10.position}/${x10.parts}/$color/$i.png"
-                    "${base}${x10.position}/${x10.parts}/$color/$i.png"
+                    "${base}${key}/${x10.parts}/$color/$i.png" // ← key
                 }
                 colors.add(ColorModel(color, ArrayList(paths)))
             }
         }
 
-        // KHÔNG add "none"/"dice" ở đây — để map() xử lý sau khi có đủ thông tin position
         return colors to listThumbPath
     }
 }

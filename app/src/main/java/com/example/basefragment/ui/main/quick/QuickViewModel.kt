@@ -15,6 +15,7 @@ import com.example.basefragment.data.model.custom.SelectionIndex
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.channels.BufferOverflow
@@ -54,14 +55,16 @@ class QuickViewModel @Inject constructor(
     val readyKey: SharedFlow<String> = _readyKey.asSharedFlow()
     // ── MỚI: khai báo đủ ──────────────────────────────────────────────────
     private val mergeDispatcher = Dispatchers.IO.limitedParallelism(12)
-    private var backgroundJob: kotlinx.coroutines.Job? = null
+    private var backgroundJob: Job? = null
+    private var visibleJob: Job? = null
+
     val keyToPosition = ConcurrentHashMap<String, Int>()
     private val _visibleRange = MutableStateFlow(0..5)
 
     companion object {
-        const val TOTAL_ITEMS = 20
+        const val TOTAL_ITEMS = 100
         const val PAGE_SIZE    = 6
-        const val MERGE_SIZE   = 256     // giảm từ 256 → 192
+        const val MERGE_SIZE   = 512     // giảm từ 256 → 192
     }
 
     fun itemKey(item: QuickMixItem) =
@@ -113,19 +116,20 @@ class QuickViewModel @Inject constructor(
         backgroundJob?.cancel()
         backgroundJob = viewModelScope.launch(mergeDispatcher) {
 
-            // Window 1: merge PAGE_SIZE item đầu (visible ngay khi mở)
+            // ✅ Batch 1: 6 item đầu tiên (visible ngay khi mở)
             all.take(PAGE_SIZE)
-                .map { async(mergeDispatcher) { mergeAndCache(it) } }
+                .map { async { mergeAndCache(it) } }
                 .awaitAll()
 
-            // Window 2+: background tuần tự theo batch
-            all.drop(PAGE_SIZE).chunked(PAGE_SIZE).forEach { batch ->
+            // ✅ Batch 2+: background, nhường CPU cho visibleJob
+            all.drop(PAGE_SIZE).chunked(3).forEach { batch ->
                 if (!isActive) return@launch
-                // ── ƯU TIÊN: bỏ qua item đã có trong visible range ──
-                // (chúng đã được merge bởi updateVisibleRange rồi)
-                val needed = batch.filter { !bitmapCache.containsKey(itemKey(it)) }
-                if (needed.isEmpty()) return@forEach
-                needed.map { async(mergeDispatcher) { mergeAndCache(it) } }.awaitAll()
+                // ✅ Chờ visibleJob xong rồi mới chạy tiếp background
+                visibleJob?.join()
+                batch.filter { !bitmapCache.containsKey(itemKey(it)) }
+                    .takeIf { it.isNotEmpty() }
+                    ?.map { async { mergeAndCache(it) } }
+                    ?.awaitAll()
             }
         }
     }
@@ -161,27 +165,16 @@ class QuickViewModel @Inject constructor(
         val safeLast  = (last + 1).coerceIn(0, all.size)
         if (safeFirst >= safeLast) return
 
-        val visible = all.subList(safeFirst, safeLast)
-        val missing = visible.filter { !bitmapCache.containsKey(itemKey(it)) }
+        val missing = all.subList(safeFirst, safeLast)
+            .filter { !bitmapCache.containsKey(itemKey(it)) }
         if (missing.isEmpty()) return
 
-        // ── Hủy background job, ưu tiên visible trước ──
-        backgroundJob?.cancel()
-
-        backgroundJob = viewModelScope.launch(mergeDispatcher) {
-            // 1. Merge visible ngay lập tức
+        // ✅ Cancel visibleJob cũ, KHÔNG cancel backgroundJob
+        visibleJob?.cancel()
+        visibleJob = viewModelScope.launch(mergeDispatcher) {
             missing
-                .map { async(mergeDispatcher) { mergeAndCache(it) } }
+                .map { async { mergeAndCache(it) } }
                 .awaitAll()
-
-            // 2. Tiếp tục background các item còn lại (chưa cache)
-            if (!isActive) return@launch
-            all.filter { !bitmapCache.containsKey(itemKey(it)) }
-                .chunked(PAGE_SIZE)
-                .forEach { batch ->
-                    if (!isActive) return@launch
-                    batch.map { async(mergeDispatcher) { mergeAndCache(it) } }.awaitAll()
-                }
         }
     }
 

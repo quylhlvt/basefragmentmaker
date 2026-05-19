@@ -46,10 +46,13 @@ class QuickFragment : BaseFragment<FragmentQuickBinding, QuickViewModel>(
             adapter       = this@QuickFragment.adapter
             itemAnimator  = null
         }
-
         binding.recyclerViewQuick.addOnScrollListener(object : RecyclerView.OnScrollListener() {
             override fun onScrolled(recyclerView: RecyclerView, dx: Int, dy: Int) {
                 notifyVisibleRange()
+            }
+            // ✅ Báo ngay khi scroll dừng — ưu tiên load đúng vùng đang xem
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                if (newState == RecyclerView.SCROLL_STATE_IDLE) notifyVisibleRange()
             }
         })
 

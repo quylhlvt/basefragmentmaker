@@ -17,16 +17,17 @@ class QuickMixAdapter(
     var onItemClick:       ((QuickMixItem) -> Unit)? = null
     var onRegenerateClick: ((Int) -> Unit)?           = null
 
+    // ✅ Map key → position để notifyKeyReady O(1) thay vì O(n)
+    private val keyToAdapterPos = HashMap<String, Int>()
+
     inner class VH(val binding: ItemQuickMixBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(item: QuickMixItem) {
             val key = viewModel.itemKey(item)
             binding.imgPreview.tag = key
-
             binding.root.setOnClickListener { onItemClick?.invoke(item) }
 
-            // Check cache mỗi lần bind — kể cả khi scroll lại
             val cached = viewModel.bitmapCache[key]
             if (cached != null && !cached.isRecycled) {
                 binding.progressLoading.gone()
@@ -34,31 +35,43 @@ class QuickMixAdapter(
             } else {
                 binding.progressLoading.visible()
                 binding.imgPreview.setImageBitmap(null)
-
-                // ← Chủ động request merge nếu item này chưa có bitmap
-                viewModel.requestMergeIfMissing(item)
+                // ✅ KHÔNG gọi requestMergeIfMissing ở đây
+                // — để updateVisibleRange xử lý ưu tiên
             }
         }
     }
 
-    // Gọi khi ViewModel báo key nào ready — chỉ update đúng item đó
-    fun notifyKeyReady(key: String) {
-        for (i in 0 until itemCount) {
-            val item = runCatching { getItem(i) }.getOrNull() ?: continue
-            if (viewModel.itemKey(item) == key) {
-                notifyItemChanged(i, PAYLOAD_BITMAP_READY)
-                break
-            }
+    // ✅ Override submitList để build map ngay khi data về
+    override fun submitList(list: List<QuickMixItem>?) {
+        keyToAdapterPos.clear()
+        list?.forEachIndexed { index, item ->
+            keyToAdapterPos[viewModel.itemKey(item)] = index
         }
+        super.submitList(list)
+    }
+
+    override fun submitList(list: List<QuickMixItem>?, commitCallback: Runnable?) {
+        keyToAdapterPos.clear()
+        list?.forEachIndexed { index, item ->
+            keyToAdapterPos[viewModel.itemKey(item)] = index
+        }
+        super.submitList(list, commitCallback)
+    }
+
+    // ✅ O(1) — không loop nữa
+    fun notifyKeyReady(key: String) {
+        val pos = keyToAdapterPos[key] ?: return
+        notifyItemChanged(pos, PAYLOAD_BITMAP_READY)
     }
 
     override fun onBindViewHolder(holder: VH, position: Int, payloads: MutableList<Any>) {
         if (payloads.contains(PAYLOAD_BITMAP_READY)) {
-            val key    = viewModel.itemKey(getItem(position))
+            val item   = runCatching { getItem(position) }.getOrNull() ?: return
+            val key    = viewModel.itemKey(item)
+            if (holder.binding.imgPreview.tag != key) return
             val cached = viewModel.bitmapCache[key]
-            if (cached != null && !cached.isRecycled &&
-                holder.binding.imgPreview.tag == key) {
-                holder.binding.progressLoading.visibility = android.view.View.GONE
+            if (cached != null && !cached.isRecycled) {
+                holder.binding.progressLoading.gone()
                 holder.binding.imgPreview.setImageBitmap(cached)
             }
             return
