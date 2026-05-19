@@ -66,20 +66,20 @@
     <string name="zero_star_title">Gefällt Ihnen die App?</string>
     <string name="zero_star">Teilen Sie uns Ihre Erfahrung mit</string>
 
-    <string name="one_star_title">Oh nein =((</string>
+    <string name="one_star_title">Oh nein!</string>
     <string name="one_star">Bitte geben Sie uns Feedback</string>
 
-    <string name="two_star_title">Oh nein =((</string>
+    <string name="two_star_title">Oh nein!</string>
     <string name="two_star">Bitte geben Sie uns Feedback</string>
 
-    <string name="three_star_title">Oh nein =((</string>
+    <string name="three_star_title">Oh nein!</string>
     <string name="three_star">Bitte geben Sie uns Feedback</string>
 
-    <string name="four_star_title">Wir lieben dich auch =3</string>
-    <string name="four_star">Danke für Ihr Feedback =3</string>
+    <string name="four_star_title">Wir lieben dich auch!</string>
+    <string name="four_star">Danke für Ihr Feedback</string>
 
-    <string name="five_star_title">Wir lieben dich auch =3</string>
-    <string name="five_star">Danke für Ihr Feedback =3</string>
+    <string name="five_star_title">Wir lieben dich auch!</string>
+    <string name="five_star">Danke für Ihr Feedback</string>
 
     <string name="rate_us_0">Sie haben noch nicht bewertet!</string>
     <string name="have_rated">Vielen Dank für Ihre Bewertung</string>
@@ -96,6 +96,7 @@
     <string name="image">Bild</string>
     <string name="color">Farbe</string>
     <string name="successful">Erfolgreich</string>
+    <string name="successfully">Erfolgreich</string>
     <string name="context_guide_body">Im Kostümspiel-Modus erhalten die Spieler zufällig ein Referenzbild. Ihre Aufgabe ist es, diese Figur so genau wie möglich nachzubilden, indem Sie passende Frisuren, Outfits, Farben und Accessoires auswählen. Jede richtige Übereinstimmung erhöht Ihren Prozentsatz (%). Je ähnlicher Ihre Figur dem Zufallsbild ist, desto höher ist Ihre Punktzahl. Achten Sie auf kleine Details, um das beste Cosplay-Ergebnis zu erzielen.</string>
     <string name="try_again">Erneut versuchen</string>
     <string name="no_internet">Kein Internet</string>

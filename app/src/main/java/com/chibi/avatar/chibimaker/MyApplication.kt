@@ -5,7 +5,6 @@ import android.util.Log
 import androidx.core.content.ContextCompat
 import androidx.core.content.res.ResourcesCompat
 import com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
-
 import com.tencent.mmkv.MMKV
 import dagger.hilt.android.HiltAndroidApp
 

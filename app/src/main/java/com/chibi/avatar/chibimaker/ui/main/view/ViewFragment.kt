@@ -83,12 +83,12 @@ class ViewFragment : BaseFragment<FragmentViewBinding, ViewViewModel>(
                 1 -> {
                     actionBar.btnActionBarRight.onClick       { confirmDelete() }
                     actionBar.btnActionBarNextToRight.onClick { navigateToEdit() }
-                    btnBottomLeft.onClick                     { shareImage() }
+                    btnBottomLeft.onClick( 1500)                   { shareImage() }
                     btnBottomRight.onClick                    { downloadImage() }
                 }
                 2 -> {
                     actionBar.btnActionBarRight.onClick { confirmDelete() }
-                    btnBottomLeft.onClick               { shareImage() }
+                    btnBottomLeft.onClick   ( 1500)            { shareImage() }
                     btnBottomRight.onClick              { downloadImage() }
                 }
             }

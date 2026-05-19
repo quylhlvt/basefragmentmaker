@@ -95,7 +95,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
     override fun initView() {
         binding.actionBar.apply {
             setImageActionBar(btnActionBarLeft, R.drawable.back_app)
-            setImageActionBar(btnActionBarRight, R.drawable.next_app)
+//            setImageActionBar(btnActionBarRight, R.drawable.next_app)
 //            setTextActionBar( tvCenter, "05:00" )
         }
         setupAdapters()
@@ -270,7 +270,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
     override fun viewListener() {
         binding.apply {
             actionBar.btnActionBarLeft.onClick { popBack() }
-            actionBar.btnActionBarRight.onClick { navigateToSuccess() }
+//            actionBar.btnActionBarRight.onClick { navigateToSuccess() }
 
             materialSmall.onClick { imgShowBig.visible() }
             close.onClick { imgShowBig.gone() }
@@ -533,7 +533,7 @@ class ShowFragment : BaseFragment<FragmentShowBinding, ShowViewModel>(
         // Animate progress fill (scaleY từ 0→1 theo %)
         binding.progressTrack.post {
             val trackH = binding.progressTrack.height.toFloat()
-            val marginPx = 12 * resources.displayMetrics.density
+            val marginPx = 10 * resources.displayMetrics.density
             val fillH = trackH - marginPx
             val scale = percent / 100f
 

@@ -66,20 +66,20 @@
     <string name="zero_star_title">क्या आपको यह ऐप पसंद है?</string>
     <string name="zero_star">अपना अनुभव बताएं</string>
 
-    <string name="one_star_title">ओह नहीं =(</string>
+    <string name="one_star_title">ओह नहीं!</string>
     <string name="one_star">कृपया हमें अपनी प्रतिक्रिया दें</string>
 
-    <string name="two_star_title">ओह नहीं =(</string>
+    <string name="two_star_title">ओह नहीं!</string>
     <string name="two_star">कृपया हमें अपनी प्रतिक्रिया दें</string>
 
-    <string name="three_star_title">ओह नहीं =(</string>
+    <string name="three_star_title">ओह नहीं!</string>
     <string name="three_star">कृपया हमें अपनी प्रतिक्रिया दें</string>
 
-    <string name="four_star_title">हम भी आपसे प्यार करते हैं =3</string>
-    <string name="four_star">आपकी प्रतिक्रिया के लिए धन्यवाद =3</string>
+    <string name="four_star_title">हम भी आपसे प्यार करते हैं!</string>
+    <string name="four_star">आपकी प्रतिक्रिया के लिए धन्यवाद</string>
 
-    <string name="five_star_title">हम भी आपसे प्यार करते हैं =3</string>
-    <string name="five_star">आपकी प्रतिक्रिया के लिए धन्यवाद =3</string>
+    <string name="five_star_title">हम भी आपसे प्यार करते हैं!</string>
+    <string name="five_star">आपकी प्रतिक्रिया के लिए धन्यवाद</string>
 
     <string name="rate_us_0">आपने अभी तक रेट नहीं किया है!</string>
     <string name="have_rated">हमारे ऐप को रेट करने के लिए धन्यवाद</string>
@@ -96,6 +96,7 @@
     <string name="image">छवि</string>
     <string name="color">रंग</string>
     <string name="successful">सफल</string>
+    <string name="successfully">सफलतापूर्वक</string>
     <string name="context_guide_body">कॉसप्ले मोड में, खिलाड़ियों को एक संदर्भ छवि यादृच्छिक रूप से दी जाती है। आपका कार्य सही हेयरस्टाइल, कपड़े, रंग और एक्सेसरी चुनकर उस चरित्र को जितना हो सके उतना सटीक रूप से बनाना है। हर सही मिलान आपके प्रतिशत (%) को बढ़ाता है। आपका चरित्र जितना अधिक उस छवि जैसा दिखेगा, आपका अंतिम स्कोर उतना ही अधिक होगा। सर्वोत्तम परिणाम पाने के लिए छोटे-छोटे विवरणों पर ध्यान दें।</string>
     <string name="try_again">फिर से प्रयास करें</string>
     <string name="no_internet">इंटरनेट नहीं है</string>

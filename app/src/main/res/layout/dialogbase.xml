@@ -16,7 +16,7 @@
             android:layout_height="wrap_content"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:layout_marginHorizontal="20dp">
+            android:layout_marginHorizontal="15dp">
             <androidx.constraintlayout.widget.ConstraintLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -29,7 +29,6 @@
                     android:layout_gravity="center"
                     android:layout_height="wrap_content"
                     app:layout_constraintTop_toBottomOf="@id/tvTitle"
-                    android:layout_marginHorizontal="20dp"
                     android:layout_marginTop="-20dp"
                     android:paddingVertical="20dp"
                     android:background="@drawable/frame_bg_dialog"
@@ -44,7 +43,7 @@
                         android:layout_width="match_parent"
                         android:layout_height="wrap_content"
                         android:layout_marginHorizontal="20dp"
-                        android:layout_marginTop="30dp"
+                        android:layout_marginTop="20dp"
                         android:fontFamily="@font/baloo2_extrabold"
                         android:gravity="center"
                         android:text="@string/haven_t_saved_it_yet_do_you_want_to_exit"
@@ -85,7 +84,7 @@
                         <!--                btnDone-->
                         <androidx.constraintlayout.widget.ConstraintLayout
                             android:id="@+id/bg"
-                            android:paddingVertical="20dp"
+                            android:paddingVertical="10dp"
                             android:layout_width="match_parent"
                             android:layout_height="wrap_content"
                             app:layout_constraintTop_toBottomOf="@+id/txtContent">
@@ -188,7 +187,7 @@
                                 android:id="@+id/btnOk"
                                 android:layout_width="0dp"
                                 android:layout_height="0dp"
-                                android:layout_marginHorizontal="68dp"
+                                android:layout_marginHorizontal="78dp"
                                 app:layout_constraintDimensionRatio="1.24:0.36"
                                 app:layout_constraintEnd_toEndOf="parent"
                                 app:layout_constraintStart_toStartOf="parent"

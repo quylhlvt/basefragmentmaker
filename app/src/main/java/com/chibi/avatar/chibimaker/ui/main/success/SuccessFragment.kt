@@ -75,7 +75,7 @@ class SuccessFragment : BaseFragment<FragmentSuccessBinding, SuccessViewModel>(
                 )
             }
             // Share
-            actionBar.btnActionBarNextToRight.onClick { shareImage() }
+            actionBar.btnActionBarNextToRight.onClick( 1500) { shareImage() }
 
             // MyCreation
             btnBottomLeft.onClick {

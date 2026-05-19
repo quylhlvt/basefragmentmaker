@@ -66,22 +66,22 @@
     <string name="zero_star_title">Aimez-vous l’application ?</string>
     <string name="zero_star">Donnez-nous votre avis</string>
 
-    <string name="one_star_title">Oh non =(</string>
+    <string name="one_star_title">Oh non!</string>
     <string name="one_star">Merci de nous donner votre avis</string>
 
-    <string name="two_star_title">Oh non =(</string>
+    <string name="two_star_title">Oh non!</string>
     <string name="two_star">Merci de nous donner votre avis</string>
 
-    <string name="three_star_title">Oh non =(</string>
+    <string name="three_star_title">Oh non!</string>
     <string name="three_star">Merci de nous donner votre avis</string>
 
-    <string name="four_star_title">Nous vous aimons aussi =3</string>
-    <string name="four_star">Merci pour votre avis =3</string>
+    <string name="four_star_title">Nous vous aimons aussi!</string>
+    <string name="four_star">Merci pour votre avis</string>
 
-    <string name="five_star_title">Nous vous aimons aussi =3</string>
-    <string name="five_star">Merci pour votre avis =3</string>
+    <string name="five_star_title">Nous vous aimons aussi!</string>
+    <string name="five_star">Merci pour votre avis</string>
 
-    <string name="rate_us_0">Vous n’avez pas encore noté !</string>
+    <string name="rate_us_0">Vous n’avez pas encore noté!</string>
     <string name="have_rated">Merci d’avoir noté notre application</string>
     <string name="refresh">Actualiser</string>
     <string name="hello_blank_fragment">Bonjour fragment vide</string>
@@ -96,6 +96,7 @@
     <string name="image">Image</string>
     <string name="color">Couleur</string>
     <string name="successful">Succès</string>
+    <string name="successfully">Avec succès</string>
     <string name="context_guide_body">En mode Déguisement, les joueurs reçoivent aléatoirement une image de référence. Votre mission est de recréer ce personnage le plus fidèlement possible en choisissant les bonnes coiffures, tenues, couleurs et accessoires. Chaque correspondance correcte augmente votre pourcentage (%). Plus votre personnage ressemble à l’image, plus votre score final sera élevé. Faites attention aux détails pour obtenir le meilleur résultat.</string>
     <string name="try_again">Réessayer</string>
     <string name="no_internet">Pas d\'internet</string>

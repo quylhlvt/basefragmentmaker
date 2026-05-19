@@ -17,7 +17,7 @@ fun Fragment.shareApp() {
 }
 
 fun Fragment.policy() {
-    val url = "https://sites.google.com/view/cat-avatar-cat-maker/home"
+    val url = "https://sites.google.com/view/chibi-avatar-doll-maker/home"
     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
     startActivity(intent)
 }

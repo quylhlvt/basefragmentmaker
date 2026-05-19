@@ -258,7 +258,8 @@
                     android:textColor="@color/white"
                     app:outerStrokeColor="@color/app_color"
                     app:outerStrokeWidth="1dp"
-                    android:paddingVertical="30dp"
+                    android:paddingTop="30dp"
+                    android:paddingBottom="50dp"
                     android:lineSpacingMultiplier="0.8"
                     android:textSize="20sp" />
             </FrameLayout>

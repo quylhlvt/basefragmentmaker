@@ -332,7 +332,7 @@
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="0dp"
-            android:layout_marginHorizontal="60dp"
+            android:layout_marginHorizontal="30dp"
             android:src="@drawable/img_vs"
             android:elevation="3dp"
             app:layout_constraintBottom_toBottomOf="parent"

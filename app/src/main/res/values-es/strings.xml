@@ -66,20 +66,20 @@
     <string name="zero_star_title">¿Te gusta la app?</string>
     <string name="zero_star">Cuéntanos tu experiencia</string>
 
-    <string name="one_star_title">Oh no =(</string>
+    <string name="one_star_title">Oh no!</string>
     <string name="one_star">Por favor danos tu opinión</string>
 
-    <string name="two_star_title">Oh no =(</string>
+    <string name="two_star_title">Oh no!</string>
     <string name="two_star">Por favor danos tu opinión</string>
 
-    <string name="three_star_title">Oh no =(</string>
+    <string name="three_star_title">Oh no!</string>
     <string name="three_star">Por favor danos tu opinión</string>
 
-    <string name="four_star_title">Te queremos también =3</string>
-    <string name="four_star">Gracias por tu opinión =3</string>
+    <string name="four_star_title">Te queremos también!</string>
+    <string name="four_star">Gracias por tu opinión</string>
 
-    <string name="five_star_title">Te queremos también =3</string>
-    <string name="five_star">Gracias por tu opinión =3</string>
+    <string name="five_star_title">Te queremos también!</string>
+    <string name="five_star">Gracias por tu opinión</string>
 
     <string name="rate_us_0">¡Aún no has calificado!</string>
     <string name="have_rated">Gracias por calificar nuestra app</string>
@@ -96,6 +96,7 @@
     <string name="image">Imagen</string>
     <string name="color">Color</string>
     <string name="successful">Exitoso</string>
+    <string name="successfully">Exitosamente</string>
     <string name="context_guide_body">En el modo Disfraz, los jugadores reciben aleatoriamente una imagen de referencia. Tu tarea es recrear ese personaje con la mayor precisión posible eligiendo los peinados, atuendos, colores y accesorios correctos. Cada coincidencia correcta aumenta tu porcentaje (%). Cuanto más se parezca tu personaje a la imagen, mayor será tu puntuación final. Presta atención a los pequeños detalles para lograr el mejor resultado de cosplay.</string>
     <string name="try_again">Intentar de nuevo</string>
     <string name="no_internet">Sin internet</string>

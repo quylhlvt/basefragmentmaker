@@ -84,7 +84,7 @@
                 style="@style/single_marquee"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-
+                android:layout_marginStart="8dp"
                 android:gravity="center_vertical"
                 android:text="@string/language"
                 android:fontFamily="@font/atma_bold"
@@ -147,6 +147,7 @@
                 style="@style/single_marquee"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
+                android:layout_marginStart="8dp"
 
                 app:layout_constraintStart_toEndOf="@+id/ic_rate"
                 android:gravity="center_vertical"
@@ -210,7 +211,7 @@
                 style="@style/single_marquee"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
-
+                android:layout_marginStart="8dp"
                 android:gravity="center_vertical"
                 android:text="@string/share_app"
                 android:fontFamily="@font/atma_bold"
@@ -272,7 +273,7 @@
                 style="@style/single_marquee"
                 android:layout_width="0dp"
                 android:layout_height="match_parent"
-
+                android:layout_marginStart="8dp"
                 android:fontFamily="@font/atma_bold"
                 android:gravity="center_vertical"
                 android:text="@string/privacy_policy"
