@@ -25,7 +25,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/tvLabel" />
 
-    <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+    <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
         android:id="@+id/tvLabel"
         style="@style/single_marquee"
         android:layout_width="0dp"

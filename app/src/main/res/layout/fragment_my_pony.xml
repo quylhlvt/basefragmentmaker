@@ -67,7 +67,7 @@
 
 
                 <!--                tvMyAvatar-->
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tvMyAvatar"
                     style="@style/single_marquee"
                     android:layout_width="0dp"
@@ -118,7 +118,7 @@
                     android:src="@drawable/bg_btn_type_unselected" />
 
                 <!--                tvMyDesign-->
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tvMyDesign"
                     style="@style/single_marquee"
                     android:fontFamily="@font/atma_bold"
@@ -168,7 +168,7 @@
         tools:listitem="@layout/item_my_design" />
 
 
-    <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+    <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
         android:id="@+id/noItem"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -323,7 +323,7 @@
                     android:layout_marginBottom="2dp"
                     android:scaleType="fitXY"
                     android:src="@drawable/bg_btn_type_selected" />
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tvShare"
                     style="@style/single_marquee"
                     android:layout_width="0dp"
@@ -370,7 +370,7 @@
                     android:layout_marginBottom="2dp"
                     android:scaleType="fitXY"
                     android:src="@drawable/bg_btn_type_selected" />
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tvDownload"
                     style="@style/single_marquee"
                     android:layout_width="0dp"

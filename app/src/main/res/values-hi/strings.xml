@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- values-hi/strings.xml -->
 <resources>
-    <string name="app_name">Cat Avatar: Cat Maker</string>
+    <string name="app_name">Chibi Avatar: Doll Maker</string>
     <string name="next">आगे</string>
     <string name="language">भाषा</string>
     <string name="title_1">\u00A0अपना प्यारा चिबी पर्सोना बनाएं\u00A0</string>
@@ -118,4 +118,9 @@
     <string name="tvCosplay6">हर सही मैच आपके</string>
     <string name="tvCosplay7">प्रतिशत स्कोर (%) को बढ़ाता है।</string>
     <string name="tvCosplay8">आपका कैरेक्टर जितना अधिक रैंडम इमेज जैसा दिखेगा, आपका अंतिम स्कोर उतना ही अधिक होगा। सबसे अच्छा कॉसप्ले परिणाम पाने के लिए छोटी-छोटी बातों पर ध्यान दें।</string>
+    <string name="oops_not_in_character">उफ़! किरदार में नहीं~</string>
+    <string name="your_outfit_doesn_t_match_the_character">आपका पहनावा किरदार से मेल नहीं खाता</string>
+    <string name="yay_perfect_match">वाह! एकदम सही मिलान</string>
+    <string name="exactly_like_the_character">बिल्कुल किरदार जैसा!</string>
+    <string name="save">सहेजें</string>
 </resources>

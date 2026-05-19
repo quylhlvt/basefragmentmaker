@@ -90,7 +90,7 @@
                     android:src="@drawable/img_bg_home1" />
 
 
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tv"
                     style="@style/single_marquee"
                     android:layout_width="0dp"
@@ -163,7 +163,7 @@
                     android:src="@drawable/img_bg_home2" />
 
 
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tv2"
                     style="@style/single_marquee"
                     android:layout_width="0dp"
@@ -233,7 +233,7 @@
                     android:src="@drawable/img_bg_home3" />
 
 
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tv3"
                     style="@style/single_marquee"
                     android:layout_width="0dp"
@@ -304,7 +304,7 @@
                     android:src="@drawable/img_bg_home4" />
 
 
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/tv4"
                     style="@style/single_marquee"
                     android:layout_width="0dp"

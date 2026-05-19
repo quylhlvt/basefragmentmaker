@@ -1,4 +1,4 @@
-package com.oc.catemoji.catoc
+package com.chibi.avatar.chibimaker
 
 import org.junit.Test
 

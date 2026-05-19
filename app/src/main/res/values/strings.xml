@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Cat Avatar: Cat Maker</string>
+    <string name="app_name">Chibi Avatar: Doll Maker</string>
     <string name="next">Next</string>
     <string name="language">Language</string>
     <string name="title_1">\u00A0Create Your Adorable Chibi Persona\u00A0</string>
@@ -119,6 +119,7 @@
     <string name="tvCosplay8">The closer your character looks to the random image, the higher your final score will be. Pay attention to small details to achieve the best cosplay result.</string>
     <string name="oops_not_in_character">Oops! Not in character~</string>
     <string name="your_outfit_doesn_t_match_the_character">Your outfit doesn’t match the character</string>
-    <string name="yay_perfect_match">Yay! Perfect match to do</string>
+    <string name="yay_perfect_match">Yay! Perfect match</string>
     <string name="exactly_like_the_character">Exactly like the character!</string>
+    <string name="save">Save</string>
 </resources>

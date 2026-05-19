@@ -39,7 +39,7 @@
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/layoutActionBar" />
 
-    <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextViewPermission
+    <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextViewPermission
         android:id="@+id/txtPermission"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
@@ -92,7 +92,7 @@
                     android:scaleType="fitXY"
                     android:src="@drawable/frame_select_language" />
 
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_centerVertical="true"
@@ -148,7 +148,7 @@
                     android:layout_marginBottom="4dp"
                     android:scaleType="fitXY"
                     android:src="@drawable/frame_select_language" />
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:layout_width="wrap_content"
                     android:layout_height="match_parent"
                     android:layout_centerVertical="true"
@@ -186,7 +186,7 @@
         </LinearLayout>
 
     </ScrollView>
-    <com.oc.catemoji.catoc.core.extention.ShadowTextView1
+    <com.chibi.avatar.chibimaker.core.extention.ShadowTextView1
         android:id="@+id/tvContinue"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"

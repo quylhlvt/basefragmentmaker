@@ -31,7 +31,7 @@
 <!--    app:layout_constraintStart_toStartOf="@+id/tvContent"-->
 <!--    app:layout_constraintEnd_toEndOf="@+id/tvContent"/>-->
 
-    <com.oc.catemoji.catoc.core.extention.ShadowTextView
+    <com.chibi.avatar.chibimaker.core.extention.ShadowTextView
         android:id="@+id/tvContent"
         style="@style/single_marquee"
         android:layout_width="wrap_content"

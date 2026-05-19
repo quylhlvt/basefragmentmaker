@@ -9,7 +9,7 @@
     android:clipToPadding="false"
     tools:context=".ui.main.show.ShowFragment">
     <!-- chạy chữ vòng cung-->
-    <!--    <com.oc.catemoji.catoc.core.extention.CurvedTextView-->
+    <!--    <com.chibi.avatar.chibimaker.core.extention.CurvedTextView-->
     <!--        android:id="@+id/tv1"-->
     <!--        android:layout_width="match_parent"-->
     <!--        android:layout_height="match_parent"-->
@@ -667,7 +667,7 @@
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent" />
 
-            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+            <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/outerStrokeShadownTextView"
                 android:layout_width="0dp"
                 android:layout_height="0dp"
@@ -707,7 +707,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+            <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/outerStrokeShadownTextView2"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
@@ -760,7 +760,7 @@
                 app:layout_constraintStart_toStartOf="@id/imgNext"
                 app:layout_constraintTop_toTopOf="@id/imgNext">
 
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/txtNext"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
@@ -857,7 +857,7 @@
                 app:layout_constraintStart_toStartOf="parent"
                 app:layout_constraintTop_toTopOf="parent" />
 
-            <com.oc.catemoji.catoc.core.extention.CurvedTextView
+            <com.chibi.avatar.chibimaker.core.extention.CurvedTextView
                 android:id="@+id/tvWin"
                 style="@style/single_marquee"
                 android:layout_width="0dp"
@@ -895,7 +895,7 @@
     app:layout_constraintDimensionRatio="2.82:2.44"
     android:layout_marginHorizontal="30dp"
     app:layout_constraintBottom_toTopOf="@+id/title"/>
-            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+            <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:id="@+id/txtWin3"
@@ -947,7 +947,7 @@
                 app:layout_constraintStart_toStartOf="@id/imgShowNext"
                 app:layout_constraintTop_toTopOf="@id/imgShowNext">
 
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                     android:id="@+id/txtNext2"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"

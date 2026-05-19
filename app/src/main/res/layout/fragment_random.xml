@@ -136,7 +136,7 @@
             app:layout_constraintDimensionRatio="1:1"
             android:scaleType="fitXY"
             android:src="@drawable/ic_ramdom" />
-        <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+        <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
             android:id="@+id/txtShow"
             style="@style/single_marquee"
             android:layout_width="0dp"

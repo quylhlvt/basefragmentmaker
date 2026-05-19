@@ -137,7 +137,7 @@
             app:layout_constraintDimensionRatio="1:1"
             android:scaleType="fitXY"
             android:src="@drawable/ic_ramdom" />
-        <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+        <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
             android:id="@+id/txtRandom"
             style="@style/single_marquee"
             android:layout_width="0dp"
@@ -161,7 +161,6 @@
         android:layout_width="0dp"
         android:layout_height="0dp"
         android:layout_marginHorizontal="8dp"
-        android:background="@drawable/bg_cosplay1"
         app:layout_constraintDimensionRatio="1.56:0.40"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toEndOf="@+id/random"
@@ -200,7 +199,7 @@
             app:layout_constraintDimensionRatio="1:1"
             android:scaleType="fitXY"
             android:src="@drawable/ic_cosplay" />
-        <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+        <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
             android:id="@+id/txtShow"
             style="@style/single_marquee"
             android:layout_width="0dp"
@@ -247,7 +246,7 @@
         android:clipToPadding="false"
                 app:layout_constraintTop_toTopOf="parent">
 
-                <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextViewCosplay
+                <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextViewCosplay
                     android:background="@drawable/context_body"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"

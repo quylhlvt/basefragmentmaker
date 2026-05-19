@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- values-es/strings.xml -->
 <resources>
-    <string name="app_name">Cat Avatar: Cat Maker</string>
+    <string name="app_name">Chibi Avatar: Doll Maker</string>
     <string name="next">Siguiente</string>
     <string name="language">Idioma</string>
     <string name="title_1">\u00A0Crea tu adorable personaje chibi\u00A0</string>
@@ -118,4 +118,10 @@
     <string name="tvCosplay6">Cada coincidencia correcta aumenta tu</string>
     <string name="tvCosplay7">porcentaje (%).</string>
     <string name="tvCosplay8">Cuanto más se parezca tu personaje a la imagen aleatoria, mayor será tu puntuación final. Presta atención a los pequeños detalles para lograr el mejor resultado de cosplay.</string>
+
+    <string name="oops_not_in_character">¡Ups! No es el personaje~</string>
+    <string name="your_outfit_doesn_t_match_the_character">Tu atuendo no coincide con el personaje</string>
+    <string name="yay_perfect_match">¡Genial! Coincidencia perfecta</string>
+    <string name="exactly_like_the_character">¡Exactamente como el personaje!</string>
+    <string name="save">Guardar</string>
 </resources>

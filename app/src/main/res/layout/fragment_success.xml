@@ -69,7 +69,7 @@
         app:layout_constraintTop_toTopOf="@+id/tvSuccess" />
 
     <!--        tvSuccess-->
-    <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+    <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
         style="@style/single_marquee"
         android:id="@+id/tvSuccess"
         android:layout_width="match_parent"
@@ -124,7 +124,7 @@
                 android:layout_marginBottom="1.8dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/frame_select_add" />
-            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+            <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/txtLeft"
                 style="@style/single_marquee"
                 android:layout_width="match_parent"
@@ -166,7 +166,7 @@
                 android:layout_marginBottom="1.8dp"
                 android:scaleType="fitXY"
                 android:src="@drawable/frame_select_add" />
-            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+            <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/txtRight"
                 style="@style/single_marquee"
                 android:layout_width="match_parent"

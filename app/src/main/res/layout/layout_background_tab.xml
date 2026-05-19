@@ -43,7 +43,7 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/frame_select_add" />
 
-            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+            <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/btnBackgroundImageTv"
                 style="@style/single_marquee"
                 android:layout_width="match_parent"
@@ -85,7 +85,7 @@
                 android:scaleType="fitXY"
                 android:src="@drawable/frame_unselect_add" />
 
-            <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+            <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
                 android:id="@+id/btnBackgroundColorTv"
                 style="@style/single_marquee"
                 android:layout_width="match_parent"

@@ -8,7 +8,7 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
     <application
         android:name=".MyApplication"
-        android:allowBackup="true"
+        android:allowBackup="false"
         android:networkSecurityConfig="@xml/network_security_config"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -43,8 +43,8 @@
                 android:resource="@xml/provider" />
         </provider>
         <provider
-            android:name="com.oc.catemoji.catoc.utils.share.whatsapp.StickerContentProvider"
-            android:authorities="com.oc.catemoji.catoc.utils.share.whatsapp.StickerContentProvider"
+            android:name="com.chibi.avatar.chibimaker.utils.share.whatsapp.StickerContentProvider"
+            android:authorities="com.chibi.avatar.chibimaker.utils.share.whatsapp.StickerContentProvider"
             android:exported="true"
             android:readPermission="com.whatsapp.sticker.READ" />
     </application>

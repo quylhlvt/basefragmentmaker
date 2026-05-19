@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!-- values-id/strings.xml -->
 <resources>
-    <string name="app_name">Cat Avatar: Cat Maker</string>
+    <string name="app_name">Chibi Avatar: Doll Maker</string>
     <string name="next">Lanjut</string>
     <string name="language">Bahasa</string>
     <string name="title_1">\u00A0Buat persona chibi lucumu\u00A0</string>
@@ -118,4 +118,9 @@
     <string name="tvCosplay6">Setiap kecocokan yang benar akan meningkatkan</string>
     <string name="tvCosplay7">persentase skor (%).</string>
     <string name="tvCosplay8">Semakin mirip karaktermu dengan gambar acak tersebut, semakin tinggi skor akhir yang akan kamu dapatkan. Perhatikan detail kecil untuk mendapatkan hasil cosplay terbaik.</string>
+    <string name="oops_not_in_character">Ups! Tidak sesuai karakter~</string>
+    <string name="your_outfit_doesn_t_match_the_character">Pakaianmu tidak cocok dengan karakter</string>
+    <string name="yay_perfect_match">Hore! Cocok sempurna</string>
+    <string name="exactly_like_the_character">Persis seperti karakternya!</string>
+    <string name="save">Simpan</string>
 </resources>

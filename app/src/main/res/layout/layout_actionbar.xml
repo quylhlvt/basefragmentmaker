@@ -41,7 +41,7 @@
     </androidx.cardview.widget.CardView>
 
     <!--    tvStart-->
-    <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+    <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
         android:id="@+id/tvStart"
         style="@style/single_marquee"
         android:layout_width="0dp"
@@ -62,7 +62,7 @@
         />
 
     <!--    tvCenter-->
-    <com.oc.catemoji.catoc.core.extention.OuterStrokeShadownTextView
+    <com.chibi.avatar.chibimaker.core.extention.OuterStrokeShadownTextView
         android:id="@+id/tvCenter"
         style="@style/single_marquee"
         android:layout_width="0dp"
